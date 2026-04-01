@@ -66,12 +66,12 @@ export default function Home() {
       renderer.setSize(w, h);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 0.8;
+      renderer.toneMappingExposure = 1.8;
 
       // Scene
       const scene = new THREE.Scene();
-      scene.fog = new THREE.FogExp2(0x070710, 0.015);
-      scene.background = new THREE.Color(0x070710);
+      scene.fog = new THREE.FogExp2(0x0a0a1a, 0.008);
+      scene.background = new THREE.Color(0x0a0a1a);
 
       // Camera — starts at z=0, will dolly forward on scroll
       const camera = new THREE.PerspectiveCamera(60, w / h, 0.1, 500);
@@ -79,7 +79,7 @@ export default function Home() {
       camera.lookAt(0, 6, -100);
 
       // ── Build procedural city ──
-      const buildingMat = new THREE.MeshStandardMaterial({ color: 0x0a0a14, roughness: 0.9, metalness: 0.1 });
+      const buildingMat = new THREE.MeshStandardMaterial({ color: 0x1a1a2e, roughness: 0.7, metalness: 0.2 });
       const windowMat = new THREE.MeshBasicMaterial({ color: 0xc8a050 });
       const neonColors = [0x4a9eff, 0xff4a8d, 0x4aeaff, 0xc8a050, 0x4aff9e, 0xff9f4a, 0xffd700];
 
@@ -102,13 +102,13 @@ export default function Home() {
           const cols = Math.floor(bw / 2);
           for (let r = 0; r < rows; r++) {
             for (let c = 0; c < cols; c++) {
-              if (Math.random() > 0.4) continue;
-              const wGeo = new THREE.PlaneGeometry(0.6, 0.8);
-              const isWarm = Math.random() > 0.3;
+              if (Math.random() > 0.55) continue;
+              const wGeo = new THREE.PlaneGeometry(0.8, 1.0);
+              const isWarm = Math.random() > 0.25;
               const wMat = new THREE.MeshBasicMaterial({
-                color: isWarm ? (Math.random() > 0.5 ? 0xffeebb : 0xc8a050) : 0x4a9eff,
+                color: isWarm ? (Math.random() > 0.5 ? 0xffeebb : 0xffcc66) : (Math.random() > 0.5 ? 0x4a9eff : 0x6ab8ff),
                 transparent: true,
-                opacity: 0.3 + Math.random() * 0.6,
+                opacity: 0.5 + Math.random() * 0.5,
               });
               const wMesh = new THREE.Mesh(wGeo, wMat);
               const wx = xOff + (c - cols / 2) * 2 + 1;
@@ -120,10 +120,10 @@ export default function Home() {
             }
           }
 
-          // Neon signs on some buildings
-          if (Math.random() > 0.7) {
+          // Neon signs on buildings — more frequent, brighter
+          if (Math.random() > 0.4) {
             const neonColor = neonColors[Math.floor(Math.random() * neonColors.length)];
-            const light = new THREE.PointLight(neonColor, 3, 25);
+            const light = new THREE.PointLight(neonColor, 8, 40);
             light.position.set(xOff, bh * 0.6, z + side * 2);
             scene.add(light);
           }
@@ -132,7 +132,7 @@ export default function Home() {
 
       // Road surface
       const roadGeo = new THREE.PlaneGeometry(20, 400);
-      const roadMat = new THREE.MeshStandardMaterial({ color: 0x111118, roughness: 0.95 });
+      const roadMat = new THREE.MeshStandardMaterial({ color: 0x1a1a24, roughness: 0.85, metalness: 0.05 });
       const road = new THREE.Mesh(roadGeo, roadMat);
       road.rotation.x = -Math.PI / 2;
       road.position.set(0, 0, -150);
@@ -141,24 +141,28 @@ export default function Home() {
       // Road center line
       for (let z = 5; z > -300; z -= 8) {
         const lineGeo = new THREE.PlaneGeometry(0.15, 3);
-        const lineMat = new THREE.MeshBasicMaterial({ color: 0xc8a050, transparent: true, opacity: 0.3 });
+        const lineMat = new THREE.MeshBasicMaterial({ color: 0xf0d070, transparent: true, opacity: 0.6 });
         const line = new THREE.Mesh(lineGeo, lineMat);
         line.rotation.x = -Math.PI / 2;
         line.position.set(0, 0.01, z);
         scene.add(line);
       }
 
-      // Ambient and directional light
-      scene.add(new THREE.AmbientLight(0x1a1a2e, 0.5));
-      const dirLight = new THREE.DirectionalLight(0x4a4a6e, 0.3);
-      dirLight.position.set(10, 30, -20);
+      // Ambient and directional light — much brighter
+      scene.add(new THREE.AmbientLight(0x2a2a4e, 1.5));
+      const dirLight = new THREE.DirectionalLight(0x6a6a9e, 0.8);
+      dirLight.position.set(10, 40, -20);
       scene.add(dirLight);
+      // Moonlight from above
+      const moonLight = new THREE.DirectionalLight(0x4466aa, 0.4);
+      moonLight.position.set(-20, 50, -50);
+      scene.add(moonLight);
 
-      // Street lights
-      for (let z = 0; z > -280; z -= 20) {
+      // Street lights — brighter, closer together
+      for (let z = 0; z > -280; z -= 14) {
         for (let side = -1; side <= 1; side += 2) {
-          const sl = new THREE.PointLight(0xffcc77, 1.5, 18);
-          sl.position.set(side * 10, 10, z);
+          const sl = new THREE.PointLight(0xffcc77, 4, 30);
+          sl.position.set(side * 10, 12, z);
           scene.add(sl);
         }
       }
@@ -167,7 +171,7 @@ export default function Home() {
       const brandNames = ["BMW", "HUAWEI", "W HOTELS", "RICK ROSS", "MARRIOTT", "TISSOT", "LAMBORGHINI"];
       const brandColors = [0x4a9eff, 0xff4a8d, 0x4aeaff, 0xff9f4a, 0x4aff9e, 0xc8a050, 0xffd700];
       brandNames.forEach((name, i) => {
-        const light = new THREE.PointLight(brandColors[i], 4, 30);
+        const light = new THREE.PointLight(brandColors[i], 10, 45);
         const zPos = -20 - i * 30;
         const xPos = (i % 2 === 0 ? -1 : 1) * (15 + Math.random() * 10);
         light.position.set(xPos, 12 + Math.random() * 15, zPos);
@@ -349,7 +353,7 @@ export default function Home() {
           <canvas ref={canvasRef} style={{ position: "absolute", inset: 0, zIndex: 1 }} />
 
           {/* Atmospheric overlay */}
-          <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "radial-gradient(ellipse at center 60%, transparent 30%, rgba(7,7,10,0.5) 100%)", pointerEvents: "none" }} />
+          <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "radial-gradient(ellipse at center 60%, transparent 50%, rgba(10,10,26,0.3) 100%)", pointerEvents: "none" }} />
 
           {/* Road light streaks */}
           <div style={{ position: "absolute", bottom: "25%", left: 0, width: "100%", height: 2, zIndex: 3, pointerEvents: "none", overflow: "hidden" }}>
