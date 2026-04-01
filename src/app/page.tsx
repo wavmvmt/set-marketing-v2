@@ -9,7 +9,6 @@ export default function Home() {
   const [videoReady, setVideoReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const methodRef = useRef<HTMLDivElement>(null);
-  const tunnelRef = useRef<HTMLDivElement>(null);
 
   // ── SPLASH ──
   useEffect(() => {
@@ -62,7 +61,9 @@ export default function Home() {
         if (docHeight <= 0) { ticking = false; return; }
         const progress = Math.max(0, Math.min(1, scrollTop / docHeight));
         if (video.duration && isFinite(video.duration) && !isNaN(video.duration)) {
-          video.currentTime = progress * video.duration;
+          // Loop the video 5x across the full page — it never stops driving
+          const loops = 5;
+          video.currentTime = (progress * video.duration * loops) % video.duration;
         }
         ticking = false;
       });
@@ -90,18 +91,45 @@ export default function Home() {
         scrollTrigger: { trigger: ".hero-section", start: "top top", end: "bottom top", scrub: 1 },
       });
 
-      // Method tunnel
-      if (methodRef.current && tunnelRef.current) {
-        gsap.to(tunnelRef.current, {
-          z: 3000, ease: "none",
-          scrollTrigger: { trigger: methodRef.current, start: "top top", end: "+=400%", scrub: 1.5, pin: true, anticipatePin: 1 },
+      // Method: pinned section, each gate scales up (approaches you) in sequence
+      if (methodRef.current) {
+        const methodTl = gsap.timeline({
+          scrollTrigger: {
+            trigger: methodRef.current,
+            start: "top top",
+            end: "+=300%",
+            scrub: 1,
+            pin: true,
+            anticipatePin: 1,
+          },
         });
-        document.querySelectorAll(".gate-content").forEach((el, i) => {
-          gsap.fromTo(el, { opacity: 0 }, { opacity: 1,
-            scrollTrigger: { trigger: methodRef.current, start: `${i * 22 + 5}% top`, end: `${i * 22 + 18}% top`, scrub: 1 } });
-          gsap.to(el, { opacity: 0,
-            scrollTrigger: { trigger: methodRef.current, start: `${i * 22 + 20}% top`, end: `${i * 22 + 25}% top`, scrub: 1 } });
+
+        // Each gate: scale from 0.3 (far) to 1 (here) to 1.5 (passed), with opacity fade in/out
+        const gates = document.querySelectorAll(".method-gate");
+        gates.forEach((gate, i) => {
+          const offset = i * 0.25; // stagger through timeline
+          // Fade in + scale up
+          methodTl.fromTo(gate,
+            { scale: 0.3, opacity: 0, filter: "blur(8px)" },
+            { scale: 1, opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power2.out" },
+            offset
+          );
+          // Hold visible
+          methodTl.to(gate, { duration: 0.05 }, offset + 0.2);
+          // Scale past + fade out (except last gate stays)
+          if (i < gates.length - 1) {
+            methodTl.to(gate,
+              { scale: 2, opacity: 0, filter: "blur(4px)", duration: 0.15, ease: "power2.in" },
+              offset + 0.25
+            );
+          }
         });
+
+        // Progress bar
+        const progressBar = document.getElementById("method-progress");
+        if (progressBar) {
+          methodTl.to(progressBar, { scaleX: 1, ease: "none", duration: 1 }, 0);
+        }
       }
 
       // Reveals
@@ -328,29 +356,78 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ═══ SCENE 6: METHOD — Walk-forward tunnel, 95% opaque ═══ */}
+        {/* ═══ SCENE 6: METHOD — Scale-based walk forward ═══ */}
         <section ref={methodRef} id="process" style={{ position: "relative", height: "100vh", overflow: "hidden", background: sectionBg(0.65) }}>
-          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", perspective: "800px", perspectiveOrigin: "center center" }}>
-            <div style={{ position: "absolute", top: 40, left: 0, right: 0, textAlign: "center", zIndex: 20 }}>
-              <span style={{ fontSize: "0.55rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>05 · Walk Through The Method</span>
-              <h2 style={{ fontFamily: "var(--serif)", fontSize: "clamp(1.6rem, 3vw, 2.4rem)", marginTop: 10 }}>The SET <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Method</em></h2>
-            </div>
-            <div ref={tunnelRef} style={{ position: "absolute", width: "100%", height: "100%", transformStyle: "preserve-3d", willChange: "transform" }}>
-              {STEPS.map((step, i) => (
-                <div key={step.n} className="gate-content" style={{ position: "absolute", top: "50%", left: "50%", transform: `translate(-50%, -50%) translateZ(${-(i * 800)}px)`, width: "min(80vw, 700px)", textAlign: "center", transformStyle: "preserve-3d", backfaceVisibility: "hidden" }}>
-                  <div style={{ position: "absolute", inset: -40, borderRadius: 24, border: `2px solid ${step.ac}${i === 3 ? "80" : "30"}`, boxShadow: `0 0 ${20 + i * 15}px ${step.ac}${i === 3 ? "40" : "15"}, inset 0 0 ${10 + i * 10}px ${step.ac}10`, pointerEvents: "none" }} />
-                  <div style={{ width: 56, height: 56, borderRadius: "50%", background: i === 3 ? "var(--gold)" : `${step.ac}20`, border: `2px solid ${step.ac}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1rem", fontWeight: 700, color: i === 3 ? "var(--bg)" : step.ac, margin: "0 auto 20px" }}>{step.n}</div>
-                  <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", color: step.ac, textTransform: "uppercase", fontWeight: 600, marginBottom: 12 }}>{step.s}</div>
-                  <h3 style={{ fontFamily: "var(--serif)", fontSize: "clamp(1.8rem, 3.5vw, 2.8rem)", color: "var(--text)", marginBottom: 16 }}>{step.t}</h3>
-                  <p style={{ fontSize: "0.95rem", color: "var(--text2)", lineHeight: 1.7, maxWidth: 500, margin: "0 auto" }}>{step.d}</p>
-                  <div style={{ position: "absolute", inset: -80, borderRadius: 30, background: `radial-gradient(circle, ${step.ac}${Math.round((0.25 + i * 0.25) * 12).toString(16).padStart(2, "0")} 0%, transparent 70%)`, pointerEvents: "none", zIndex: -1 }} />
-                </div>
-              ))}
-              {Array.from({ length: 20 }).map((_, i) => (
-                <div key={i} style={{ position: "absolute", top: "50%", left: "50%", transform: `translate(-50%, -50%) translateZ(${-i * 200}px)`, width: `${85 - i * 1.5}vw`, height: `${85 - i * 1.5}vh`, border: "1px solid rgba(255,255,255,0.02)", borderRadius: 20 - i * 0.5, pointerEvents: "none" }} />
-              ))}
-            </div>
+          {/* Progress bar */}
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, zIndex: 30 }}>
+            <div id="method-progress" style={{ width: "100%", height: "100%", background: "var(--gold)", transformOrigin: "left", transform: "scaleX(0)" }} />
           </div>
+
+          {/* Header */}
+          <div style={{ position: "absolute", top: 40, left: 0, right: 0, textAlign: "center", zIndex: 20 }}>
+            <span style={{ fontSize: "0.55rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>05 · Walk Through The Method</span>
+            <h2 style={{ fontFamily: "var(--serif)", fontSize: "clamp(1.6rem, 3vw, 2.4rem)", marginTop: 10 }}>The SET <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Method</em></h2>
+          </div>
+
+          {/* Gates — stacked on top of each other, GSAP scales them in/out */}
+          {STEPS.map((step, i) => (
+            <div
+              key={step.n}
+              className="method-gate"
+              style={{
+                position: "absolute",
+                inset: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                opacity: i === 0 ? 1 : 0,
+                scale: i === 0 ? "1" : "0.3",
+              }}
+            >
+              {/* Gate frame glow */}
+              <div style={{
+                position: "absolute",
+                inset: "10%",
+                borderRadius: 24,
+                border: `1px solid ${step.ac}30`,
+                boxShadow: `0 0 ${30 + i * 20}px ${step.ac}15, inset 0 0 ${20 + i * 15}px ${step.ac}08`,
+                pointerEvents: "none",
+              }} />
+
+              <div style={{ textAlign: "center", maxWidth: 600, padding: "0 24px", position: "relative", zIndex: 5 }}>
+                {/* Gate number */}
+                <div style={{
+                  width: 64, height: 64, borderRadius: "50%",
+                  background: i === 3 ? "var(--gold)" : `${step.ac}20`,
+                  border: `2px solid ${step.ac}`,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: "1.2rem", fontWeight: 700,
+                  color: i === 3 ? "var(--bg)" : step.ac,
+                  margin: "0 auto 20px",
+                }}>{step.n}</div>
+
+                {/* Subtitle */}
+                <div style={{ fontSize: "0.65rem", letterSpacing: "0.2em", color: step.ac, textTransform: "uppercase", fontWeight: 600, marginBottom: 16 }}>{step.s}</div>
+
+                {/* Title */}
+                <h3 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2rem, 4vw, 3rem)", color: "var(--text)", marginBottom: 16 }}>{step.t}</h3>
+
+                {/* Description */}
+                <p style={{ fontSize: "1rem", color: "var(--text2)", lineHeight: 1.7 }}>{step.d}</p>
+
+                {/* Gate indicator */}
+                <div style={{ marginTop: 32, display: "flex", gap: 8, justifyContent: "center" }}>
+                  {STEPS.map((_, j) => (
+                    <div key={j} style={{
+                      width: j === i ? 24 : 8, height: 8, borderRadius: 4,
+                      background: j === i ? step.ac : "rgba(255,255,255,0.1)",
+                      transition: "all 0.3s",
+                    }} />
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
         </section>
 
         {/* ═══ SCENE 7: VOICES — 88% opaque, video peeks through ═══ */}
