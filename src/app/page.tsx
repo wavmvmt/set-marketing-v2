@@ -45,31 +45,49 @@ export default function Home() {
     return () => cancelAnimationFrame(id);
   }, [splashDone]);
 
-  // ── CONTINUOUS SCROLL-DRIVEN VIDEO: Scrubs through ENTIRE page ──
+  // ── SCROLL-DRIVEN VIDEO with SMOOTH LERP — no jank ──
   useEffect(() => {
     if (!splashDone) return;
     const video = videoRef.current;
     if (!video) return;
 
-    let ticking = false;
+    let targetTime = 0;
+    let currentTime = 0;
+    let animating = true;
+
+    // Scroll handler — just sets the target, doesn't touch the video directly
     const onScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        const scrollTop = window.scrollY || document.documentElement.scrollTop;
-        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-        if (docHeight <= 0) { ticking = false; return; }
-        const progress = Math.max(0, Math.min(1, scrollTop / docHeight));
-        if (video.duration && isFinite(video.duration) && !isNaN(video.duration)) {
-          // Loop the video 5x across the full page — it never stops driving
-          const loops = 5;
-          video.currentTime = (progress * video.duration * loops) % video.duration;
-        }
-        ticking = false;
-      });
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (docHeight <= 0) return;
+      const progress = Math.max(0, Math.min(1, scrollTop / docHeight));
+      if (video.duration && isFinite(video.duration)) {
+        const loops = 5;
+        targetTime = (progress * video.duration * loops) % video.duration;
+      }
     };
+
+    // Animation loop — smoothly interpolates toward the target frame
+    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+    const animate = () => {
+      if (!animating) return;
+      // Smooth interpolation — 0.08 = very smooth, 0.15 = responsive
+      currentTime = lerp(currentTime, targetTime, 0.1);
+      // Only seek if the difference is meaningful (avoids micro-jank)
+      if (Math.abs(currentTime - video.currentTime) > 0.03) {
+        video.currentTime = currentTime;
+      }
+      requestAnimationFrame(animate);
+    };
+
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    onScroll(); // set initial position
+    animate();
+
+    return () => {
+      animating = false;
+      window.removeEventListener("scroll", onScroll);
+    };
   }, [splashDone, videoReady]);
 
   // ── GSAP + LENIS ──
@@ -80,7 +98,7 @@ export default function Home() {
       const { ScrollTrigger } = await import("gsap/ScrollTrigger");
       gsap.registerPlugin(ScrollTrigger);
       const LenisModule = await import("lenis");
-      const lenis = new LenisModule.default({ duration: 1.4, easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
+      const lenis = new LenisModule.default({ duration: 1.0, easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), smoothWheel: true });
       lenis.on("scroll", ScrollTrigger.update);
       gsap.ticker.add((t: number) => lenis.raf(t * 1000));
       gsap.ticker.lagSmoothing(0);
@@ -98,28 +116,25 @@ export default function Home() {
             trigger: methodRef.current,
             start: "top top",
             end: "+=300%",
-            scrub: 1,
+            scrub: 1.5,
             pin: true,
             anticipatePin: 1,
           },
         });
 
-        // Each gate: scale from 0.3 (far) to 1 (here) to 1.5 (passed), with opacity fade in/out
+        // Each gate: scale from small (far) to full (here) to big (passed) — NO blur for performance
         const gates = document.querySelectorAll(".method-gate");
         gates.forEach((gate, i) => {
-          const offset = i * 0.25; // stagger through timeline
-          // Fade in + scale up
+          const offset = i * 0.25;
           methodTl.fromTo(gate,
-            { scale: 0.3, opacity: 0, filter: "blur(8px)" },
-            { scale: 1, opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power2.out" },
+            { scale: 0.3, opacity: 0 },
+            { scale: 1, opacity: 1, duration: 0.2, ease: "power2.out" },
             offset
           );
-          // Hold visible
           methodTl.to(gate, { duration: 0.05 }, offset + 0.2);
-          // Scale past + fade out (except last gate stays)
           if (i < gates.length - 1) {
             methodTl.to(gate,
-              { scale: 2, opacity: 0, filter: "blur(4px)", duration: 0.15, ease: "power2.in" },
+              { scale: 2.2, opacity: 0, duration: 0.15, ease: "power2.in" },
               offset + 0.25
             );
           }
@@ -196,6 +211,7 @@ export default function Home() {
       <video
         ref={videoRef}
         muted
+        loop
         playsInline
         preload="auto"
         onLoadedData={() => setVideoReady(true)}
@@ -204,6 +220,8 @@ export default function Home() {
           objectFit: "cover", zIndex: 0,
           filter: "brightness(1.1) saturate(1.4) contrast(1.15)",
           pointerEvents: "none",
+          willChange: "auto",
+          transform: "translateZ(0)",
         }}
       >
         <source src="/inside-car-night.mp4" type="video/mp4" />
