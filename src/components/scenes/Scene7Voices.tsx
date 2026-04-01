@@ -11,19 +11,19 @@ const TESTIMONIALS = [
     quote: "SET completely reframed how we approach growth. Instead of random campaigns, we now operate with structured acquisition systems and measurable KPIs. The clarity alone made it worth it.",
     author: "Mahmoud Elminawi",
     role: "Founder, Elminawi Group",
-    initial: "M",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=120&q=80&auto=format&fit=crop&crop=face",
   },
   {
     quote: "What impressed me most was the strategic depth. If you are serious about scaling your business, bet on SET. They increased my leads by 33% in 90 days, with systems, not guesswork.",
     author: "Sean Huley",
     role: "CEO, Huley Enterprises",
-    initial: "S",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&q=80&auto=format&fit=crop&crop=face",
   },
   {
     quote: "SET installed Revenue OS and reduced our cost per acquisition by 27%. We doubled revenue in 18 months. The system works because they built it to last.",
     author: "George Pintilie",
     role: "Founder, Pintilie Group",
-    initial: "G",
+    avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=120&q=80&auto=format&fit=crop&crop=face",
   },
 ];
 
@@ -103,14 +103,15 @@ export default function Scene7Voices() {
               </p>
 
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <div style={{
-                  width: 36, height: 36, borderRadius: "50%",
-                  background: "var(--color-accent-dim)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontFamily: "var(--font-display)", fontSize: "0.9rem", color: "var(--color-accent)",
-                }}>
-                  {t.initial}
-                </div>
+                <img
+                  src={t.avatar}
+                  alt={t.author}
+                  style={{
+                    width: 36, height: 36, borderRadius: "50%",
+                    objectFit: "cover",
+                    border: "1px solid var(--color-border)",
+                  }}
+                />
                 <div>
                   <div style={{ fontSize: "0.82rem", fontWeight: 500, color: "var(--color-text)" }}>{t.author}</div>
                   <div style={{ fontSize: "0.68rem", color: "var(--color-text-muted)" }}>{t.role}</div>

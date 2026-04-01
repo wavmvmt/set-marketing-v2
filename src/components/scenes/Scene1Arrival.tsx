@@ -131,57 +131,45 @@ export default function Scene1Arrival() {
           ))}
         </div>
 
-        {/* Mid layer — city skyline silhouette */}
+        {/* Mid layer — city skyline photo */}
         <div
           className="city-layer-mid"
           style={{
             position: "absolute",
             inset: 0,
-            display: "flex",
-            alignItems: "flex-end",
-            justifyContent: "center",
-            paddingBottom: "10vh",
           }}
         >
-          {/* Skyline — placeholder geometric buildings */}
-          <svg
-            viewBox="0 0 1200 400"
-            style={{ width: "100%", maxWidth: 1200, opacity: 0.3 }}
-            preserveAspectRatio="xMidYMax meet"
-          >
-            <defs>
-              <linearGradient id="buildingGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#2a2a4a" />
-                <stop offset="100%" stopColor="#0a0a14" />
-              </linearGradient>
-            </defs>
-            {/* Buildings */}
-            <rect x="50" y="120" width="60" height="280" fill="url(#buildingGrad)" />
-            <rect x="130" y="80" width="45" height="320" fill="url(#buildingGrad)" />
-            <rect x="200" y="160" width="70" height="240" fill="url(#buildingGrad)" />
-            <rect x="300" y="40" width="50" height="360" fill="url(#buildingGrad)" />
-            <rect x="380" y="100" width="80" height="300" fill="url(#buildingGrad)" />
-            <rect x="490" y="20" width="55" height="380" fill="url(#buildingGrad)" />
-            <rect x="570" y="60" width="65" height="340" fill="url(#buildingGrad)" />
-            <rect x="660" y="140" width="50" height="260" fill="url(#buildingGrad)" />
-            <rect x="740" y="50" width="70" height="350" fill="url(#buildingGrad)" />
-            <rect x="840" y="90" width="55" height="310" fill="url(#buildingGrad)" />
-            <rect x="920" y="130" width="60" height="270" fill="url(#buildingGrad)" />
-            <rect x="1010" y="70" width="48" height="330" fill="url(#buildingGrad)" />
-            <rect x="1080" y="110" width="65" height="290" fill="url(#buildingGrad)" />
-            {/* Windows - small lit rectangles */}
-            {Array.from({ length: 60 }).map((_, i) => (
-              <rect
-                key={i}
-                x={80 + Math.random() * 1000}
-                y={60 + Math.random() * 300}
-                width={4}
-                height={6}
-                fill={Math.random() > 0.5 ? "#c8a050" : "#4a9eff"}
-                opacity={Math.random() * 0.6 + 0.2}
-              />
-            ))}
-          </svg>
+          {/* Night city image */}
+          <img
+            src="https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=1920&q=80&auto=format"
+            alt=""
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              objectPosition: "center 60%",
+              opacity: 0.35,
+              filter: "brightness(0.7) contrast(1.2) saturate(1.3)",
+            }}
+          />
+          {/* Second city layer for depth */}
+          <img
+            src="https://images.unsplash.com/photo-1514565131-fce0801e5785?w=1920&q=80&auto=format"
+            alt=""
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              objectPosition: "center bottom",
+              opacity: 0.15,
+              filter: "brightness(0.5) hue-rotate(20deg)",
+              mixBlendMode: "screen",
+            }}
+          />
 
           {/* Neon brand signs */}
           {NEON_BRANDS.map((brand) => (

@@ -13,6 +13,7 @@ const STEPS = [
     subtitle: "Where you are now",
     brief: "A confidential deep-dive into your acquisition channels, conversion performance, and growth ceiling. We identify exactly where revenue is being left on the table.",
     deliverables: ["Channel audit", "Conversion analysis", "Growth ceiling identification", "Revenue gap report"],
+    image: "https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?w=800&q=80&auto=format&fit=crop",
     bgStart: "#07070a",
     bgEnd: "#0a0a14",
     accent: "#5a5666",
@@ -23,6 +24,7 @@ const STEPS = [
     subtitle: "The blueprint appears",
     brief: "We build your custom Revenue Architecture: positioning, channel strategy, funnel map, and KPI framework. Every dollar of ad spend has a clear job before we press go.",
     deliverables: ["Positioning framework", "Channel strategy", "Funnel map", "KPI framework"],
+    image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80&auto=format&fit=crop",
     bgStart: "#0a0a14",
     bgEnd: "#0f0f1e",
     accent: "#6a6a8a",
@@ -33,6 +35,7 @@ const STEPS = [
     subtitle: "It's running",
     brief: "Our team installs the full system: paid acquisition, automation, CRM alignment, creative, and reporting infrastructure, engineered to run without you in every decision.",
     deliverables: ["Paid acquisition launch", "CRM automation", "Creative production", "Reporting dashboard"],
+    image: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&q=80&auto=format&fit=crop",
     bgStart: "#0f0f1e",
     bgEnd: "#161628",
     accent: "#8a8ab0",
@@ -43,6 +46,7 @@ const STEPS = [
     subtitle: "This is what success looks like",
     brief: "Weekly data review, ongoing optimization, and executive-level oversight. We scale what's working and cut what isn't, with full transparency on every metric that matters.",
     deliverables: ["Weekly optimization", "Scale playbook", "Executive reporting", "Full transparency"],
+    image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80&auto=format&fit=crop",
     bgStart: "#161628",
     bgEnd: "#1a1a30",
     accent: "#c8a050",
@@ -156,12 +160,32 @@ export default function Scene6Method() {
                   background: `linear-gradient(135deg, ${step.bgStart}, ${step.bgEnd})`,
                   border: "1px solid var(--color-border)",
                   borderRadius: 14,
-                  padding: "clamp(24px, 3vw, 36px)",
+                  overflow: "hidden",
                   transition: "border-color 0.4s",
                 }}
                 onMouseEnter={(e) => (e.currentTarget.style.borderColor = step.accent + "50")}
                 onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--color-border)")}
               >
+                {/* Step image */}
+                <div style={{ position: "relative", height: 120, overflow: "hidden" }}>
+                  <img
+                    src={step.image}
+                    alt={step.title}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      filter: `brightness(${0.25 + i * 0.15}) saturate(${0.5 + i * 0.2})`,
+                      transition: "filter 0.6s ease",
+                    }}
+                  />
+                  <div style={{
+                    position: "absolute", inset: 0,
+                    background: `linear-gradient(transparent 30%, ${step.bgEnd})`,
+                  }} />
+                </div>
+
+                <div style={{ padding: "clamp(20px, 3vw, 32px)" }}>
                 <div style={{ marginBottom: 4 }}>
                   <span style={{ fontSize: "0.62rem", letterSpacing: "0.15em", color: step.accent, textTransform: "uppercase", fontWeight: 600 }}>
                     {step.subtitle}
@@ -186,6 +210,7 @@ export default function Scene6Method() {
                       {d}
                     </span>
                   ))}
+                </div>
                 </div>
               </div>
             </div>

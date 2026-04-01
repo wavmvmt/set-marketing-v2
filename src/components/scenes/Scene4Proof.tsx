@@ -11,6 +11,7 @@ const CASES = [
     id: 1,
     title: "From $250M to $500M",
     service: "Revenue OS · Full Funnel · 18 Months",
+    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80&auto=format&fit=crop",
     before: "A scaling operator with fragmented acquisition and no unified growth infrastructure. Marketing and sales were disconnected, costs were climbing, and the team was hitting a ceiling.",
     after: "Revenue doubled in 18 months. Cost per acquisition dropped 27%. Sales cycle compressed by 40%. A unified Revenue OS now runs the entire growth engine.",
     quote: "SET installed Revenue OS and reduced our cost per acquisition by 27%. We doubled revenue in 18 months. The system works.",
@@ -26,6 +27,7 @@ const CASES = [
     id: 2,
     title: "Leads Up 33% in 90 Days",
     service: "Paid Acquisition · Lead Gen · 90 Days",
+    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80&auto=format&fit=crop",
     before: "Scattered campaigns with no structure. Money going out, leads inconsistent. No measurable KPIs, no system to evaluate what was actually working.",
     after: "Replaced everything with structured acquisition systems. Qualified, consistent lead flow from day one. 33% increase in leads within the first 90 days.",
     quote: "If you are serious about scaling your business, bet on SET. They increased my leads by 33% in 90 days.",
@@ -41,6 +43,7 @@ const CASES = [
     id: 3,
     title: "Clarity That Converts",
     service: "Strategy · Positioning · Growth Architecture",
+    image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&q=80&auto=format&fit=crop",
     before: "Guesswork. Random campaigns. No clear brand position. Leadership couldn't articulate why customers should choose them over anyone else.",
     after: "Complete repositioning. Sharpened messaging. A full go-to-market playbook that replaced chaos with structure and gave leadership a clear system for growth.",
     quote: "SET completely reframed how we approach growth. Instead of random campaigns, we now operate with structured acquisition systems.",
@@ -119,6 +122,34 @@ export default function Scene4Proof() {
               <span style={{ fontSize: "0.68rem", color: "var(--color-text-muted)", letterSpacing: "0.08em", marginBottom: 12 }}>
                 {c.service}
               </span>
+
+              {/* Case study image */}
+              <div style={{
+                width: "100%",
+                height: 160,
+                borderRadius: 10,
+                overflow: "hidden",
+                marginBottom: 20,
+                position: "relative",
+              }}>
+                <img
+                  src={c.image}
+                  alt={c.title}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    filter: "brightness(0.6) saturate(0.8)",
+                    transition: "filter 0.4s ease",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.filter = "brightness(0.8) saturate(1)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.filter = "brightness(0.6) saturate(0.8)")}
+                />
+                <div style={{
+                  position: "absolute", inset: 0,
+                  background: "linear-gradient(transparent 40%, rgba(20,20,28,0.9))",
+                }} />
+              </div>
 
               <h3 style={{ fontSize: "1.6rem", fontWeight: 400, color: "var(--color-text)", marginBottom: 24, fontFamily: "var(--font-display)" }}>
                 {c.title}

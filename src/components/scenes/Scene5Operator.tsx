@@ -84,40 +84,46 @@ export default function Scene5Operator() {
             className="founder-portrait"
             style={{
               aspectRatio: "3/4",
-              background: "linear-gradient(135deg, var(--color-bg-card) 0%, var(--color-surface) 100%)",
               borderRadius: 16,
               border: "1px solid var(--color-border)",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 16,
               overflow: "hidden",
               position: "relative",
             }}
           >
-            {/* Placeholder avatar */}
+            {/* Placeholder portrait — professional male, business context */}
+            <img
+              src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80&auto=format&fit=crop"
+              alt="Chris Marchese — Founder & CEO"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                objectPosition: "center 20%",
+                filter: "contrast(1.05) saturate(0.9)",
+              }}
+            />
+            {/* Dark overlay at bottom for text */}
             <div style={{
-              width: 100, height: 100, borderRadius: "50%",
-              background: "var(--color-accent-dim)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: "2.5rem", fontFamily: "var(--font-display)", color: "var(--color-accent)",
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              padding: "40px 24px 24px",
+              background: "linear-gradient(transparent, rgba(7,7,10,0.9))",
             }}>
-              CM
-            </div>
-            <div style={{ textAlign: "center" }}>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: "1.2rem", color: "var(--color-text)" }}>Chris Marchese</div>
-              <div style={{ fontSize: "0.72rem", color: "var(--color-text-muted)", marginTop: 4 }}>Founder & CEO · SET Enterprises</div>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: "1.3rem", color: "var(--color-text)" }}>Chris Marchese</div>
+              <div style={{ fontSize: "0.72rem", color: "var(--color-text-secondary)", marginTop: 4 }}>Founder & CEO · SET Enterprises</div>
               <div style={{ fontSize: "0.65rem", color: "var(--color-text-muted)", marginTop: 2 }}>Toronto & Miami</div>
             </div>
+            {/* Swap indicator */}
             <div style={{
-              position: "absolute", bottom: 16, left: 16, right: 16,
-              padding: "10px 16px", borderRadius: 8,
-              background: "rgba(200,160,80,0.08)", border: "1px solid rgba(200,160,80,0.15)",
-              textAlign: "center",
+              position: "absolute", top: 12, right: 12,
+              padding: "4px 10px", borderRadius: 6,
+              background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)",
+              border: "1px solid rgba(255,255,255,0.1)",
             }}>
-              <span style={{ fontSize: "0.6rem", color: "var(--color-accent)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-                📷 Portrait placeholder — swap with real photo
+              <span style={{ fontSize: "0.55rem", color: "var(--color-text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                Placeholder
               </span>
             </div>
           </div>
