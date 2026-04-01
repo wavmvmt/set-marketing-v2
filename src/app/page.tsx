@@ -1,22 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
-
-// ═══════════════════════════════════════════════════════════
-// SET MARKETING V2 — CINEMATIC IMMERSIVE SITE
-// Three.js city flythrough, video transitions, depth scroll
-// ═══════════════════════════════════════════════════════════
+import { useEffect, useRef, useState } from "react";
 
 export default function Home() {
   const [splashDone, setSplashDone] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [expandedService, setExpandedService] = useState<number | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [videoReady, setVideoReady] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const driftRef = useRef<HTMLDivElement>(null);
   const methodWrapRef = useRef<HTMLDivElement>(null);
 
-  // ── SPLASH: Sound wave canvas ──
+  // ── SPLASH ──
   useEffect(() => {
     const c = document.getElementById("splashC") as HTMLCanvasElement;
     if (!c || splashDone) return;
@@ -51,197 +47,53 @@ export default function Home() {
     return () => cancelAnimationFrame(id);
   }, [splashDone]);
 
-  // ── THREE.JS: 3D Night City Flythrough ──
+  // ── SCROLL-DRIVEN VIDEO: Scrub video with scroll position ──
   useEffect(() => {
-    if (!splashDone || !canvasRef.current) return;
+    if (!splashDone) return;
+    const video = videoRef.current;
+    const hero = heroRef.current;
+    if (!video || !hero) return;
 
-    let disposed = false;
-    const initScene = async () => {
-      const THREE = await import("three");
-      const canvas = canvasRef.current!;
-      const w = window.innerWidth, h = window.innerHeight;
-
-      // Renderer
-      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-      renderer.setSize(w, h);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.8;
-
-      // Scene
-      const scene = new THREE.Scene();
-      scene.fog = new THREE.FogExp2(0x0a0a1a, 0.008);
-      scene.background = new THREE.Color(0x0a0a1a);
-
-      // Camera — starts at z=0, will dolly forward on scroll
-      const camera = new THREE.PerspectiveCamera(60, w / h, 0.1, 500);
-      camera.position.set(0, 8, 0);
-      camera.lookAt(0, 6, -100);
-
-      // ── Build procedural city ──
-      const buildingMat = new THREE.MeshStandardMaterial({ color: 0x1a1a2e, roughness: 0.7, metalness: 0.2 });
-      const windowMat = new THREE.MeshBasicMaterial({ color: 0xc8a050 });
-      const neonColors = [0x4a9eff, 0xff4a8d, 0x4aeaff, 0xc8a050, 0x4aff9e, 0xff9f4a, 0xffd700];
-
-      // Generate buildings along a street
-      for (let z = 10; z > -300; z -= 6) {
-        for (let side = -1; side <= 1; side += 2) {
-          if (Math.random() > 0.85) continue; // gaps
-          const bw = 4 + Math.random() * 8;
-          const bh = 8 + Math.random() * 40;
-          const bd = 4 + Math.random() * 6;
-          const xOff = side * (12 + Math.random() * 15);
-
-          const geo = new THREE.BoxGeometry(bw, bh, bd);
-          const mesh = new THREE.Mesh(geo, buildingMat.clone());
-          mesh.position.set(xOff, bh / 2, z);
-          scene.add(mesh);
-
-          // Windows (emissive points)
-          const rows = Math.floor(bh / 3);
-          const cols = Math.floor(bw / 2);
-          for (let r = 0; r < rows; r++) {
-            for (let c = 0; c < cols; c++) {
-              if (Math.random() > 0.55) continue;
-              const wGeo = new THREE.PlaneGeometry(0.8, 1.0);
-              const isWarm = Math.random() > 0.25;
-              const wMat = new THREE.MeshBasicMaterial({
-                color: isWarm ? (Math.random() > 0.5 ? 0xffeebb : 0xffcc66) : (Math.random() > 0.5 ? 0x4a9eff : 0x6ab8ff),
-                transparent: true,
-                opacity: 0.5 + Math.random() * 0.5,
-              });
-              const wMesh = new THREE.Mesh(wGeo, wMat);
-              const wx = xOff + (c - cols / 2) * 2 + 1;
-              const wy = r * 3 + 2;
-              const wz = z + (side > 0 ? -bd / 2 - 0.01 : bd / 2 + 0.01);
-              wMesh.position.set(wx, wy, wz);
-              wMesh.rotation.y = side > 0 ? 0 : Math.PI;
-              scene.add(wMesh);
-            }
+    let ticking = false;
+    const onScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const rect = hero.getBoundingClientRect();
+          const scrollH = hero.offsetHeight - window.innerHeight;
+          const progress = Math.max(0, Math.min(1, -rect.top / scrollH));
+          if (video.duration && isFinite(video.duration)) {
+            video.currentTime = progress * video.duration;
           }
-
-          // Neon signs on buildings — more frequent, brighter
-          if (Math.random() > 0.4) {
-            const neonColor = neonColors[Math.floor(Math.random() * neonColors.length)];
-            const light = new THREE.PointLight(neonColor, 8, 40);
-            light.position.set(xOff, bh * 0.6, z + side * 2);
-            scene.add(light);
-          }
-        }
+          ticking = false;
+        });
+        ticking = true;
       }
-
-      // Road surface
-      const roadGeo = new THREE.PlaneGeometry(20, 400);
-      const roadMat = new THREE.MeshStandardMaterial({ color: 0x1a1a24, roughness: 0.85, metalness: 0.05 });
-      const road = new THREE.Mesh(roadGeo, roadMat);
-      road.rotation.x = -Math.PI / 2;
-      road.position.set(0, 0, -150);
-      scene.add(road);
-
-      // Road center line
-      for (let z = 5; z > -300; z -= 8) {
-        const lineGeo = new THREE.PlaneGeometry(0.15, 3);
-        const lineMat = new THREE.MeshBasicMaterial({ color: 0xf0d070, transparent: true, opacity: 0.6 });
-        const line = new THREE.Mesh(lineGeo, lineMat);
-        line.rotation.x = -Math.PI / 2;
-        line.position.set(0, 0.01, z);
-        scene.add(line);
-      }
-
-      // Ambient and directional light — much brighter
-      scene.add(new THREE.AmbientLight(0x2a2a4e, 1.5));
-      const dirLight = new THREE.DirectionalLight(0x6a6a9e, 0.8);
-      dirLight.position.set(10, 40, -20);
-      scene.add(dirLight);
-      // Moonlight from above
-      const moonLight = new THREE.DirectionalLight(0x4466aa, 0.4);
-      moonLight.position.set(-20, 50, -50);
-      scene.add(moonLight);
-
-      // Street lights — brighter, closer together
-      for (let z = 0; z > -280; z -= 14) {
-        for (let side = -1; side <= 1; side += 2) {
-          const sl = new THREE.PointLight(0xffcc77, 4, 30);
-          sl.position.set(side * 10, 12, z);
-          scene.add(sl);
-        }
-      }
-
-      // ── Neon brand sign meshes floating in space ──
-      const brandNames = ["BMW", "HUAWEI", "W HOTELS", "RICK ROSS", "MARRIOTT", "TISSOT", "LAMBORGHINI"];
-      const brandColors = [0x4a9eff, 0xff4a8d, 0x4aeaff, 0xff9f4a, 0x4aff9e, 0xc8a050, 0xffd700];
-      brandNames.forEach((name, i) => {
-        const light = new THREE.PointLight(brandColors[i], 10, 45);
-        const zPos = -20 - i * 30;
-        const xPos = (i % 2 === 0 ? -1 : 1) * (15 + Math.random() * 10);
-        light.position.set(xPos, 12 + Math.random() * 15, zPos);
-        scene.add(light);
-      });
-
-      // ── Scroll-driven camera dolly ──
-      let scrollProgress = 0;
-      const maxZ = -200;
-
-      const onScroll = () => {
-        if (!heroRef.current) return;
-        const rect = heroRef.current.getBoundingClientRect();
-        const totalScroll = heroRef.current.offsetHeight - window.innerHeight;
-        scrollProgress = Math.max(0, Math.min(1, -rect.top / totalScroll));
-
-        camera.position.z = scrollProgress * maxZ;
-        camera.position.y = 8 - scrollProgress * 2;
-        // Slight sway
-        camera.position.x = Math.sin(scrollProgress * 4) * 1.5;
-        camera.lookAt(camera.position.x * 0.5, 6, camera.position.z - 40);
-      };
-      window.addEventListener("scroll", onScroll, { passive: true });
-
-      // ── Animate ──
-      let time = 0;
-      const animate = () => {
-        if (disposed) return;
-        time += 0.01;
-        renderer.render(scene, camera);
-        requestAnimationFrame(animate);
-      };
-      animate();
-
-      // Resize
-      const onResize = () => {
-        const nw = window.innerWidth, nh = window.innerHeight;
-        camera.aspect = nw / nh;
-        camera.updateProjectionMatrix();
-        renderer.setSize(nw, nh);
-      };
-      window.addEventListener("resize", onResize);
-
-      return () => {
-        disposed = true;
-        window.removeEventListener("scroll", onScroll);
-        window.removeEventListener("resize", onResize);
-        renderer.dispose();
-      };
     };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [splashDone, videoReady]);
 
-    const cleanup = initScene();
-    return () => { disposed = true; cleanup.then(fn => fn?.()); };
-  }, [splashDone]);
-
-  // ── GSAP + Lenis init ──
+  // ── GSAP + LENIS ──
   useEffect(() => {
     if (!splashDone) return;
     const init = async () => {
       const { gsap } = await import("gsap");
       const { ScrollTrigger } = await import("gsap/ScrollTrigger");
       gsap.registerPlugin(ScrollTrigger);
-
       const LenisModule = await import("lenis");
       const lenis = new LenisModule.default({ duration: 1.4, easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
       lenis.on("scroll", ScrollTrigger.update);
       gsap.ticker.add((t: number) => lenis.raf(t * 1000));
       gsap.ticker.lagSmoothing(0);
 
-      // ── Car drift video trigger ──
+      // Hero content parallax
+      gsap.to(".hero-text", {
+        y: -120, opacity: 0,
+        ease: "none",
+        scrollTrigger: { trigger: heroRef.current, start: "top top", end: "60% top", scrub: 1 },
+      });
+
+      // Car drift
       if (driftRef.current) {
         ScrollTrigger.create({
           trigger: driftRef.current,
@@ -249,43 +101,27 @@ export default function Home() {
           onEnter: () => {
             const vid = document.getElementById("driftVid") as HTMLVideoElement;
             if (vid) { vid.currentTime = 0; vid.play().catch(() => {}); }
-            gsap.fromTo(driftRef.current, { opacity: 0, x: "-100%" }, { opacity: 1, x: "0%", duration: 1.2, ease: "power3.out" });
-            gsap.to(driftRef.current, { opacity: 0, x: "100%", duration: 0.8, delay: 2, ease: "power2.in" });
+            gsap.fromTo(driftRef.current, { opacity: 0, x: "-100vw" }, { opacity: 1, x: "0%", duration: 1, ease: "power3.out" });
+            gsap.to(driftRef.current, { opacity: 0, x: "100vw", duration: 0.8, delay: 2.2, ease: "power2.in" });
           },
         });
       }
 
-      // ── Method depth scroll: walk forward through gates ──
+      // Method depth gates
       if (methodWrapRef.current) {
-        const gates = gsap.utils.toArray<HTMLElement>(".depth-gate");
-        gates.forEach((gate, i) => {
-          gsap.fromTo(gate, {
-            z: -300,
-            opacity: 0,
-            scale: 0.7,
-            rotateX: 15,
-          }, {
-            z: 0,
-            opacity: 1,
-            scale: 1,
-            rotateX: 0,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: gate,
-              start: "top 85%",
-              end: "top 30%",
-              scrub: 1,
-            },
-          });
+        document.querySelectorAll(".depth-gate").forEach((gate) => {
+          gsap.fromTo(gate, { z: -400, opacity: 0, scale: 0.65, rotateX: 20 },
+            { z: 0, opacity: 1, scale: 1, rotateX: 0, ease: "power2.out",
+              scrollTrigger: { trigger: gate as Element, start: "top 90%", end: "top 35%", scrub: 1 } });
         });
       }
 
-      // ── General section reveals ──
+      // General reveals
       gsap.utils.toArray<HTMLElement>(".reveal").forEach(el => {
-        gsap.from(el, { opacity: 0, y: 60, duration: 1, ease: "power3.out", scrollTrigger: { trigger: el, start: "top 78%" } });
+        gsap.from(el, { opacity: 0, y: 60, duration: 1, ease: "power3.out", scrollTrigger: { trigger: el, start: "top 80%" } });
       });
       gsap.utils.toArray<HTMLElement>(".reveal-stagger").forEach(el => {
-        gsap.from(el.children, { opacity: 0, y: 50, stagger: 0.1, duration: 0.9, ease: "power3.out", scrollTrigger: { trigger: el, start: "top 70%" } });
+        gsap.from(el.children, { opacity: 0, y: 50, stagger: 0.1, duration: 0.9, ease: "power3.out", scrollTrigger: { trigger: el, start: "top 72%" } });
       });
     };
     init();
@@ -346,38 +182,63 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* ═══ SCENE 1: 3D CITY FLYTHROUGH ═══ */}
-      <section ref={heroRef} style={{ position: "relative", height: "350vh" }}>
+      {/* ═══ SCENE 1: SCROLL-DRIVEN VIDEO HERO ═══ */}
+      <section ref={heroRef} style={{ position: "relative", height: "300vh" }}>
         <div style={{ position: "sticky", top: 0, height: "100vh", overflow: "hidden" }}>
-          {/* Three.js Canvas */}
-          <canvas ref={canvasRef} style={{ position: "absolute", inset: 0, zIndex: 1 }} />
+          {/* Real video — night city driving POV, scrubs with scroll */}
+          <video
+            ref={videoRef}
+            muted
+            playsInline
+            preload="auto"
+            onLoadedData={() => setVideoReady(true)}
+            style={{
+              position: "absolute", inset: 0, width: "100%", height: "100%",
+              objectFit: "cover", zIndex: 1,
+              filter: "brightness(0.8) saturate(1.3) contrast(1.1)",
+            }}
+          >
+            <source src="https://videos.pexels.com/video-files/3129671/3129671-uhd_2560_1440_30fps.mp4" type="video/mp4" />
+          </video>
 
-          {/* Atmospheric overlay */}
-          <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "radial-gradient(ellipse at center 60%, transparent 50%, rgba(10,10,26,0.3) 100%)", pointerEvents: "none" }} />
+          {/* Gradient overlays for readability */}
+          <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "linear-gradient(180deg, rgba(7,7,10,0.4) 0%, rgba(7,7,10,0.15) 40%, rgba(7,7,10,0.15) 60%, rgba(7,7,10,0.7) 100%)", pointerEvents: "none" }} />
+          <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "radial-gradient(ellipse at center, transparent 50%, rgba(7,7,10,0.4) 100%)", pointerEvents: "none" }} />
 
-          {/* Road light streaks */}
-          <div style={{ position: "absolute", bottom: "25%", left: 0, width: "100%", height: 2, zIndex: 3, pointerEvents: "none", overflow: "hidden" }}>
-            <div style={{ width: "40%", height: "100%", background: "linear-gradient(90deg, transparent, rgba(200,160,80,0.35), transparent)", filter: "blur(2px)", animation: "slideLight 4s linear infinite" }} />
-          </div>
-          <div style={{ position: "absolute", bottom: "22%", left: 0, width: "100%", height: 1, zIndex: 3, pointerEvents: "none", overflow: "hidden" }}>
-            <div style={{ width: "25%", height: "100%", background: "linear-gradient(90deg, transparent, rgba(255,74,141,0.2), transparent)", filter: "blur(2px)", animation: "slideLight 6s linear infinite 1.5s" }} />
-          </div>
+          {/* Floating neon brand names */}
+          {[
+            { name: "BMW", color: "#4a9eff", x: "6%", y: "18%" },
+            { name: "HUAWEI", color: "#ff4a8d", x: "86%", y: "22%" },
+            { name: "W HOTELS", color: "#4aeaff", x: "72%", y: "72%" },
+            { name: "RICK ROSS", color: "#ff9f4a", x: "10%", y: "68%" },
+            { name: "TISSOT", color: "#c8a050", x: "82%", y: "48%" },
+            { name: "MARRIOTT", color: "#4aff9e", x: "14%", y: "42%" },
+          ].map((n, i) => (
+            <div key={n.name} style={{
+              position: "absolute", left: n.x, top: n.y, zIndex: 3,
+              color: n.color, fontFamily: "var(--sans)", fontWeight: 700,
+              fontSize: "clamp(0.5rem, 0.8vw, 0.7rem)", letterSpacing: "0.25em",
+              textShadow: `0 0 12px ${n.color}, 0 0 30px ${n.color}, 0 0 60px ${n.color}50`,
+              animation: `pulseGlow ${2.5 + i * 0.4}s ease-in-out infinite alternate`,
+              opacity: 0.75, pointerEvents: "none",
+            }}>{n.name}</div>
+          ))}
 
           {/* Content */}
-          <div style={{ position: "relative", zIndex: 10, height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "0 24px" }}>
-            <div style={{ fontSize: "0.6rem", letterSpacing: "0.4em", color: "var(--gold)", textTransform: "uppercase", marginBottom: 28, fontWeight: 500, textShadow: "0 0 30px rgba(200,160,80,0.4)" }}>Revenue Architecture · Toronto & Miami</div>
-            <h1 style={{ fontFamily: "var(--serif)", fontSize: "clamp(3rem, 7.5vw, 6rem)", fontWeight: 300, lineHeight: 1.03, marginBottom: 28, textShadow: "0 4px 60px rgba(0,0,0,0.7)" }}>
-              We Don&rsquo;t Run <em style={{ fontStyle: "italic", color: "var(--gold)", textShadow: "0 0 60px rgba(200,160,80,0.3)" }}>Campaigns.</em><br />We Install Systems.
+          <div className="hero-text" style={{ position: "relative", zIndex: 10, height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "0 24px" }}>
+            <div style={{ fontSize: "0.6rem", letterSpacing: "0.4em", color: "var(--gold)", textTransform: "uppercase", marginBottom: 28, fontWeight: 500, textShadow: "0 0 30px rgba(200,160,80,0.5)" }}>Revenue Architecture · Toronto & Miami · Est. 2019</div>
+            <h1 style={{ fontFamily: "var(--serif)", fontSize: "clamp(3rem, 7.5vw, 6rem)", fontWeight: 300, lineHeight: 1.03, marginBottom: 28, textShadow: "0 2px 40px rgba(0,0,0,0.7), 0 0 80px rgba(0,0,0,0.3)" }}>
+              We Don&rsquo;t Run <em style={{ fontStyle: "italic", color: "var(--gold)", textShadow: "0 0 50px rgba(200,160,80,0.35)" }}>Campaigns.</em><br />We Install Systems.
             </h1>
-            <p style={{ fontSize: "clamp(0.9rem, 1.3vw, 1.08rem)", color: "rgba(240,236,228,0.6)", lineHeight: 1.7, maxWidth: 540, marginBottom: 44, textShadow: "0 2px 20px rgba(0,0,0,0.5)" }}>
+            <p style={{ fontSize: "clamp(0.9rem, 1.3vw, 1.08rem)", color: "rgba(240,236,228,0.75)", lineHeight: 1.7, maxWidth: 540, marginBottom: 44, textShadow: "0 2px 16px rgba(0,0,0,0.6)" }}>
               SET Marketing engineers acquisition, conversion, and automation infrastructure for operators generating $1M to $20M.
             </p>
             <div style={{ display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "center" }}>
               <a href="#contact" className="btn-gold">Apply for Q2</a>
-              <a href="#results" className="btn-ghost">View Results →</a>
+              <a href="#results" className="btn-ghost" style={{ backdropFilter: "blur(8px)", background: "rgba(0,0,0,0.2)" }}>View Results →</a>
             </div>
-            <div style={{ position: "absolute", bottom: 32, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, opacity: 0.3, animation: "bob 2.5s ease-in-out infinite" }}>
-              <span style={{ fontSize: "0.5rem", letterSpacing: "0.2em", color: "var(--text3)", textTransform: "uppercase" }}>Scroll to fly through</span>
+            <div style={{ position: "absolute", bottom: 32, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, opacity: 0.4, animation: "bob 2.5s ease-in-out infinite" }}>
+              <span style={{ fontSize: "0.5rem", letterSpacing: "0.2em", color: "var(--text3)", textTransform: "uppercase" }}>Scroll to explore</span>
               <div style={{ width: 1, height: 24, background: "linear-gradient(to bottom, var(--gold), transparent)" }} />
             </div>
           </div>
@@ -385,11 +246,11 @@ export default function Home() {
       </section>
 
       {/* ═══ CAR DRIFT TRANSITION ═══ */}
-      <div ref={driftRef} style={{ position: "relative", height: 120, overflow: "hidden", zIndex: 20, marginTop: -60, opacity: 0 }}>
-        <video id="driftVid" muted playsInline preload="auto" style={{ width: "100%", height: 200, objectFit: "cover", filter: "brightness(0.6) contrast(1.3)" }}>
+      <div ref={driftRef} style={{ position: "relative", height: 140, overflow: "hidden", zIndex: 20, marginTop: -70, opacity: 0 }}>
+        <video id="driftVid" muted playsInline preload="auto" style={{ width: "100%", height: 220, objectFit: "cover", filter: "brightness(0.7) contrast(1.2) saturate(1.4)" }}>
           <source src="https://videos.pexels.com/video-files/2491284/2491284-uhd_2560_1440_24fps.mp4" type="video/mp4" />
         </video>
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, var(--bg) 0%, transparent 30%, transparent 70%, var(--bg) 100%)" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, var(--bg) 0%, transparent 25%, transparent 75%, var(--bg) 100%)" }} />
       </div>
 
       {/* ═══ SCENE 2: TRUST WALL ═══ */}
@@ -474,7 +335,7 @@ export default function Home() {
             <span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>04 · Founder & CEO</span>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: "clamp(32px, 6vw, 80px)", alignItems: "center" }}>
-            <div className="founder-img reveal" style={{ borderRadius: 14, overflow: "hidden", aspectRatio: "3/4", position: "relative" }}>
+            <div className="reveal" style={{ borderRadius: 14, overflow: "hidden", aspectRatio: "3/4", position: "relative" }}>
               <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80" alt="" style={{ width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0.65) saturate(0.8)" }} />
               <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, var(--bg) 0%, transparent 40%)" }} />
               <div style={{ position: "absolute", bottom: 20, left: 20, right: 20, textAlign: "center" }}>
@@ -490,7 +351,7 @@ export default function Home() {
                 <span style={{ background: "linear-gradient(135deg, #c8a050, #e8c878)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>$500M+</span> in client revenue.<br />System-first.
               </h2>
               {["12 years as an industrial millwright.", "No trust fund. No shortcuts.", "Just pattern recognition and an obsession", "with what actually moves people to act.", "That obsession became Strategic Emotional Targeting.", "That framework became SET."].map((l, i) => (
-                <p key={i} className="story-line reveal" style={{ fontFamily: "var(--serif)", fontSize: "clamp(1rem, 1.3vw, 1.2rem)", color: i >= 4 ? "var(--gold)" : "var(--text2)", fontStyle: i >= 4 ? "italic" : "normal", lineHeight: 1.5, marginBottom: 8 }}>{l}</p>
+                <p key={i} className="reveal" style={{ fontFamily: "var(--serif)", fontSize: "clamp(1rem, 1.3vw, 1.2rem)", color: i >= 4 ? "var(--gold)" : "var(--text2)", fontStyle: i >= 4 ? "italic" : "normal", lineHeight: 1.5, marginBottom: 8 }}>{l}</p>
               ))}
               <div className="reveal-stagger" style={{ display: "flex", gap: 14, flexWrap: "wrap", marginTop: 28 }}>
                 {["SET Enterprises", "SET Ventures", "SET Sales Academy"].map(e => <div key={e} style={{ padding: "10px 18px", border: "1px solid var(--border)", borderRadius: 6, background: "var(--bg3)", fontSize: "0.76rem", fontWeight: 500 }}>{e}</div>)}
@@ -500,13 +361,13 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══ SCENE 6: THE METHOD — WALK-FORWARD DEPTH ═══ */}
+      {/* ═══ SCENE 6: METHOD — WALK-FORWARD DEPTH ═══ */}
       <section id="process" ref={methodWrapRef} style={{ padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: "linear-gradient(180deg, var(--bg), var(--bg2))", perspective: "1200px", perspectiveOrigin: "center 40%" }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
           <div className="reveal" style={{ textAlign: "center", marginBottom: 70 }}>
             <span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>05 · Walk Through The Method</span>
             <h2 style={{ fontSize: "clamp(2rem, 4vw, 3.2rem)", marginTop: 16 }}>The SET <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Method</em></h2>
-            <p style={{ fontSize: "0.85rem", color: "var(--text2)", marginTop: 10 }}>Scroll to walk through each gate. Life gets better as you go.</p>
+            <p style={{ fontSize: "0.85rem", color: "var(--text2)", marginTop: 10 }}>Scroll to walk through each gate.</p>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 60, transformStyle: "preserve-3d" }}>
             {STEPS.map((s, i) => (
@@ -523,10 +384,7 @@ export default function Home() {
                 <div style={{ position: "relative", minHeight: 240 }}>
                   <img src={s.img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", filter: `brightness(${0.3 + i * 0.15}) saturate(${0.7 + i * 0.2})` }} />
                   <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to right, rgba(${10 + i * 5},${10 + i * 5},${20 + i * 8},0.95) 0%, transparent 40%)` }} />
-                  {/* Progressive brightness indicator */}
-                  <div style={{ position: "absolute", bottom: 16, right: 16, padding: "6px 12px", borderRadius: 20, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)", fontSize: "0.55rem", color: s.ac, letterSpacing: "0.1em", textTransform: "uppercase" }}>
-                    Gate {i + 1} of 4
-                  </div>
+                  <div style={{ position: "absolute", bottom: 16, right: 16, padding: "6px 12px", borderRadius: 20, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)", fontSize: "0.55rem", color: s.ac, letterSpacing: "0.1em", textTransform: "uppercase" }}>Gate {i + 1} of 4</div>
                 </div>
               </div>
             ))}
@@ -558,11 +416,11 @@ export default function Home() {
       <section id="contact" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", position: "relative" }}>
         <div style={{ position: "absolute", top: "15%", left: "50%", transform: "translateX(-50%)", width: 700, height: 700, borderRadius: "50%", background: "radial-gradient(circle, rgba(200,160,80,0.04) 0%, transparent 65%)", pointerEvents: "none" }} />
         {!formSubmitted ? <>
-          <div className="close-headline reveal" style={{ textAlign: "center", marginBottom: 50, position: "relative", zIndex: 2 }}>
+          <div className="reveal" style={{ textAlign: "center", marginBottom: 50, position: "relative", zIndex: 2 }}>
             <h2 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.5rem, 5.5vw, 4.5rem)", fontWeight: 300, lineHeight: 1.1, marginBottom: 20 }}>Ready to <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Install</em> the System?</h2>
             <p style={{ fontSize: "0.9rem", color: "var(--text2)", maxWidth: 450, margin: "0 auto", lineHeight: 1.6 }}>We work with a select number of operators each quarter.</p>
           </div>
-          <div className="close-form reveal" style={{ width: "100%", maxWidth: 500, background: "var(--glass)", backdropFilter: "blur(24px)", border: "1px solid var(--border)", borderRadius: 20, padding: "clamp(28px, 4vw, 44px)", position: "relative", zIndex: 2 }}>
+          <div className="reveal" style={{ width: "100%", maxWidth: 500, background: "var(--glass)", backdropFilter: "blur(24px)", border: "1px solid var(--border)", borderRadius: 20, padding: "clamp(28px, 4vw, 44px)", position: "relative", zIndex: 2 }}>
             <form onSubmit={e => { e.preventDefault(); setFormSubmitted(true); }} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div><label style={{ fontSize: "0.62rem", letterSpacing: "0.1em", color: "var(--text3)", textTransform: "uppercase", marginBottom: 6, display: "block" }}>Your Name</label><input className="form-input" placeholder="Full name" required /></div>
               <div><label style={{ fontSize: "0.62rem", letterSpacing: "0.1em", color: "var(--text3)", textTransform: "uppercase", marginBottom: 6, display: "block" }}>Best Contact</label><input className="form-input" placeholder="Phone or email" required /></div>
