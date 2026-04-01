@@ -174,11 +174,11 @@ export default function Home() {
         style={{
           position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
           objectFit: "cover", zIndex: 0,
-          filter: "brightness(0.75) saturate(1.3) contrast(1.1)",
+          filter: "brightness(1.1) saturate(1.4) contrast(1.15)",
           pointerEvents: "none",
         }}
       >
-        <source src="/scenic-highway.mp4" type="video/mp4" />
+        <source src="/inside-car-night.mp4" type="video/mp4" />
       </video>
 
       {/* Fixed vignette over the video */}
