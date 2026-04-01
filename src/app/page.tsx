@@ -217,11 +217,12 @@ export default function Home() {
             style={{
               position: "absolute", inset: 0, width: "100%", height: "100%",
               objectFit: "cover", zIndex: 1,
-              filter: "brightness(0.85) saturate(1.4) contrast(1.05)",
+              filter: "brightness(0.7) saturate(1.3) contrast(1.15)",
             }}
           >
-            {/* Windshield POV — driving through city at night */}
-            <source src="/dashcam-night.mp4" type="video/mp4" />
+            {/* Dashboard forward view — looking through windshield, road ahead, driving through city */}
+            <source src="/dash-forward.mp4" type="video/mp4" />
+            {/* Alt: /dashcam-night2.mp4 for night city version */}
           </video>
 
           {/* Fallback image while video loads */}
