@@ -220,8 +220,8 @@ export default function Home() {
               filter: "brightness(0.85) saturate(1.4) contrast(1.05)",
             }}
           >
-            {/* Self-hosted night city driving video */}
-            <source src="/city-drive2.mp4" type="video/mp4" />
+            {/* Windshield POV — driving through city at night */}
+            <source src="/dashcam-night.mp4" type="video/mp4" />
           </video>
 
           {/* Fallback image while video loads */}
