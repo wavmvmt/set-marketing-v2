@@ -9,8 +9,8 @@ export default function Home() {
   const [videoReady, setVideoReady] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const driftRef = useRef<HTMLDivElement>(null);
-  const methodWrapRef = useRef<HTMLDivElement>(null);
+  const methodRef = useRef<HTMLDivElement>(null);
+  const tunnelRef = useRef<HTMLDivElement>(null);
 
   // ── SPLASH ──
   useEffect(() => {
@@ -47,7 +47,7 @@ export default function Home() {
     return () => cancelAnimationFrame(id);
   }, [splashDone]);
 
-  // ── SCROLL-DRIVEN VIDEO: Scrub video with scroll position ──
+  // ── SCROLL-DRIVEN VIDEO ──
   useEffect(() => {
     if (!splashDone) return;
     const video = videoRef.current;
@@ -56,18 +56,18 @@ export default function Home() {
 
     let ticking = false;
     const onScroll = () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          const rect = hero.getBoundingClientRect();
-          const scrollH = hero.offsetHeight - window.innerHeight;
-          const progress = Math.max(0, Math.min(1, -rect.top / scrollH));
-          if (video.duration && isFinite(video.duration)) {
-            video.currentTime = progress * video.duration;
-          }
-          ticking = false;
-        });
-        ticking = true;
-      }
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const rect = hero.getBoundingClientRect();
+        const scrollH = hero.offsetHeight - window.innerHeight;
+        if (scrollH <= 0) { ticking = false; return; }
+        const progress = Math.max(0, Math.min(1, -rect.top / scrollH));
+        if (video.duration && isFinite(video.duration) && !isNaN(video.duration)) {
+          video.currentTime = progress * video.duration;
+        }
+        ticking = false;
+      });
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -86,33 +86,55 @@ export default function Home() {
       gsap.ticker.add((t: number) => lenis.raf(t * 1000));
       gsap.ticker.lagSmoothing(0);
 
-      // Hero content parallax
+      // Hero text parallax — fades out as you scroll through the video
       gsap.to(".hero-text", {
-        y: -120, opacity: 0,
-        ease: "none",
-        scrollTrigger: { trigger: heroRef.current, start: "top top", end: "60% top", scrub: 1 },
+        y: -150, opacity: 0, ease: "none",
+        scrollTrigger: { trigger: heroRef.current, start: "top top", end: "50% top", scrub: 1 },
       });
 
-      // Car drift
-      if (driftRef.current) {
-        ScrollTrigger.create({
-          trigger: driftRef.current,
-          start: "top 80%",
-          onEnter: () => {
-            const vid = document.getElementById("driftVid") as HTMLVideoElement;
-            if (vid) { vid.currentTime = 0; vid.play().catch(() => {}); }
-            gsap.fromTo(driftRef.current, { opacity: 0, x: "-100vw" }, { opacity: 1, x: "0%", duration: 1, ease: "power3.out" });
-            gsap.to(driftRef.current, { opacity: 0, x: "100vw", duration: 0.8, delay: 2.2, ease: "power2.in" });
+      // ═══ METHOD: Walk-forward tunnel ═══
+      // Pin the section and move the tunnel container forward in z-space
+      if (methodRef.current && tunnelRef.current) {
+        const totalDepth = 3000; // total z-distance to travel
+
+        gsap.to(tunnelRef.current, {
+          z: totalDepth,
+          ease: "none",
+          scrollTrigger: {
+            trigger: methodRef.current,
+            start: "top top",
+            end: "+=400%",
+            scrub: 1.5,
+            pin: true,
+            anticipatePin: 1,
           },
         });
-      }
 
-      // Method depth gates
-      if (methodWrapRef.current) {
-        document.querySelectorAll(".depth-gate").forEach((gate) => {
-          gsap.fromTo(gate, { z: -400, opacity: 0, scale: 0.65, rotateX: 20 },
-            { z: 0, opacity: 1, scale: 1, rotateX: 0, ease: "power2.out",
-              scrollTrigger: { trigger: gate as Element, start: "top 90%", end: "top 35%", scrub: 1 } });
+        // Each gate's content fades in as it approaches center and fades out as it passes
+        document.querySelectorAll(".gate-content").forEach((el, i) => {
+          const gateZ = i * 800;
+          // Content opacity: invisible when far, visible when near camera (z ~= gateZ), invisible when passed
+          gsap.fromTo(el,
+            { opacity: 0 },
+            {
+              opacity: 1,
+              scrollTrigger: {
+                trigger: methodRef.current,
+                start: `${i * 22 + 5}% top`,
+                end: `${i * 22 + 18}% top`,
+                scrub: 1,
+              },
+            }
+          );
+          gsap.to(el, {
+            opacity: 0,
+            scrollTrigger: {
+              trigger: methodRef.current,
+              start: `${i * 22 + 20}% top`,
+              end: `${i * 22 + 25}% top`,
+              scrub: 1,
+            },
+          });
         });
       }
 
@@ -149,10 +171,10 @@ export default function Home() {
     { t: "Clarity That Converts", tp: "Strategy · Positioning", b: "Guesswork. Random campaigns. No clear brand position.", a: "Complete repositioning. Full GTM playbook replaced chaos with structure.", q: "SET reframed our entire growth approach. Structured systems replaced guesswork.", au: "Mahmoud Elminawi", r: "Founder", m: [{ v: "100%", l: "Clarity" }, { v: "New", l: "Playbook" }, { v: "✓", l: "Installed" }], img: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&q=80" },
   ];
   const STEPS = [
-    { n: "01", t: "Revenue Assessment", s: "Where you are now", d: "Deep-dive into acquisition channels, conversion performance, and growth ceiling.", tags: ["Channel audit", "Gap report"], ac: "#5a5670", img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=70" },
-    { n: "02", t: "Architecture Design", s: "The blueprint appears", d: "Custom Revenue Architecture: positioning, channel strategy, funnel map, KPI framework.", tags: ["Positioning", "Funnel map"], ac: "#7a7a9a", img: "https://images.unsplash.com/photo-1507925921958-8a62f3d1a50d?w=600&q=70" },
-    { n: "03", t: "System Installation", s: "It's running", d: "Full system: paid acquisition, automation, CRM, creative, and reporting infrastructure.", tags: ["Launch", "Automation"], ac: "#a0a0c0", img: "https://images.unsplash.com/photo-1551434678-e076c223a692?w=600&q=70" },
-    { n: "04", t: "Scale & Optimize", s: "This is what success looks like", d: "Weekly optimization, executive oversight, full transparency on every metric.", tags: ["Scale", "Transparency"], ac: "#c8a050", img: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&q=70" },
+    { n: "01", t: "Revenue Assessment", s: "Where you are now", d: "Deep-dive into acquisition channels, conversion performance, and growth ceiling.", ac: "#5a5670", bg: "rgba(12,12,20,0.95)" },
+    { n: "02", t: "Architecture Design", s: "The blueprint appears", d: "Custom Revenue Architecture: positioning, channel strategy, funnel map, KPI framework.", ac: "#7a7a9a", bg: "rgba(18,18,32,0.95)" },
+    { n: "03", t: "System Installation", s: "It's running", d: "Full system: paid acquisition, automation, CRM, creative, and reporting infrastructure.", ac: "#a0a0c0", bg: "rgba(24,24,44,0.95)" },
+    { n: "04", t: "Scale & Optimize", s: "This is what success looks like", d: "Weekly optimization, executive oversight, full transparency on every metric.", ac: "#c8a050", bg: "rgba(30,28,50,0.95)" },
   ];
   const VOICES = [
     { q: "SET completely reframed how we approach growth. Structured acquisition systems and measurable KPIs.", a: "Mahmoud Elminawi", r: "Founder, Elminawi Group" },
@@ -185,7 +207,7 @@ export default function Home() {
       {/* ═══ SCENE 1: SCROLL-DRIVEN VIDEO HERO ═══ */}
       <section ref={heroRef} style={{ position: "relative", height: "300vh" }}>
         <div style={{ position: "sticky", top: 0, height: "100vh", overflow: "hidden" }}>
-          {/* Real video — night city driving POV, scrubs with scroll */}
+          {/* Scroll-driven video — real night city driving footage from Mixkit */}
           <video
             ref={videoRef}
             muted
@@ -195,15 +217,23 @@ export default function Home() {
             style={{
               position: "absolute", inset: 0, width: "100%", height: "100%",
               objectFit: "cover", zIndex: 1,
-              filter: "brightness(0.8) saturate(1.3) contrast(1.1)",
+              filter: "brightness(0.85) saturate(1.4) contrast(1.05)",
             }}
           >
-            <source src="https://videos.pexels.com/video-files/3129671/3129671-uhd_2560_1440_30fps.mp4" type="video/mp4" />
+            {/* Night city driving POV — Mixkit #42038 */}
+            <source src="https://assets.mixkit.co/videos/42038/42038-720.mp4" type="video/mp4" />
           </video>
 
-          {/* Gradient overlays for readability */}
-          <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "linear-gradient(180deg, rgba(7,7,10,0.4) 0%, rgba(7,7,10,0.15) 40%, rgba(7,7,10,0.15) 60%, rgba(7,7,10,0.7) 100%)", pointerEvents: "none" }} />
-          <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "radial-gradient(ellipse at center, transparent 50%, rgba(7,7,10,0.4) 100%)", pointerEvents: "none" }} />
+          {/* Fallback image while video loads */}
+          {!videoReady && (
+            <div style={{ position: "absolute", inset: 0, zIndex: 1, background: "linear-gradient(135deg, #0a0a1a 0%, #141428 50%, #0a0a1a 100%)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ fontSize: "0.6rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase", animation: "pulseGlow 2s ease-in-out infinite" }}>Loading experience...</div>
+            </div>
+          )}
+
+          {/* Gradient overlays for text readability */}
+          <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "linear-gradient(180deg, rgba(7,7,10,0.5) 0%, rgba(7,7,10,0.1) 35%, rgba(7,7,10,0.1) 65%, rgba(7,7,10,0.7) 100%)", pointerEvents: "none" }} />
+          <div style={{ position: "absolute", inset: 0, zIndex: 2, background: "radial-gradient(ellipse at center, transparent 40%, rgba(7,7,10,0.35) 100%)", pointerEvents: "none" }} />
 
           {/* Floating neon brand names */}
           {[
@@ -214,53 +244,36 @@ export default function Home() {
             { name: "TISSOT", color: "#c8a050", x: "82%", y: "48%" },
             { name: "MARRIOTT", color: "#4aff9e", x: "14%", y: "42%" },
           ].map((n, i) => (
-            <div key={n.name} style={{
-              position: "absolute", left: n.x, top: n.y, zIndex: 3,
-              color: n.color, fontFamily: "var(--sans)", fontWeight: 700,
-              fontSize: "clamp(0.5rem, 0.8vw, 0.7rem)", letterSpacing: "0.25em",
-              textShadow: `0 0 12px ${n.color}, 0 0 30px ${n.color}, 0 0 60px ${n.color}50`,
-              animation: `pulseGlow ${2.5 + i * 0.4}s ease-in-out infinite alternate`,
-              opacity: 0.75, pointerEvents: "none",
-            }}>{n.name}</div>
+            <div key={n.name} style={{ position: "absolute", left: n.x, top: n.y, zIndex: 3, color: n.color, fontFamily: "var(--sans)", fontWeight: 700, fontSize: "clamp(0.5rem, 0.8vw, 0.7rem)", letterSpacing: "0.25em", textShadow: `0 0 12px ${n.color}, 0 0 30px ${n.color}, 0 0 60px ${n.color}50`, animation: `pulseGlow ${2.5 + i * 0.4}s ease-in-out infinite alternate`, opacity: 0.75, pointerEvents: "none" }}>{n.name}</div>
           ))}
 
           {/* Content */}
           <div className="hero-text" style={{ position: "relative", zIndex: 10, height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "0 24px" }}>
             <div style={{ fontSize: "0.6rem", letterSpacing: "0.4em", color: "var(--gold)", textTransform: "uppercase", marginBottom: 28, fontWeight: 500, textShadow: "0 0 30px rgba(200,160,80,0.5)" }}>Revenue Architecture · Toronto & Miami · Est. 2019</div>
-            <h1 style={{ fontFamily: "var(--serif)", fontSize: "clamp(3rem, 7.5vw, 6rem)", fontWeight: 300, lineHeight: 1.03, marginBottom: 28, textShadow: "0 2px 40px rgba(0,0,0,0.7), 0 0 80px rgba(0,0,0,0.3)" }}>
+            <h1 style={{ fontFamily: "var(--serif)", fontSize: "clamp(3rem, 7.5vw, 6rem)", fontWeight: 300, lineHeight: 1.03, marginBottom: 28, textShadow: "0 2px 40px rgba(0,0,0,0.8), 0 0 80px rgba(0,0,0,0.4)" }}>
               We Don&rsquo;t Run <em style={{ fontStyle: "italic", color: "var(--gold)", textShadow: "0 0 50px rgba(200,160,80,0.35)" }}>Campaigns.</em><br />We Install Systems.
             </h1>
-            <p style={{ fontSize: "clamp(0.9rem, 1.3vw, 1.08rem)", color: "rgba(240,236,228,0.75)", lineHeight: 1.7, maxWidth: 540, marginBottom: 44, textShadow: "0 2px 16px rgba(0,0,0,0.6)" }}>
+            <p style={{ fontSize: "clamp(0.9rem, 1.3vw, 1.08rem)", color: "rgba(240,236,228,0.8)", lineHeight: 1.7, maxWidth: 540, marginBottom: 44, textShadow: "0 2px 20px rgba(0,0,0,0.7)" }}>
               SET Marketing engineers acquisition, conversion, and automation infrastructure for operators generating $1M to $20M.
             </p>
             <div style={{ display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "center" }}>
               <a href="#contact" className="btn-gold">Apply for Q2</a>
-              <a href="#results" className="btn-ghost" style={{ backdropFilter: "blur(8px)", background: "rgba(0,0,0,0.2)" }}>View Results →</a>
+              <a href="#results" className="btn-ghost" style={{ backdropFilter: "blur(8px)", background: "rgba(0,0,0,0.25)" }}>View Results →</a>
             </div>
             <div style={{ position: "absolute", bottom: 32, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, opacity: 0.4, animation: "bob 2.5s ease-in-out infinite" }}>
-              <span style={{ fontSize: "0.5rem", letterSpacing: "0.2em", color: "var(--text3)", textTransform: "uppercase" }}>Scroll to explore</span>
+              <span style={{ fontSize: "0.5rem", letterSpacing: "0.2em", color: "var(--text3)", textTransform: "uppercase" }}>Scroll to drive through the city</span>
               <div style={{ width: 1, height: 24, background: "linear-gradient(to bottom, var(--gold), transparent)" }} />
             </div>
           </div>
         </div>
       </section>
 
-      {/* ═══ CAR DRIFT TRANSITION ═══ */}
-      <div ref={driftRef} style={{ position: "relative", height: 140, overflow: "hidden", zIndex: 20, marginTop: -70, opacity: 0 }}>
-        <video id="driftVid" muted playsInline preload="auto" style={{ width: "100%", height: 220, objectFit: "cover", filter: "brightness(0.7) contrast(1.2) saturate(1.4)" }}>
-          <source src="https://videos.pexels.com/video-files/2491284/2491284-uhd_2560_1440_24fps.mp4" type="video/mp4" />
-        </video>
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, var(--bg) 0%, transparent 25%, transparent 75%, var(--bg) 100%)" }} />
-      </div>
-
       {/* ═══ SCENE 2: TRUST WALL ═══ */}
       <section id="clients" style={{ padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: "linear-gradient(180deg, var(--bg), var(--bg2), var(--bg))" }}>
         <div style={{ maxWidth: 1000, margin: "0 auto" }}>
-          <div className="reveal" style={{ textAlign: "center", marginBottom: 50 }}>
-            <span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>01 · Trusted By</span>
-          </div>
+          <div className="reveal" style={{ textAlign: "center", marginBottom: 50 }}><span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>01 · Trusted By</span></div>
           <div className="reveal-stagger" style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 14, marginBottom: 70 }}>
-            {BRANDS.map(b => <div key={b} style={{ fontSize: "0.68rem", fontWeight: 600, letterSpacing: "0.12em", color: "var(--text3)", textTransform: "uppercase", padding: "10px 18px", border: "1px solid var(--border)", borderRadius: 3, transition: "all 0.5s" }}>{b}</div>)}
+            {BRANDS.map(b => <div key={b} style={{ fontSize: "0.68rem", fontWeight: 600, letterSpacing: "0.12em", color: "var(--text3)", textTransform: "uppercase", padding: "10px 18px", border: "1px solid var(--border)", borderRadius: 3 }}>{b}</div>)}
           </div>
           <div className="reveal-stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 24 }}>
             {STATS.map(s => <div key={s.l} style={{ textAlign: "center", padding: 20 }}>
@@ -304,24 +317,18 @@ export default function Home() {
             <h2 style={{ fontSize: "clamp(2rem, 4vw, 3.2rem)", marginTop: 16 }}>Real Numbers. <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Real</em> Impact.</h2>
           </div>
           <div className="reveal-stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: 20 }}>
-            {CASES.map((c, i) => <div key={i} style={{ background: "var(--bg3)", border: "1px solid var(--border)", borderRadius: 14, overflow: "hidden", transition: "all 0.5s var(--smooth)" }} onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-8px)"; e.currentTarget.style.boxShadow = "0 20px 60px rgba(0,0,0,0.5)"; }} onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}>
+            {CASES.map((c, i) => <div key={i} style={{ background: "var(--bg3)", border: "1px solid var(--border)", borderRadius: 14, overflow: "hidden", transition: "all 0.5s" }} onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-8px)"; e.currentTarget.style.boxShadow = "0 20px 60px rgba(0,0,0,0.5)"; }} onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}>
               <div style={{ height: 180, overflow: "hidden", position: "relative" }}>
                 <img src={c.img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0.45) saturate(1.3)", transition: "transform 0.6s" }} onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.05)")} onMouseLeave={e => (e.currentTarget.style.transform = "")} />
                 <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, var(--bg3), transparent 60%)" }} />
-                <div style={{ position: "absolute", bottom: 16, left: 20 }}>
-                  <span style={{ fontSize: "0.58rem", color: "var(--text3)" }}>{c.tp}</span>
-                  <h3 style={{ fontFamily: "var(--serif)", fontSize: "1.5rem", color: "var(--text)", marginTop: 4 }}>{c.t}</h3>
-                </div>
+                <div style={{ position: "absolute", bottom: 16, left: 20 }}><span style={{ fontSize: "0.58rem", color: "var(--text3)" }}>{c.tp}</span><h3 style={{ fontFamily: "var(--serif)", fontSize: "1.5rem", color: "var(--text)", marginTop: 4 }}>{c.t}</h3></div>
               </div>
               <div style={{ padding: "20px 24px 28px" }}>
                 <div style={{ marginBottom: 16 }}><span style={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.15em", color: "var(--text3)", textTransform: "uppercase" }}>Before</span><p style={{ fontSize: "0.78rem", color: "var(--text2)", lineHeight: 1.5, marginTop: 4 }}>{c.b}</p></div>
                 <div style={{ height: 1, background: "var(--border)", marginBottom: 16 }} />
                 <div style={{ marginBottom: 18 }}><span style={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.15em", color: "var(--gold)", textTransform: "uppercase" }}>After</span><p style={{ fontSize: "0.78rem", color: "var(--text)", lineHeight: 1.5, marginTop: 4 }}>{c.a}</p></div>
                 <div style={{ display: "flex", gap: 12, marginBottom: 18 }}>{c.m.map(m => <div key={m.l} style={{ flex: 1, textAlign: "center" }}><div style={{ fontFamily: "var(--serif)", fontSize: "1.3rem", color: "var(--gold)" }}>{m.v}</div><div style={{ fontSize: "0.58rem", color: "var(--text3)" }}>{m.l}</div></div>)}</div>
-                <div style={{ borderLeft: "2px solid var(--gold-dim)", paddingLeft: 14 }}>
-                  <p style={{ fontSize: "0.76rem", color: "var(--text2)", fontStyle: "italic", lineHeight: 1.5 }}>&ldquo;{c.q}&rdquo;</p>
-                  <div style={{ marginTop: 6, fontSize: "0.7rem" }}><span style={{ color: "var(--text)", fontWeight: 500 }}>{c.au}</span><span style={{ color: "var(--text3)", marginLeft: 6 }}>{c.r}</span></div>
-                </div>
+                <div style={{ borderLeft: "2px solid var(--gold-dim)", paddingLeft: 14 }}><p style={{ fontSize: "0.76rem", color: "var(--text2)", fontStyle: "italic", lineHeight: 1.5 }}>&ldquo;{c.q}&rdquo;</p><div style={{ marginTop: 6, fontSize: "0.7rem" }}><span style={{ color: "var(--text)", fontWeight: 500 }}>{c.au}</span><span style={{ color: "var(--text3)", marginLeft: 6 }}>{c.r}</span></div></div>
               </div>
             </div>)}
           </div>
@@ -331,9 +338,7 @@ export default function Home() {
       {/* ═══ SCENE 5: OPERATOR ═══ */}
       <section id="about" style={{ padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <div className="reveal" style={{ textAlign: "center", marginBottom: 50 }}>
-            <span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>04 · Founder & CEO</span>
-          </div>
+          <div className="reveal" style={{ textAlign: "center", marginBottom: 50 }}><span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>04 · Founder & CEO</span></div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: "clamp(32px, 6vw, 80px)", alignItems: "center" }}>
             <div className="reveal" style={{ borderRadius: 14, overflow: "hidden", aspectRatio: "3/4", position: "relative" }}>
               <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80" alt="" style={{ width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0.65) saturate(0.8)" }} />
@@ -341,9 +346,6 @@ export default function Home() {
               <div style={{ position: "absolute", bottom: 20, left: 20, right: 20, textAlign: "center" }}>
                 <div style={{ fontFamily: "var(--serif)", fontSize: "1.2rem" }}>Chris Marchese</div>
                 <div style={{ fontSize: "0.65rem", color: "var(--text3)", marginTop: 2 }}>Founder & CEO · Toronto & Miami</div>
-                <div style={{ marginTop: 10, padding: "6px 12px", borderRadius: 6, background: "var(--gold-dim)", border: "1px solid rgba(200,160,80,0.2)", display: "inline-block" }}>
-                  <span style={{ fontSize: "0.5rem", color: "var(--gold)", letterSpacing: "0.08em", textTransform: "uppercase" }}>📷 Swap with real portrait</span>
-                </div>
               </div>
             </div>
             <div>
@@ -361,32 +363,103 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══ SCENE 6: METHOD — WALK-FORWARD DEPTH ═══ */}
-      <section id="process" ref={methodWrapRef} style={{ padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: "linear-gradient(180deg, var(--bg), var(--bg2))", perspective: "1200px", perspectiveOrigin: "center 40%" }}>
-        <div style={{ maxWidth: 900, margin: "0 auto" }}>
-          <div className="reveal" style={{ textAlign: "center", marginBottom: 70 }}>
-            <span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>05 · Walk Through The Method</span>
-            <h2 style={{ fontSize: "clamp(2rem, 4vw, 3.2rem)", marginTop: 16 }}>The SET <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Method</em></h2>
-            <p style={{ fontSize: "0.85rem", color: "var(--text2)", marginTop: 10 }}>Scroll to walk through each gate.</p>
+      {/* ═══ SCENE 6: METHOD — WALK FORWARD THROUGH GATES (PINNED TUNNEL) ═══ */}
+      <section ref={methodRef} id="process" style={{ position: "relative", height: "100vh", overflow: "hidden", background: "#07070a" }}>
+        {/* This section gets pinned — scroll controls z-depth movement */}
+        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", perspective: "800px", perspectiveOrigin: "center center" }}>
+          {/* Header — stays fixed */}
+          <div style={{ position: "absolute", top: 40, left: 0, right: 0, textAlign: "center", zIndex: 20 }}>
+            <span style={{ fontSize: "0.55rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>05 · Walk Through The Method</span>
+            <h2 style={{ fontFamily: "var(--serif)", fontSize: "clamp(1.6rem, 3vw, 2.4rem)", marginTop: 10 }}>The SET <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Method</em></h2>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 60, transformStyle: "preserve-3d" }}>
-            {STEPS.map((s, i) => (
-              <div key={s.n} className="depth-gate" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderRadius: 16, overflow: "hidden", border: `1px solid ${s.ac}30`, transformStyle: "preserve-3d", willChange: "transform, opacity", background: `linear-gradient(135deg, rgba(${10 + i * 5},${10 + i * 5},${20 + i * 8},0.95), rgba(${15 + i * 6},${15 + i * 6},${28 + i * 10},0.95))` }}>
-                <div style={{ padding: "clamp(24px, 3vw, 40px)", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-                    <div style={{ width: 40, height: 40, borderRadius: "50%", background: i === 3 ? "var(--gold)" : s.ac + "20", border: `2px solid ${s.ac}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.72rem", fontWeight: 700, color: i === 3 ? "var(--bg)" : s.ac }}>{s.n}</div>
-                    <span style={{ fontSize: "0.55rem", letterSpacing: "0.15em", color: s.ac, textTransform: "uppercase", fontWeight: 600 }}>{s.s}</span>
-                  </div>
-                  <h3 style={{ fontFamily: "var(--serif)", fontSize: "clamp(1.4rem, 2.2vw, 1.8rem)", color: "var(--text)", marginBottom: 10 }}>{s.t}</h3>
-                  <p style={{ fontSize: "0.82rem", color: "var(--text2)", lineHeight: 1.65, marginBottom: 16 }}>{s.d}</p>
-                  <div style={{ display: "flex", gap: 6 }}>{s.tags.map(t => <span key={t} style={{ padding: "3px 10px", borderRadius: 14, fontSize: "0.62rem", background: s.ac + "15", color: s.ac }}>{t}</span>)}</div>
+
+          {/* THE TUNNEL — all 4 gates stacked in z-depth, container moves forward on scroll */}
+          <div
+            ref={tunnelRef}
+            style={{
+              position: "absolute",
+              width: "100%",
+              height: "100%",
+              transformStyle: "preserve-3d",
+              willChange: "transform",
+            }}
+          >
+            {STEPS.map((step, i) => {
+              const gateZ = -(i * 800); // each gate 800px deeper
+              const brightness = 0.25 + i * 0.25; // gets brighter: 0.25, 0.5, 0.75, 1.0
+              const borderColor = step.ac;
+
+              return (
+                <div
+                  key={step.n}
+                  className="gate-content"
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: `translate(-50%, -50%) translateZ(${gateZ}px)`,
+                    width: "min(80vw, 700px)",
+                    textAlign: "center",
+                    transformStyle: "preserve-3d",
+                    backfaceVisibility: "hidden",
+                  }}
+                >
+                  {/* Gate frame — a glowing border ring */}
+                  <div style={{
+                    position: "absolute",
+                    inset: -40,
+                    borderRadius: 24,
+                    border: `2px solid ${borderColor}${i === 3 ? "80" : "30"}`,
+                    boxShadow: `0 0 ${20 + i * 15}px ${borderColor}${i === 3 ? "40" : "15"}, inset 0 0 ${10 + i * 10}px ${borderColor}10`,
+                    pointerEvents: "none",
+                  }} />
+
+                  {/* Gate number */}
+                  <div style={{
+                    width: 56, height: 56, borderRadius: "50%",
+                    background: i === 3 ? "var(--gold)" : `${step.ac}20`,
+                    border: `2px solid ${step.ac}`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: "1rem", fontWeight: 700,
+                    color: i === 3 ? "var(--bg)" : step.ac,
+                    margin: "0 auto 20px",
+                  }}>{step.n}</div>
+
+                  {/* Gate subtitle */}
+                  <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", color: step.ac, textTransform: "uppercase", fontWeight: 600, marginBottom: 12 }}>{step.s}</div>
+
+                  {/* Gate title */}
+                  <h3 style={{ fontFamily: "var(--serif)", fontSize: "clamp(1.8rem, 3.5vw, 2.8rem)", color: "var(--text)", marginBottom: 16 }}>{step.t}</h3>
+
+                  {/* Description */}
+                  <p style={{ fontSize: "0.95rem", color: "var(--text2)", lineHeight: 1.7, maxWidth: 500, margin: "0 auto" }}>{step.d}</p>
+
+                  {/* Visual brightness indicator — the world gets brighter */}
+                  <div style={{
+                    position: "absolute",
+                    inset: -80,
+                    borderRadius: 30,
+                    background: `radial-gradient(circle, ${step.ac}${Math.round(brightness * 12).toString(16).padStart(2, "0")} 0%, transparent 70%)`,
+                    pointerEvents: "none",
+                    zIndex: -1,
+                  }} />
                 </div>
-                <div style={{ position: "relative", minHeight: 240 }}>
-                  <img src={s.img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", filter: `brightness(${0.3 + i * 0.15}) saturate(${0.7 + i * 0.2})` }} />
-                  <div style={{ position: "absolute", inset: 0, background: `linear-gradient(to right, rgba(${10 + i * 5},${10 + i * 5},${20 + i * 8},0.95) 0%, transparent 40%)` }} />
-                  <div style={{ position: "absolute", bottom: 16, right: 16, padding: "6px 12px", borderRadius: 20, background: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)", fontSize: "0.55rem", color: s.ac, letterSpacing: "0.1em", textTransform: "uppercase" }}>Gate {i + 1} of 4</div>
-                </div>
-              </div>
+              );
+            })}
+
+            {/* Depth lines — like a corridor/tunnel */}
+            {Array.from({ length: 20 }).map((_, i) => (
+              <div key={i} style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: `translate(-50%, -50%) translateZ(${-i * 200}px)`,
+                width: `${85 - i * 1.5}vw`,
+                height: `${85 - i * 1.5}vh`,
+                border: "1px solid rgba(255,255,255,0.03)",
+                borderRadius: 20 - i * 0.5,
+                pointerEvents: "none",
+              }} />
             ))}
           </div>
         </div>
