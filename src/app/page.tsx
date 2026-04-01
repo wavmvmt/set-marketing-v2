@@ -174,11 +174,11 @@ export default function Home() {
         style={{
           position: "fixed", top: 0, left: 0, width: "100vw", height: "100vh",
           objectFit: "cover", zIndex: 0,
-          filter: "brightness(0.55) saturate(1.4) contrast(1.15)",
+          filter: "brightness(0.75) saturate(1.3) contrast(1.1)",
           pointerEvents: "none",
         }}
       >
-        <source src="/pov-highway.mp4" type="video/mp4" />
+        <source src="/scenic-highway.mp4" type="video/mp4" />
       </video>
 
       {/* Fixed vignette over the video */}
@@ -234,7 +234,7 @@ export default function Home() {
         </section>
 
         {/* ═══ SCENE 2: TRUST WALL — 85% opaque, video subtly peeks through ═══ */}
-        <section id="clients" style={{ padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: sectionBg(0.88) }}>
+        <section id="clients" style={{ padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: sectionBg(0.5) }}>
           <div style={{ maxWidth: 1000, margin: "0 auto" }}>
             <div className="reveal" style={{ textAlign: "center", marginBottom: 50 }}><span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>01 · Trusted By</span></div>
             <div className="reveal-stagger" style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 14, marginBottom: 70 }}>
@@ -251,7 +251,7 @@ export default function Home() {
         </section>
 
         {/* ═══ SCENE 3: ARSENAL — 92% opaque ═══ */}
-        <section id="services" style={{ padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: sectionBg(0.92) }}>
+        <section id="services" style={{ padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: sectionBg(0.55) }}>
           <div style={{ maxWidth: 1100, margin: "0 auto" }}>
             <div className="reveal" style={{ textAlign: "center", marginBottom: 56 }}>
               <span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>02 · What We Build</span>
@@ -275,7 +275,7 @@ export default function Home() {
         </section>
 
         {/* ═══ SCENE 4: PROOF — 88% opaque ═══ */}
-        <section id="results" style={{ padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: sectionBg(0.88) }}>
+        <section id="results" style={{ padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: sectionBg(0.5) }}>
           <div style={{ maxWidth: 1200, margin: "0 auto" }}>
             <div className="reveal" style={{ textAlign: "center", marginBottom: 56 }}>
               <span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>03 · Client Results</span>
@@ -301,7 +301,7 @@ export default function Home() {
         </section>
 
         {/* ═══ SCENE 5: OPERATOR — 92% opaque ═══ */}
-        <section id="about" style={{ padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: sectionBg(0.92) }}>
+        <section id="about" style={{ padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: sectionBg(0.55) }}>
           <div style={{ maxWidth: 1100, margin: "0 auto" }}>
             <div className="reveal" style={{ textAlign: "center", marginBottom: 50 }}><span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>04 · Founder & CEO</span></div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: "clamp(32px, 6vw, 80px)", alignItems: "center" }}>
@@ -329,7 +329,7 @@ export default function Home() {
         </section>
 
         {/* ═══ SCENE 6: METHOD — Walk-forward tunnel, 95% opaque ═══ */}
-        <section ref={methodRef} id="process" style={{ position: "relative", height: "100vh", overflow: "hidden", background: sectionBg(0.95) }}>
+        <section ref={methodRef} id="process" style={{ position: "relative", height: "100vh", overflow: "hidden", background: sectionBg(0.65) }}>
           <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", perspective: "800px", perspectiveOrigin: "center center" }}>
             <div style={{ position: "absolute", top: 40, left: 0, right: 0, textAlign: "center", zIndex: 20 }}>
               <span style={{ fontSize: "0.55rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>05 · Walk Through The Method</span>
@@ -354,7 +354,7 @@ export default function Home() {
         </section>
 
         {/* ═══ SCENE 7: VOICES — 88% opaque, video peeks through ═══ */}
-        <section style={{ padding: "clamp(60px, 10vh, 100px) clamp(20px, 6vw, 80px)", background: sectionBg(0.88) }}>
+        <section style={{ padding: "clamp(60px, 10vh, 100px) clamp(20px, 6vw, 80px)", background: sectionBg(0.5) }}>
           <div style={{ maxWidth: 1100, margin: "0 auto" }}>
             <div className="reveal" style={{ textAlign: "center", marginBottom: 44 }}>
               <span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>06 · Client Voices</span>
@@ -374,7 +374,7 @@ export default function Home() {
         </section>
 
         {/* ═══ SCENE 8: THE CLOSE — 70% opaque, video visible as you reach the end ═══ */}
-        <section id="contact" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: sectionBg(0.7) }}>
+        <section id="contact" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: sectionBg(0.3) }}>
           <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at center, transparent 30%, rgba(7,7,10,0.4) 100%)", pointerEvents: "none" }} />
           {!formSubmitted ? <>
             <div className="reveal" style={{ textAlign: "center", marginBottom: 50, position: "relative", zIndex: 2 }}>
@@ -399,7 +399,7 @@ export default function Home() {
         </section>
 
         {/* ═══ FOOTER ═══ */}
-        <footer style={{ borderTop: "1px solid var(--border)", padding: "clamp(36px, 5vh, 56px) clamp(20px, 6vw, 80px) 20px", background: sectionBg(0.95) }}>
+        <footer style={{ borderTop: "1px solid var(--border)", padding: "clamp(36px, 5vh, 56px) clamp(20px, 6vw, 80px) 20px", background: sectionBg(0.75) }}>
           <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 28 }}>
             <div><div style={{ fontFamily: "var(--serif)", fontSize: "1.2rem", letterSpacing: "0.15em", color: "var(--gold)", marginBottom: 10 }}>SET</div><p style={{ fontSize: "0.68rem", color: "var(--text3)", lineHeight: 1.7, maxWidth: 240 }}>Revenue architecture for operators generating $1M to $20M.</p><a href="mailto:chris@marketingbyset.com" style={{ fontSize: "0.68rem", color: "var(--text2)", textDecoration: "none", display: "block", marginTop: 8 }}>chris@marketingbyset.com</a></div>
             {[{ t: "Services", l: ["Growth Strategy", "Paid Acquisition", "Funnel Optimization", "Fractional CMO", "SET OS"] }, { t: "Company", l: ["About Chris", "Case Studies", "Our Process", "Contact"] }, { t: "Ecosystem", l: ["SET Ventures", "SET Sales Academy", "TheChrisMarchese.com"] }].map(c => <div key={c.t}><h4 style={{ fontSize: "0.58rem", letterSpacing: "0.2em", color: "var(--text3)", textTransform: "uppercase", marginBottom: 12, fontFamily: "var(--sans)", fontWeight: 600 }}>{c.t}</h4>{c.l.map(l => <div key={l} style={{ fontSize: "0.68rem", color: "var(--text2)", marginBottom: 7 }}>{l}</div>)}</div>)}
