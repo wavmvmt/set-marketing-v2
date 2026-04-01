@@ -147,12 +147,22 @@ export default function Home() {
         }
       }
 
-      // Reveals
-      gsap.utils.toArray<HTMLElement>(".reveal").forEach(el => {
-        gsap.from(el, { opacity: 0, y: 60, duration: 1, ease: "power3.out", scrollTrigger: { trigger: el, start: "top 80%" } });
-      });
-      gsap.utils.toArray<HTMLElement>(".reveal-stagger").forEach(el => {
-        gsap.from(el.children, { opacity: 0, y: 50, stagger: 0.1, duration: 0.9, ease: "power3.out", scrollTrigger: { trigger: el, start: "top 72%" } });
+      // Reveals — use native Intersection Observer (more reliable than GSAP for visibility)
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.05, rootMargin: "0px 0px -5% 0px" });
+
+      document.querySelectorAll(".fade-in").forEach(el => observer.observe(el));
+      document.querySelectorAll(".fade-in-stagger").forEach(container => {
+        Array.from(container.children).forEach((child, i) => {
+          (child as HTMLElement).style.transitionDelay = `${i * 80}ms`;
+          observer.observe(child);
+        });
       });
     };
     init();
@@ -282,11 +292,11 @@ export default function Home() {
         {/* ═══ SCENE 2: TRUST WALL — 85% opaque, video subtly peeks through ═══ */}
         <section id="clients" style={{ padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: sectionBg(0.5) }}>
           <div style={{ maxWidth: 1000, margin: "0 auto" }}>
-            <div className="reveal" style={{ textAlign: "center", marginBottom: 50 }}><span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>01 · Trusted By</span></div>
-            <div className="reveal-stagger" style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 14, marginBottom: 70 }}>
+            <div className="fade-in" style={{ textAlign: "center", marginBottom: 50 }}><span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>01 · Trusted By</span></div>
+            <div className="fade-in-stagger" style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 14, marginBottom: 70 }}>
               {BRANDS.map(b => <div key={b} style={{ fontSize: "0.68rem", fontWeight: 600, letterSpacing: "0.12em", color: "var(--text3)", textTransform: "uppercase", padding: "10px 18px", border: "1px solid var(--border)", borderRadius: 3 }}>{b}</div>)}
             </div>
-            <div className="reveal-stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 24 }}>
+            <div className="fade-in-stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 24 }}>
               {STATS.map(s => <div key={s.l} style={{ textAlign: "center", padding: 20 }}>
                 <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.5rem, 4vw, 3.4rem)", fontWeight: 300, lineHeight: 1 }}>{s.v}</div>
                 <div style={{ fontSize: "0.72rem", fontWeight: 500, color: "var(--gold)", marginTop: 8 }}>{s.l}</div>
@@ -299,11 +309,11 @@ export default function Home() {
         {/* ═══ SCENE 3: ARSENAL — 92% opaque ═══ */}
         <section id="services" style={{ padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: sectionBg(0.55) }}>
           <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-            <div className="reveal" style={{ textAlign: "center", marginBottom: 56 }}>
+            <div className="fade-in" style={{ textAlign: "center", marginBottom: 56 }}>
               <span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>02 · What We Build</span>
               <h2 style={{ fontSize: "clamp(2rem, 4vw, 3.2rem)", marginTop: 16 }}>Revenue <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Architecture</em></h2>
             </div>
-            <div className="reveal-stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 14 }}>
+            <div className="fade-in-stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 14 }}>
               {SERVICES.map(s => {
                 const open = expandedService === s.id;
                 return <div key={s.id} onClick={() => setExpandedService(open ? null : s.id)} style={{ background: "rgba(20,20,28,0.85)", border: `1px solid ${open ? s.c + "40" : "var(--border)"}`, borderRadius: 12, padding: 28, cursor: "pointer", transition: "all 0.4s", position: "relative", overflow: "hidden", backdropFilter: "blur(8px)" }}>
@@ -323,11 +333,11 @@ export default function Home() {
         {/* ═══ SCENE 4: PROOF — 88% opaque ═══ */}
         <section id="results" style={{ padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: sectionBg(0.5) }}>
           <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-            <div className="reveal" style={{ textAlign: "center", marginBottom: 56 }}>
+            <div className="fade-in" style={{ textAlign: "center", marginBottom: 56 }}>
               <span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>03 · Client Results</span>
               <h2 style={{ fontSize: "clamp(2rem, 4vw, 3.2rem)", marginTop: 16 }}>Real Numbers. <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Real</em> Impact.</h2>
             </div>
-            <div className="reveal-stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: 20 }}>
+            <div className="fade-in-stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: 20 }}>
               {CASES.map((c, i) => <div key={i} style={{ background: "rgba(20,20,28,0.9)", border: "1px solid var(--border)", borderRadius: 14, overflow: "hidden", transition: "all 0.5s", backdropFilter: "blur(8px)" }} onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-8px)"; e.currentTarget.style.boxShadow = "0 20px 60px rgba(0,0,0,0.5)"; }} onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}>
                 <div style={{ height: 180, overflow: "hidden", position: "relative" }}>
                   <img src={c.img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0.45) saturate(1.3)", transition: "transform 0.6s" }} onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.05)")} onMouseLeave={e => (e.currentTarget.style.transform = "")} />
@@ -349,9 +359,9 @@ export default function Home() {
         {/* ═══ SCENE 5: OPERATOR — 92% opaque ═══ */}
         <section id="about" style={{ padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: sectionBg(0.55) }}>
           <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-            <div className="reveal" style={{ textAlign: "center", marginBottom: 50 }}><span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>04 · Founder & CEO</span></div>
+            <div className="fade-in" style={{ textAlign: "center", marginBottom: 50 }}><span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>04 · Founder & CEO</span></div>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: "clamp(32px, 6vw, 80px)", alignItems: "center" }}>
-              <div className="reveal" style={{ borderRadius: 14, overflow: "hidden", aspectRatio: "3/4", position: "relative" }}>
+              <div className="fade-in" style={{ borderRadius: 14, overflow: "hidden", aspectRatio: "3/4", position: "relative" }}>
                 <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80" alt="" style={{ width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0.65) saturate(0.8)" }} />
                 <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(7,7,10,0.95) 0%, transparent 40%)" }} />
                 <div style={{ position: "absolute", bottom: 20, left: 20, right: 20, textAlign: "center" }}>
@@ -360,13 +370,13 @@ export default function Home() {
                 </div>
               </div>
               <div>
-                <h2 className="reveal" style={{ fontSize: "clamp(1.8rem, 3vw, 2.6rem)", lineHeight: 1.2, marginBottom: 36 }}>
+                <h2 className="fade-in" style={{ fontSize: "clamp(1.8rem, 3vw, 2.6rem)", lineHeight: 1.2, marginBottom: 36 }}>
                   <span style={{ background: "linear-gradient(135deg, #c8a050, #e8c878)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>$500M+</span> in client revenue.<br />System-first.
                 </h2>
                 {["12 years as an industrial millwright.", "No trust fund. No shortcuts.", "Just pattern recognition and an obsession", "with what actually moves people to act.", "That obsession became Strategic Emotional Targeting.", "That framework became SET."].map((l, i) => (
-                  <p key={i} className="reveal" style={{ fontFamily: "var(--serif)", fontSize: "clamp(1rem, 1.3vw, 1.2rem)", color: i >= 4 ? "var(--gold)" : "var(--text2)", fontStyle: i >= 4 ? "italic" : "normal", lineHeight: 1.5, marginBottom: 8 }}>{l}</p>
+                  <p key={i} className="fade-in" style={{ fontFamily: "var(--serif)", fontSize: "clamp(1rem, 1.3vw, 1.2rem)", color: i >= 4 ? "var(--gold)" : "var(--text2)", fontStyle: i >= 4 ? "italic" : "normal", lineHeight: 1.5, marginBottom: 8 }}>{l}</p>
                 ))}
-                <div className="reveal-stagger" style={{ display: "flex", gap: 14, flexWrap: "wrap", marginTop: 28 }}>
+                <div className="fade-in-stagger" style={{ display: "flex", gap: 14, flexWrap: "wrap", marginTop: 28 }}>
                   {["SET Enterprises", "SET Ventures", "SET Sales Academy"].map(e => <div key={e} style={{ padding: "10px 18px", border: "1px solid var(--border)", borderRadius: 6, background: "rgba(20,20,28,0.8)", fontSize: "0.76rem", fontWeight: 500, backdropFilter: "blur(4px)" }}>{e}</div>)}
                 </div>
               </div>
@@ -451,11 +461,11 @@ export default function Home() {
         {/* ═══ SCENE 7: VOICES — 88% opaque, video peeks through ═══ */}
         <section style={{ padding: "clamp(60px, 10vh, 100px) clamp(20px, 6vw, 80px)", background: sectionBg(0.5) }}>
           <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-            <div className="reveal" style={{ textAlign: "center", marginBottom: 44 }}>
+            <div className="fade-in" style={{ textAlign: "center", marginBottom: 44 }}>
               <span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>06 · Client Voices</span>
               <h2 style={{ fontSize: "clamp(1.8rem, 3vw, 2.4rem)", marginTop: 16 }}>Operators Who <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Scaled</em></h2>
             </div>
-            <div className="reveal-stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 16 }}>
+            <div className="fade-in-stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 16 }}>
               {VOICES.map((v, i) => <div key={i} style={{ background: "rgba(20,20,28,0.85)", border: "1px solid var(--border)", borderRadius: 12, padding: 26, transition: "all 0.4s", backdropFilter: "blur(8px)" }} onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--border2)"; e.currentTarget.style.transform = "translateY(-3px)"; }} onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.transform = ""; }}>
                 <div style={{ display: "flex", gap: 2, marginBottom: 14 }}>{[1,2,3,4,5].map(s => <span key={s} style={{ color: "var(--star)", fontSize: "0.5rem", opacity: 0.4 }}>★</span>)}</div>
                 <p style={{ fontSize: "0.8rem", color: "var(--text2)", lineHeight: 1.65, fontStyle: "italic", marginBottom: 18 }}>&ldquo;{v.q}&rdquo;</p>
@@ -472,11 +482,11 @@ export default function Home() {
         <section id="contact" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: sectionBg(0.3) }}>
           <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at center, transparent 30%, rgba(7,7,10,0.4) 100%)", pointerEvents: "none" }} />
           {!formSubmitted ? <>
-            <div className="reveal" style={{ textAlign: "center", marginBottom: 50, position: "relative", zIndex: 2 }}>
+            <div className="fade-in" style={{ textAlign: "center", marginBottom: 50, position: "relative", zIndex: 2 }}>
               <h2 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.5rem, 5.5vw, 4.5rem)", fontWeight: 300, lineHeight: 1.1, marginBottom: 20, textShadow: "0 2px 30px rgba(0,0,0,0.5)" }}>Ready to <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Install</em> the System?</h2>
               <p style={{ fontSize: "0.9rem", color: "var(--text2)", maxWidth: 450, margin: "0 auto", lineHeight: 1.6 }}>We work with a select number of operators each quarter.</p>
             </div>
-            <div className="reveal" style={{ width: "100%", maxWidth: 500, background: "rgba(14,14,20,0.8)", backdropFilter: "blur(24px)", border: "1px solid var(--border)", borderRadius: 20, padding: "clamp(28px, 4vw, 44px)", position: "relative", zIndex: 2 }}>
+            <div className="fade-in" style={{ width: "100%", maxWidth: 500, background: "rgba(14,14,20,0.8)", backdropFilter: "blur(24px)", border: "1px solid var(--border)", borderRadius: 20, padding: "clamp(28px, 4vw, 44px)", position: "relative", zIndex: 2 }}>
               <form onSubmit={e => { e.preventDefault(); setFormSubmitted(true); }} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                 <div><label style={{ fontSize: "0.62rem", letterSpacing: "0.1em", color: "var(--text3)", textTransform: "uppercase", marginBottom: 6, display: "block" }}>Your Name</label><input className="form-input" placeholder="Full name" required /></div>
                 <div><label style={{ fontSize: "0.62rem", letterSpacing: "0.1em", color: "var(--text3)", textTransform: "uppercase", marginBottom: 6, display: "block" }}>Best Contact</label><input className="form-input" placeholder="Phone or email" required /></div>
