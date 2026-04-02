@@ -123,12 +123,12 @@ export default function Home() {
               svcLayer.style.opacity = "1";
             }
 
-            // ── Trust Wall: appears right when sec2 starts (35%), fades out before services ──
-            if (p < 0.35) {
+            // ── Trust Wall: fades in at 10% scroll, fades out before services ──
+            if (p < 0.10) {
               trustOverlay.style.opacity = "0";
               trustOverlay.style.transform = "translateY(20px)";
-            } else if (p < 0.39) {
-              const t = (p - 0.35) / 0.04;
+            } else if (p < 0.14) {
+              const t = (p - 0.10) / 0.04;
               trustOverlay.style.opacity = String(t);
               trustOverlay.style.transform = `translateY(${20 * (1 - t)}px)`;
             } else if (p < 0.52) {
