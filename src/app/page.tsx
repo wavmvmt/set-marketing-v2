@@ -72,28 +72,37 @@ export default function Home() {
         tick1();
       }
 
-      // ═══ SECTION 2 VIDEO — Scroll-driven, pinned ═══
-      const sec2Video = sec2VideoRef.current;
+      // ═══ SECTION 2: Scale forward from behind + autoplay video bg + content overlay ═══
       const sec2Section = sec2SectionRef.current;
-      if (sec2Video && sec2Section) {
-        await new Promise<void>(r => { if (sec2Video.readyState >= 1) r(); else sec2Video.addEventListener("loadedmetadata", () => r(), { once: true }); });
-        const dur2 = sec2Video.duration;
-        let target2 = 0, render2 = 0;
+      const sec2Inner = document.getElementById("sec2-inner");
+      const sec2Video = sec2VideoRef.current;
+      if (sec2Section && sec2Inner) {
+        // Start playing the video as background
+        if (sec2Video) sec2Video.play().catch(() => {});
 
-        ScrollTrigger.create({
-          trigger: sec2Section,
-          start: "top top",
-          end: "bottom bottom",
-          scrub: 0,
-          onUpdate: (self) => { target2 = self.progress * dur2; },
+        // Scale-forward: section 2 starts tiny (behind section 1) and zooms to full
+        const sec2Tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: sec2Section,
+            start: "top bottom",
+            end: "top top",
+            scrub: 1,
+          },
         });
+        sec2Tl.fromTo(sec2Inner,
+          { scale: 0.15, borderRadius: "24px", opacity: 0 },
+          { scale: 1, borderRadius: "0px", opacity: 1, ease: "power2.out" }
+        );
 
-        const tick2 = () => {
-          render2 += (target2 - render2) * 0.12;
-          if (Math.abs(render2 - sec2Video.currentTime) > 0.015) sec2Video.currentTime = render2;
-          requestAnimationFrame(tick2);
-        };
-        tick2();
+        // Content overlay fades in once section is in view
+        const overlay = document.getElementById("sec2-overlay");
+        if (overlay) {
+          gsap.fromTo(overlay,
+            { opacity: 0, y: 40 },
+            { opacity: 1, y: 0, ease: "power2.out",
+              scrollTrigger: { trigger: sec2Section, start: "15% top", end: "35% top", scrub: 1 } }
+          );
+        }
       }
 
       // ═══ METHOD GATES ═══
@@ -232,39 +241,48 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══ SECTION 2: TRANSITION VIDEO — Scroll-driven, pinned ═══
-          300vh scroll distance for 1.4s clip. Seamless transition from drift.
-          No gap, no padding, no background color between sections. */}
-      <section ref={sec2SectionRef} style={{ position: "relative", height: "300vh" }}>
-        <div style={{ position: "sticky", top: 0, width: "100%", height: "100vh", overflow: "hidden", background: "#000" }}>
-          <video
-            ref={sec2VideoRef}
-            muted playsInline preload="auto"
-            style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", minWidth: "100%", minHeight: "100%", width: "auto", height: "auto", objectFit: "cover" }}
-          >
-            <source src="/section2-bg.mp4" type="video/mp4" />
-          </video>
+      {/* ═══ SECTION 2: VIDEO BG + TRUST WALL OVERLAY ═══
+          Scales forward from behind section 1 (starts tiny, zooms to full).
+          Video plays as background, Trust Wall content overlays on top.
+          400vh: first part = scale-in transition, rest = content viewing */}
+      <section ref={sec2SectionRef} style={{ position: "relative", height: "400vh" }}>
+        <div style={{ position: "sticky", top: 0, width: "100%", height: "100vh", overflow: "hidden" }}>
+          <div id="sec2-inner" style={{ width: "100%", height: "100%", overflow: "hidden", background: "#000", transformOrigin: "center center", willChange: "transform" }}>
+            {/* Video background */}
+            <video
+              ref={sec2VideoRef}
+              autoPlay muted playsInline preload="auto" loop
+              style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", minWidth: "100%", minHeight: "100%", width: "auto", height: "auto", objectFit: "cover" }}
+            >
+              <source src="/section2-bg.mp4" type="video/mp4" />
+            </video>
+
+            {/* Dark overlay for text readability */}
+            <div style={{ position: "absolute", inset: 0, background: "rgba(7,7,10,0.55)", zIndex: 1 }} />
+
+            {/* Trust Wall content — overlaid on top of the video */}
+            <div id="sec2-overlay" style={{ position: "relative", zIndex: 10, height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 clamp(20px, 6vw, 80px)", opacity: 0 }}>
+              <div style={{ maxWidth: 1000, width: "100%", textAlign: "center" }}>
+                <span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>01 · Trusted By</span>
+
+                <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 14, marginTop: 40, marginBottom: 50 }}>
+                  {BRANDS.map(b => <div key={b} style={{ fontSize: "0.68rem", fontWeight: 600, letterSpacing: "0.12em", color: "rgba(240,236,228,0.6)", textTransform: "uppercase", padding: "10px 18px", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 3, backdropFilter: "blur(4px)", background: "rgba(255,255,255,0.03)" }}>{b}</div>)}
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 20 }}>
+                  {STATS.map(s => <div key={s.l} style={{ textAlign: "center", padding: 16 }}>
+                    <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.2rem, 3.5vw, 3rem)", fontWeight: 300, lineHeight: 1, color: "var(--text)", textShadow: "0 2px 20px rgba(0,0,0,0.5)" }}>{s.v}</div>
+                    <div style={{ fontSize: "0.7rem", fontWeight: 500, color: "var(--gold)", marginTop: 8, textShadow: "0 1px 10px rgba(0,0,0,0.5)" }}>{s.l}</div>
+                    <div style={{ fontSize: "0.62rem", color: "var(--text3)", marginTop: 4 }}>{s.s}</div>
+                  </div>)}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* ═══ REST OF SITE — Normal scroll sections ═══ */}
-
-      {/* TRUST WALL */}
-      <section id="clients" style={{ padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: "var(--bg2)" }}>
-        <div style={{ maxWidth: 1000, margin: "0 auto" }}>
-          <div className="fade-in" style={{ textAlign: "center", marginBottom: 50 }}><span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>01 · Trusted By</span></div>
-          <div className="fade-in-stagger" style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 14, marginBottom: 70 }}>
-            {BRANDS.map(b => <div key={b} style={{ fontSize: "0.68rem", fontWeight: 600, letterSpacing: "0.12em", color: "var(--text3)", textTransform: "uppercase", padding: "10px 18px", border: "1px solid var(--border)", borderRadius: 3 }}>{b}</div>)}
-          </div>
-          <div className="fade-in-stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 24 }}>
-            {STATS.map(s => <div key={s.l} style={{ textAlign: "center", padding: 20 }}>
-              <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.5rem, 4vw, 3.4rem)", fontWeight: 300, lineHeight: 1 }}>{s.v}</div>
-              <div style={{ fontSize: "0.72rem", fontWeight: 500, color: "var(--gold)", marginTop: 8 }}>{s.l}</div>
-              <div style={{ fontSize: "0.65rem", color: "var(--text3)", marginTop: 4 }}>{s.s}</div>
-            </div>)}
-          </div>
-        </div>
-      </section>
+      {/* ═══ REST OF SITE ═══ */}
 
       {/* SERVICES */}
       <section id="services" style={{ padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: "var(--bg)" }}>
