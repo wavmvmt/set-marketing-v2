@@ -311,15 +311,15 @@ export default function Home() {
           {/* OVERLAY: Trust Wall content */}
           <div id="trust-overlay" style={{ position: "absolute", inset: 0, zIndex: 10, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 clamp(20px, 6vw, 80px)", opacity: 0, transform: "translateY(30px)" }}>
             <div style={{ maxWidth: 1000, width: "100%", textAlign: "center" }}>
-              <span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>Trusted By</span>
+              <span style={{ fontSize: "0.7rem", letterSpacing: "0.3em", color: "#fff", textTransform: "uppercase", textShadow: "0 2px 10px rgba(0,0,0,0.6)", fontWeight: 600 }}>Trusted By</span>
               <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 14, marginTop: 36, marginBottom: 44 }}>
-                {BRANDS.map(b => <div key={b} style={{ fontSize: "0.68rem", fontWeight: 600, letterSpacing: "0.12em", color: "rgba(240,236,228,0.65)", textTransform: "uppercase", padding: "10px 18px", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 3, backdropFilter: "blur(6px)", background: "rgba(255,255,255,0.04)" }}>{b}</div>)}
+                {BRANDS.map(b => <div key={b} style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.12em", color: "#fff", textTransform: "uppercase", padding: "10px 18px", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 3, backdropFilter: "blur(6px)", background: "rgba(0,0,0,0.3)", textShadow: "0 1px 6px rgba(0,0,0,0.5)" }}>{b}</div>)}
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
                 {STATS.map(s => <div key={s.l} style={{ textAlign: "center", padding: 14 }}>
-                  <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(2rem, 3.5vw, 3rem)", fontWeight: 300, lineHeight: 1, color: "var(--text)", textShadow: "0 2px 20px rgba(0,0,0,0.5)" }}>{s.v}</div>
-                  <div style={{ fontSize: "0.68rem", fontWeight: 500, color: "var(--gold)", marginTop: 6 }}>{s.l}</div>
-                  <div style={{ fontSize: "0.6rem", color: "var(--text3)", marginTop: 3 }}>{s.s}</div>
+                  <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(2rem, 3.5vw, 3rem)", fontWeight: 300, lineHeight: 1, color: "#fff", textShadow: "0 2px 20px rgba(0,0,0,0.6)" }}>{s.v}</div>
+                  <div style={{ fontSize: "0.7rem", fontWeight: 600, color: "var(--gold)", marginTop: 6, textShadow: "0 1px 8px rgba(0,0,0,0.5)" }}>{s.l}</div>
+                  <div style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.8)", marginTop: 3, textShadow: "0 1px 6px rgba(0,0,0,0.5)" }}>{s.s}</div>
                 </div>)}
               </div>
             </div>
@@ -327,8 +327,8 @@ export default function Home() {
 
           {/* OVERLAY: Services title */}
           <div id="svc-title" style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", zIndex: 12, textAlign: "center", opacity: 0 }}>
-            <span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>02 · What We Build</span>
-            <h2 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.2rem, 4.5vw, 3.5rem)", marginTop: 16, color: "var(--text)", textShadow: "0 2px 30px rgba(0,0,0,0.6)" }}>Revenue <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Architecture</em></h2>
+            <span style={{ fontSize: "0.65rem", letterSpacing: "0.3em", color: "#fff", textTransform: "uppercase", textShadow: "0 2px 10px rgba(0,0,0,0.6)", fontWeight: 600 }}>02 · What We Build</span>
+            <h2 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.2rem, 4.5vw, 3.5rem)", marginTop: 16, color: "#fff", textShadow: "0 2px 30px rgba(0,0,0,0.6)" }}>Revenue <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Architecture</em></h2>
           </div>
 
           {/* OVERLAY: Service tile pairs — slide R→L */}
