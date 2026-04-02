@@ -382,25 +382,34 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══ FOUNDER ═══ */}
-      <section id="about" style={{ padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: "var(--bg)" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <div className="fade-in" style={{ textAlign: "center", marginBottom: 50 }}><span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>04 · Founder & CEO</span></div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: "clamp(32px, 6vw, 80px)", alignItems: "center" }}>
-            <div className="fade-in" style={{ borderRadius: 14, overflow: "hidden", aspectRatio: "3/4", position: "relative" }}>
-              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&q=80" alt="" style={{ width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0.65) saturate(0.8)" }} />
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, var(--bg) 0%, transparent 40%)" }} />
-              <div style={{ position: "absolute", bottom: 20, left: 20, right: 20, textAlign: "center" }}><div style={{ fontFamily: "var(--serif)", fontSize: "1.2rem" }}>Chris Marchese</div><div style={{ fontSize: "0.65rem", color: "var(--text3)", marginTop: 2 }}>Founder & CEO · Toronto & Miami</div></div>
-            </div>
-            <div>
-              <h2 className="fade-in" style={{ fontSize: "clamp(1.8rem, 3vw, 2.6rem)", lineHeight: 1.2, marginBottom: 36 }}><span style={{ background: "linear-gradient(135deg, #c8a050, #e8c878)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>$500M+</span> in client revenue.<br />System-first.</h2>
-              {["12 years as an industrial millwright.", "No trust fund. No shortcuts.", "Just pattern recognition and an obsession", "with what actually moves people to act.", "That obsession became Strategic Emotional Targeting.", "That framework became SET."].map((l, i) => (
-                <p key={i} className="fade-in" style={{ fontFamily: "var(--serif)", fontSize: "clamp(1rem, 1.3vw, 1.2rem)", color: i >= 4 ? "var(--gold)" : "var(--text2)", fontStyle: i >= 4 ? "italic" : "normal", lineHeight: 1.5, marginBottom: 8 }}>{l}</p>
-              ))}
-              <div className="fade-in-stagger" style={{ display: "flex", gap: 14, flexWrap: "wrap", marginTop: 28 }}>
-                {["SET Enterprises", "SET Ventures", "SET Sales Academy"].map(e => <div key={e} style={{ padding: "10px 18px", border: "1px solid var(--border)", borderRadius: 6, background: "var(--bg3)", fontSize: "0.76rem", fontWeight: 500 }}>{e}</div>)}
-              </div>
-            </div>
+      {/* ═══ FOUNDER — Video background, no photo, text overlaid ═══ */}
+      <section id="about" style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+        {/* Video background — BRIGHT, no dulling */}
+        <video autoPlay loop muted playsInline style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 0 }}>
+          <source src="/founder-bg.mp4" type="video/mp4" />
+        </video>
+        {/* Minimal overlay just for text readability */}
+        <div style={{ position: "absolute", inset: 0, zIndex: 1, background: "rgba(7,7,10,0.35)" }} />
+
+        <div style={{ position: "relative", zIndex: 10, maxWidth: 700, padding: "clamp(60px, 10vh, 120px) clamp(20px, 6vw, 60px)", textAlign: "left" }}>
+          <div className="fade-in" style={{ marginBottom: 40 }}>
+            <span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--gold)", textTransform: "uppercase", textShadow: "0 1px 8px rgba(0,0,0,0.5)" }}>04 · Founder & CEO</span>
+            <div style={{ fontFamily: "var(--serif)", fontSize: "1.3rem", color: "var(--text)", marginTop: 12, textShadow: "0 1px 10px rgba(0,0,0,0.5)" }}>Chris Marchese</div>
+            <div style={{ fontSize: "0.65rem", color: "var(--text2)", marginTop: 4, textShadow: "0 1px 6px rgba(0,0,0,0.5)" }}>Founder & CEO · Toronto & Miami</div>
+          </div>
+
+          <h2 className="fade-in" style={{ fontSize: "clamp(2rem, 3.5vw, 3rem)", lineHeight: 1.2, marginBottom: 36, textShadow: "0 2px 20px rgba(0,0,0,0.5)" }}>
+            <span style={{ background: "linear-gradient(135deg, #c8a050, #e8c878)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>$500M+</span> in client revenue.<br />System-first.
+          </h2>
+
+          {["12 years as an industrial millwright.", "No trust fund. No shortcuts.", "Just pattern recognition and an obsession", "with what actually moves people to act.", "That obsession became Strategic Emotional Targeting.", "That framework became SET."].map((l, i) => (
+            <p key={i} className="fade-in" style={{ fontFamily: "var(--serif)", fontSize: "clamp(1.05rem, 1.4vw, 1.25rem)", color: i >= 4 ? "var(--gold)" : "var(--text)", fontStyle: i >= 4 ? "italic" : "normal", lineHeight: 1.6, marginBottom: 10, textShadow: "0 1px 10px rgba(0,0,0,0.5)" }}>{l}</p>
+          ))}
+
+          <div className="fade-in-stagger" style={{ display: "flex", gap: 14, flexWrap: "wrap", marginTop: 32 }}>
+            {["SET Enterprises", "SET Ventures", "SET Sales Academy"].map(e => (
+              <div key={e} style={{ padding: "10px 18px", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 6, background: "rgba(14,14,20,0.5)", backdropFilter: "blur(8px)", fontSize: "0.76rem", fontWeight: 500, color: "var(--text)", textShadow: "0 1px 6px rgba(0,0,0,0.4)" }}>{e}</div>
+            ))}
           </div>
         </div>
       </section>
