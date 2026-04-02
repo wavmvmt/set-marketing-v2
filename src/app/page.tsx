@@ -7,13 +7,12 @@ export default function Home() {
   const [siteReady, setSiteReady] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [expandedService, setExpandedService] = useState<number | null>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
   const driftVideoRef = useRef<HTMLVideoElement>(null);
-  const driftSectionRef = useRef<HTMLDivElement>(null);
   const sec2VideoRef = useRef<HTMLVideoElement>(null);
-  const sec2SectionRef = useRef<HTMLDivElement>(null);
   const methodRef = useRef<HTMLDivElement>(null);
 
-  // ── SPLASH SEQUENCE ──
+  // ── SPLASH ──
   useEffect(() => {
     const t1 = setTimeout(() => setSplashPhase(1), 1200);
     const t2 = setTimeout(() => setSplashPhase(2), 2500);
@@ -23,20 +22,17 @@ export default function Home() {
 
   const enterSite = () => {
     setSplashPhase(4);
-    // Lock scroll during splash
     document.body.style.overflow = "auto";
     setTimeout(() => { setSplashPhase(5); setSiteReady(true); }, 800);
   };
 
-  // Lock scroll until enter is clicked
   useEffect(() => {
     if (splashPhase < 4) document.body.style.overflow = "hidden";
   }, [splashPhase]);
 
-  // ── GSAP INIT (once site is ready) ──
+  // ── GSAP ──
   useEffect(() => {
     if (!siteReady) return;
-
     const init = async () => {
       const { gsap } = await import("gsap");
       const { ScrollTrigger } = await import("gsap/ScrollTrigger");
@@ -48,61 +44,79 @@ export default function Home() {
       gsap.ticker.add((t: number) => lenis.raf(t * 1000));
       gsap.ticker.lagSmoothing(0);
 
-      // ═══ DRIFT VIDEO — Scroll-driven, pinned ═══
+      // ═══ UNIFIED HERO: Both videos in ONE pinned section ═══
+      const hero = heroRef.current;
       const driftVideo = driftVideoRef.current;
-      const driftSection = driftSectionRef.current;
-      if (driftVideo && driftSection) {
-        await new Promise<void>(r => { if (driftVideo.readyState >= 1) r(); else driftVideo.addEventListener("loadedmetadata", () => r(), { once: true }); });
-        const dur = driftVideo.duration;
-        let target1 = 0, render1 = 0;
+      const sec2Video = sec2VideoRef.current;
+      const driftLayer = document.getElementById("drift-layer");
+      const sec2Layer = document.getElementById("sec2-layer");
+      const trustOverlay = document.getElementById("trust-overlay");
 
+      if (hero && driftVideo && sec2Video && driftLayer && sec2Layer && trustOverlay) {
+        // Wait for drift video metadata
+        await new Promise<void>(r => {
+          if (driftVideo.readyState >= 1) r();
+          else driftVideo.addEventListener("loadedmetadata", () => r(), { once: true });
+        });
+        const driftDur = driftVideo.duration;
+
+        // Start section 2 video playing (looping background)
+        sec2Video.play().catch(() => {});
+
+        // Lerp-driven drift video scrub
+        let driftTarget = 0, driftRender = 0;
+        const tickDrift = () => {
+          driftRender += (driftTarget - driftRender) * 0.12;
+          if (Math.abs(driftRender - driftVideo.currentTime) > 0.015) {
+            driftVideo.currentTime = driftRender;
+          }
+          requestAnimationFrame(tickDrift);
+        };
+        tickDrift();
+
+        // Master ScrollTrigger — one trigger, controls everything
         ScrollTrigger.create({
-          trigger: driftSection,
+          trigger: hero,
           start: "top top",
           end: "bottom bottom",
           scrub: 0,
-          onUpdate: (self) => { target1 = self.progress * dur; },
-        });
+          onUpdate: (self) => {
+            const p = self.progress; // 0 → 1 across the full 900vh
 
-        const tick1 = () => {
-          render1 += (target1 - render1) * 0.12;
-          if (Math.abs(render1 - driftVideo.currentTime) > 0.015) driftVideo.currentTime = render1;
-          requestAnimationFrame(tick1);
-        };
-        tick1();
-      }
+            // ── Drift video: scrub from 0–65% of scroll ──
+            const driftProgress = Math.min(1, p / 0.65);
+            driftTarget = driftProgress * driftDur;
 
-      // ═══ SECTION 2: Scale forward from behind + autoplay video bg + content overlay ═══
-      const sec2Section = sec2SectionRef.current;
-      const sec2Inner = document.getElementById("sec2-inner");
-      const sec2Video = sec2VideoRef.current;
-      if (sec2Section && sec2Inner) {
-        // Start playing the video as background
-        if (sec2Video) sec2Video.play().catch(() => {});
+            // ── Crossfade: 55%–70% ──
+            if (p < 0.55) {
+              // Drift fully visible, sec2 hidden
+              driftLayer.style.opacity = "1";
+              sec2Layer.style.opacity = "0";
+            } else if (p < 0.70) {
+              // Crossfade zone
+              const fade = (p - 0.55) / 0.15; // 0→1
+              driftLayer.style.opacity = String(1 - fade);
+              sec2Layer.style.opacity = String(fade);
+            } else {
+              // Sec2 fully visible, drift hidden
+              driftLayer.style.opacity = "0";
+              sec2Layer.style.opacity = "1";
+            }
 
-        // Scale-forward: section 2 starts tiny (behind section 1) and zooms to full
-        const sec2Tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: sec2Section,
-            start: "top bottom",
-            end: "top top",
-            scrub: 1,
+            // ── Trust Wall content: fades in 72%–85% ──
+            if (p < 0.72) {
+              trustOverlay.style.opacity = "0";
+              trustOverlay.style.transform = "translateY(30px)";
+            } else if (p < 0.85) {
+              const t = (p - 0.72) / 0.13;
+              trustOverlay.style.opacity = String(t);
+              trustOverlay.style.transform = `translateY(${30 * (1 - t)}px)`;
+            } else {
+              trustOverlay.style.opacity = "1";
+              trustOverlay.style.transform = "translateY(0)";
+            }
           },
         });
-        sec2Tl.fromTo(sec2Inner,
-          { scale: 0.15, borderRadius: "24px", opacity: 0 },
-          { scale: 1, borderRadius: "0px", opacity: 1, ease: "power2.out" }
-        );
-
-        // Content overlay fades in once section is in view
-        const overlay = document.getElementById("sec2-overlay");
-        if (overlay) {
-          gsap.fromTo(overlay,
-            { opacity: 0, y: 40 },
-            { opacity: 1, y: 0, ease: "power2.out",
-              scrollTrigger: { trigger: sec2Section, start: "15% top", end: "35% top", scrub: 1 } }
-          );
-        }
       }
 
       // ═══ METHOD GATES ═══
@@ -163,56 +177,34 @@ export default function Home() {
     { q: "Revenue OS reduced our CPA by 27%. We doubled revenue in 18 months. The system works.", a: "George Pintilie", r: "Founder, Pintilie Group" },
   ];
 
+  const vidStyle: React.CSSProperties = { position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", minWidth: "100%", minHeight: "100%", width: "auto", height: "auto", objectFit: "cover" };
+
   return (
     <>
-      {/* ════════════════════════════════════════
-          SPLASH — Overlay that fades away. Site is ALWAYS underneath.
-          ════════════════════════════════════════ */}
+      {/* ═══ SPLASH ═══ */}
       {splashPhase < 5 && (
-        <div
-          onClick={splashPhase === 3 ? enterSite : undefined}
-          style={{
-            position: "fixed", inset: 0, zIndex: 200,
-            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-            cursor: splashPhase === 3 ? "pointer" : "default",
-            opacity: splashPhase === 4 ? 0 : 1,
-            transition: "opacity 0.8s ease",
-          }}
-        >
+        <div onClick={splashPhase === 3 ? enterSite : undefined} style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: splashPhase === 3 ? "pointer" : "default", opacity: splashPhase === 4 ? 0 : 1, transition: "opacity 0.8s ease" }}>
           <video autoPlay loop muted playsInline style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 0, filter: "brightness(0.4) saturate(1.2)" }}>
             <source src="/splash-bg-hd.mp4" type="video/mp4" />
           </video>
           <div style={{ position: "absolute", inset: 0, zIndex: 1, background: "radial-gradient(ellipse at center, rgba(7,7,10,0.3) 0%, rgba(7,7,10,0.7) 100%)" }} />
-
           <div style={{ position: "relative", zIndex: 10, textAlign: "center", padding: "0 24px", maxWidth: 800 }}>
             <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(3.5rem, 10vw, 7rem)", fontWeight: 300, letterSpacing: "0.4em", color: "var(--gold)", marginBottom: 32, textShadow: "0 0 60px rgba(200,160,80,0.3)" }}>S E T</div>
             <div style={{ opacity: splashPhase >= 1 ? 1 : 0, transform: splashPhase >= 1 ? "translateY(0)" : "translateY(20px)", transition: "all 1s ease" }}>
               <div style={{ fontFamily: "var(--sans)", fontSize: "0.65rem", letterSpacing: "0.35em", color: "var(--gold)", textTransform: "uppercase", marginBottom: 20, fontWeight: 500 }}>Revenue Architecture · Toronto & Miami · Est. 2019</div>
-              <h1 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2rem, 5vw, 3.8rem)", fontWeight: 300, lineHeight: 1.1, color: "var(--text)", textShadow: "0 2px 40px rgba(0,0,0,0.6)" }}>
-                We Don&rsquo;t Run <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Campaigns.</em><br />We Install Systems.
-              </h1>
+              <h1 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2rem, 5vw, 3.8rem)", fontWeight: 300, lineHeight: 1.1, color: "var(--text)", textShadow: "0 2px 40px rgba(0,0,0,0.6)" }}>We Don&rsquo;t Run <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Campaigns.</em><br />We Install Systems.</h1>
             </div>
             <div style={{ marginTop: 48, opacity: splashPhase === 2 ? 1 : 0, display: splashPhase === 2 ? "block" : "none" }}>
-              <span style={{ fontFamily: "var(--sans)", fontSize: "0.75rem", letterSpacing: "0.2em", color: "var(--text3)", textTransform: "uppercase" }}>
-                Loading<span><span style={{ animation: "dotPulse 1.4s infinite" }}>.</span><span style={{ animation: "dotPulse 1.4s infinite 0.2s" }}>.</span><span style={{ animation: "dotPulse 1.4s infinite 0.4s" }}>.</span></span>
-              </span>
+              <span style={{ fontFamily: "var(--sans)", fontSize: "0.75rem", letterSpacing: "0.2em", color: "var(--text3)", textTransform: "uppercase" }}>Loading<span><span style={{ animation: "dotPulse 1.4s infinite" }}>.</span><span style={{ animation: "dotPulse 1.4s infinite 0.2s" }}>.</span><span style={{ animation: "dotPulse 1.4s infinite 0.4s" }}>.</span></span></span>
             </div>
             <div style={{ marginTop: 48, opacity: splashPhase >= 3 && splashPhase < 4 ? 1 : 0, display: splashPhase >= 3 && splashPhase < 5 ? "block" : "none" }}>
-              <div onClick={enterSite} style={{ fontFamily: "var(--sans)", fontSize: "0.85rem", letterSpacing: "0.25em", color: "var(--gold)", textTransform: "uppercase", cursor: "pointer", animation: "flashPulse 1.5s ease-in-out infinite", padding: "16px 32px", border: "1px solid rgba(200,160,80,0.25)", borderRadius: 6, display: "inline-block" }}
-                onMouseEnter={e => { e.currentTarget.style.background = "rgba(200,160,80,0.1)"; }}
-                onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
-              >Click Here to Enter</div>
+              <div onClick={enterSite} style={{ fontFamily: "var(--sans)", fontSize: "0.85rem", letterSpacing: "0.25em", color: "var(--gold)", textTransform: "uppercase", cursor: "pointer", animation: "flashPulse 1.5s ease-in-out infinite", padding: "16px 32px", border: "1px solid rgba(200,160,80,0.25)", borderRadius: 6, display: "inline-block" }} onMouseEnter={e => { e.currentTarget.style.background = "rgba(200,160,80,0.1)"; }} onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}>Click Here to Enter</div>
             </div>
           </div>
         </div>
       )}
 
-      {/* ════════════════════════════════════════
-          MAIN SITE — Always rendered, splash just overlays it.
-          Videos preload immediately so they're ready when splash fades.
-          ════════════════════════════════════════ */}
-
-      {/* NAV */}
+      {/* ═══ NAV ═══ */}
       <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, padding: "0 clamp(20px, 4vw, 60px)", height: 68, display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(7,7,10,0.7)", backdropFilter: "blur(16px)", borderBottom: "1px solid var(--border)", opacity: siteReady ? 1 : 0, transition: "opacity 0.5s" }}>
         <div style={{ fontFamily: "var(--serif)", fontSize: "1.3rem", fontWeight: 300, letterSpacing: "0.2em", color: "var(--gold)", cursor: "pointer" }} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>SET</div>
         <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
@@ -221,70 +213,65 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* ═══ SECTION 1: DRIFT VIDEO — Scroll-driven, pinned ═══
-          500vh scroll distance. Video scrubs frame by frame.
-          The video already contains title text + car smashing it. */}
-      <section ref={driftSectionRef} style={{ position: "relative", height: "500vh" }}>
+      {/* ═══════════════════════════════════════════════════════
+          UNIFIED HERO: ONE pinned section, TWO video layers
+          900vh of scroll. Same viewport the entire time.
+          
+          Scroll 0–65%:   Drift video scrubs (title + car smash)
+          Scroll 55–70%:  Crossfade zone (drift fades, sec2 fades in)
+          Scroll 70–100%: Sec2 video visible + Trust Wall content
+          ═══════════════════════════════════════════════════════ */}
+      <section ref={heroRef} style={{ position: "relative", height: "900vh" }}>
         <div style={{ position: "sticky", top: 0, width: "100%", height: "100vh", overflow: "hidden", background: "#000" }}>
-          <video
-            ref={driftVideoRef}
-            muted playsInline preload="auto"
-            style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", minWidth: "100%", minHeight: "100%", width: "auto", height: "auto", objectFit: "cover" }}
-          >
-            <source src="/hero-drift.mp4" type="video/mp4" />
-          </video>
-          {/* Subtle scroll indicator */}
-          <div style={{ position: "absolute", bottom: 28, left: "50%", transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", gap: 5, opacity: 0.3, animation: "bob 2.5s ease-in-out infinite", zIndex: 10 }}>
+
+          {/* LAYER 1: Drift video (starts visible) */}
+          <div id="drift-layer" style={{ position: "absolute", inset: 0, zIndex: 2, opacity: 1, transition: "opacity 0.05s linear" }}>
+            <video ref={driftVideoRef} muted playsInline preload="auto" style={vidStyle}>
+              <source src="/hero-drift.mp4" type="video/mp4" />
+            </video>
+          </div>
+
+          {/* LAYER 2: Section 2 video (starts hidden, crossfades in) */}
+          <div id="sec2-layer" style={{ position: "absolute", inset: 0, zIndex: 1, opacity: 0, transition: "opacity 0.05s linear" }}>
+            <video ref={sec2VideoRef} autoPlay loop muted playsInline preload="auto" style={{ ...vidStyle, filter: "brightness(0.7) saturate(1.2)" }}>
+              <source src="/section2-bg.mp4" type="video/mp4" />
+            </video>
+            {/* Dark overlay for text readability */}
+            <div style={{ position: "absolute", inset: 0, background: "rgba(7,7,10,0.45)", zIndex: 1 }} />
+          </div>
+
+          {/* LAYER 3: Trust Wall content (fades in over sec2 video) */}
+          <div id="trust-overlay" style={{ position: "absolute", inset: 0, zIndex: 10, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 clamp(20px, 6vw, 80px)", opacity: 0, transform: "translateY(30px)", transition: "opacity 0.05s linear, transform 0.05s linear" }}>
+            <div style={{ maxWidth: 1000, width: "100%", textAlign: "center" }}>
+              <span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>Trusted By</span>
+
+              <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 14, marginTop: 36, marginBottom: 44 }}>
+                {BRANDS.map(b => (
+                  <div key={b} style={{ fontSize: "0.68rem", fontWeight: 600, letterSpacing: "0.12em", color: "rgba(240,236,228,0.65)", textTransform: "uppercase", padding: "10px 18px", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 3, backdropFilter: "blur(6px)", background: "rgba(255,255,255,0.04)" }}>{b}</div>
+                ))}
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
+                {STATS.map(s => (
+                  <div key={s.l} style={{ textAlign: "center", padding: 14 }}>
+                    <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(2rem, 3.5vw, 3rem)", fontWeight: 300, lineHeight: 1, color: "var(--text)", textShadow: "0 2px 20px rgba(0,0,0,0.5)" }}>{s.v}</div>
+                    <div style={{ fontSize: "0.68rem", fontWeight: 500, color: "var(--gold)", marginTop: 6, textShadow: "0 1px 10px rgba(0,0,0,0.5)" }}>{s.l}</div>
+                    <div style={{ fontSize: "0.6rem", color: "var(--text3)", marginTop: 3 }}>{s.s}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Scroll hint */}
+          <div style={{ position: "absolute", bottom: 28, left: "50%", transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", gap: 5, opacity: 0.3, animation: "bob 2.5s ease-in-out infinite", zIndex: 20 }}>
             <span style={{ fontSize: "0.45rem", letterSpacing: "0.2em", color: "#fff", textTransform: "uppercase", textShadow: "0 1px 6px rgba(0,0,0,0.8)" }}>Scroll</span>
             <div style={{ width: 1, height: 20, background: "linear-gradient(to bottom, rgba(255,255,255,0.4), transparent)" }} />
           </div>
         </div>
       </section>
 
-      {/* ═══ SECTION 2: VIDEO BG + TRUST WALL OVERLAY ═══
-          Scales forward from behind section 1 (starts tiny, zooms to full).
-          Video plays as background, Trust Wall content overlays on top.
-          400vh: first part = scale-in transition, rest = content viewing */}
-      <section ref={sec2SectionRef} style={{ position: "relative", height: "400vh" }}>
-        <div style={{ position: "sticky", top: 0, width: "100%", height: "100vh", overflow: "hidden" }}>
-          <div id="sec2-inner" style={{ width: "100%", height: "100%", overflow: "hidden", background: "#000", transformOrigin: "center center", willChange: "transform" }}>
-            {/* Video background */}
-            <video
-              ref={sec2VideoRef}
-              autoPlay muted playsInline preload="auto" loop
-              style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", minWidth: "100%", minHeight: "100%", width: "auto", height: "auto", objectFit: "cover" }}
-            >
-              <source src="/section2-bg.mp4" type="video/mp4" />
-            </video>
-
-            {/* Dark overlay for text readability */}
-            <div style={{ position: "absolute", inset: 0, background: "rgba(7,7,10,0.55)", zIndex: 1 }} />
-
-            {/* Trust Wall content — overlaid on top of the video */}
-            <div id="sec2-overlay" style={{ position: "relative", zIndex: 10, height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 clamp(20px, 6vw, 80px)", opacity: 0 }}>
-              <div style={{ maxWidth: 1000, width: "100%", textAlign: "center" }}>
-                <span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>01 · Trusted By</span>
-
-                <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 14, marginTop: 40, marginBottom: 50 }}>
-                  {BRANDS.map(b => <div key={b} style={{ fontSize: "0.68rem", fontWeight: 600, letterSpacing: "0.12em", color: "rgba(240,236,228,0.6)", textTransform: "uppercase", padding: "10px 18px", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 3, backdropFilter: "blur(4px)", background: "rgba(255,255,255,0.03)" }}>{b}</div>)}
-                </div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 20 }}>
-                  {STATS.map(s => <div key={s.l} style={{ textAlign: "center", padding: 16 }}>
-                    <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.2rem, 3.5vw, 3rem)", fontWeight: 300, lineHeight: 1, color: "var(--text)", textShadow: "0 2px 20px rgba(0,0,0,0.5)" }}>{s.v}</div>
-                    <div style={{ fontSize: "0.7rem", fontWeight: 500, color: "var(--gold)", marginTop: 8, textShadow: "0 1px 10px rgba(0,0,0,0.5)" }}>{s.l}</div>
-                    <div style={{ fontSize: "0.62rem", color: "var(--text3)", marginTop: 4 }}>{s.s}</div>
-                  </div>)}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ REST OF SITE ═══ */}
-
-      {/* SERVICES */}
+      {/* ═══ SERVICES ═══ */}
       <section id="services" style={{ padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: "var(--bg)" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div className="fade-in" style={{ textAlign: "center", marginBottom: 56 }}>
@@ -308,7 +295,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CASE STUDIES */}
+      {/* ═══ CASE STUDIES ═══ */}
       <section id="results" style={{ padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: "var(--bg2)" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
           <div className="fade-in" style={{ textAlign: "center", marginBottom: 56 }}>
@@ -334,7 +321,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FOUNDER */}
+      {/* ═══ FOUNDER ═══ */}
       <section id="about" style={{ padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: "var(--bg)" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div className="fade-in" style={{ textAlign: "center", marginBottom: 50 }}><span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>04 · Founder & CEO</span></div>
@@ -362,7 +349,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* METHOD */}
+      {/* ═══ METHOD ═══ */}
       <section ref={methodRef} id="process" style={{ position: "relative", height: "100vh", overflow: "hidden", background: "var(--bg2)" }}>
         <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, zIndex: 30 }}><div id="method-progress" style={{ width: "100%", height: "100%", background: "var(--gold)", transformOrigin: "left", transform: "scaleX(0)" }} /></div>
         <div style={{ position: "absolute", top: 40, left: 0, right: 0, textAlign: "center", zIndex: 20 }}>
@@ -377,15 +364,13 @@ export default function Home() {
               <div style={{ fontSize: "0.65rem", letterSpacing: "0.2em", color: step.ac, textTransform: "uppercase", fontWeight: 600, marginBottom: 16 }}>{step.s}</div>
               <h3 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2rem, 4vw, 3rem)", color: "var(--text)", marginBottom: 16 }}>{step.t}</h3>
               <p style={{ fontSize: "1rem", color: "var(--text2)", lineHeight: 1.7 }}>{step.d}</p>
-              <div style={{ marginTop: 32, display: "flex", gap: 8, justifyContent: "center" }}>
-                {STEPS.map((_, j) => <div key={j} style={{ width: j === i ? 24 : 8, height: 8, borderRadius: 4, background: j === i ? step.ac : "rgba(255,255,255,0.1)" }} />)}
-              </div>
+              <div style={{ marginTop: 32, display: "flex", gap: 8, justifyContent: "center" }}>{STEPS.map((_, j) => <div key={j} style={{ width: j === i ? 24 : 8, height: 8, borderRadius: 4, background: j === i ? step.ac : "rgba(255,255,255,0.1)" }} />)}</div>
             </div>
           </div>
         ))}
       </section>
 
-      {/* TESTIMONIALS */}
+      {/* ═══ TESTIMONIALS ═══ */}
       <section style={{ padding: "clamp(60px, 10vh, 100px) clamp(20px, 6vw, 80px)", background: "var(--bg)" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div className="fade-in" style={{ textAlign: "center", marginBottom: 44 }}>
@@ -405,7 +390,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* ═══ CTA ═══ */}
       <section id="contact" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: "var(--bg2)" }}>
         {!formSubmitted ? <>
           <div className="fade-in" style={{ textAlign: "center", marginBottom: 50 }}>
@@ -429,7 +414,7 @@ export default function Home() {
         </div>}
       </section>
 
-      {/* FOOTER */}
+      {/* ═══ FOOTER ═══ */}
       <footer style={{ borderTop: "1px solid var(--border)", padding: "clamp(36px, 5vh, 56px) clamp(20px, 6vw, 80px) 20px", background: "var(--bg)" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: 28 }}>
           <div><div style={{ fontFamily: "var(--serif)", fontSize: "1.2rem", letterSpacing: "0.15em", color: "var(--gold)", marginBottom: 10 }}>SET</div><p style={{ fontSize: "0.68rem", color: "var(--text3)", lineHeight: 1.7, maxWidth: 240 }}>Revenue architecture for operators generating $1M to $20M.</p><a href="mailto:chris@marketingbyset.com" style={{ fontSize: "0.68rem", color: "var(--text2)", textDecoration: "none", display: "block", marginTop: 8 }}>chris@marketingbyset.com</a></div>
