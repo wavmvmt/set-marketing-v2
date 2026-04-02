@@ -171,6 +171,7 @@ export default function Home() {
             const svcEnd = 0.98;
             const svcRange = svcEnd - svcStart;
             const pairDuration = svcRange / 3;
+            const slideDistance = 250; // px — full sweep across screen
 
             svcPairs.forEach((pair, i) => {
               const ps = svcStart + i * pairDuration;
@@ -179,24 +180,24 @@ export default function Home() {
               const fadeOutStart = pe - pairDuration * 0.25;
 
               let opacity = 0;
-              let xOffset = 80; // start from right
+              let xOffset = slideDistance;
 
               if (p < ps) {
-                opacity = 0; xOffset = 80;
+                opacity = 0; xOffset = slideDistance;
               } else if (p < fadeInEnd) {
                 const t = (p - ps) / (fadeInEnd - ps);
-                opacity = t; xOffset = 80 * (1 - t);
+                opacity = t; xOffset = slideDistance * (1 - t);
               } else if (p < fadeOutStart) {
                 opacity = 1; xOffset = 0;
               } else if (p < pe) {
                 const t = (p - fadeOutStart) / (pe - fadeOutStart);
-                opacity = 1 - t; xOffset = -80 * t;
+                opacity = 1 - t; xOffset = -slideDistance * t;
               } else {
-                opacity = 0; xOffset = -80;
+                opacity = 0; xOffset = -slideDistance;
               }
 
               (pair as HTMLElement).style.opacity = String(opacity);
-              (pair as HTMLElement).style.transform = `translateX(${xOffset}px) translateY(-50%)`;
+              (pair as HTMLElement).style.transform = `translate(-50%, -50%) translateX(${xOffset}px)`;
             });
           },
         });
@@ -347,7 +348,7 @@ export default function Home() {
 
           {/* OVERLAY: Service tile pairs — slide R→L */}
           {[[SERVICES[0], SERVICES[1]], [SERVICES[2], SERVICES[3]], [SERVICES[4], SERVICES[5]]].map((pair, pi) => (
-            <div key={pi} className="svc-pair" style={{ position: "absolute", top: "50%", left: "50%", transform: "translateX(80px) translateY(-50%)", zIndex: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, width: "min(90vw, 900px)", opacity: 0 }}>
+            <div key={pi} className="svc-pair" style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%) translateX(250px)", zIndex: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, width: "min(90vw, 900px)", opacity: 0 }}>
               {pair.map(s => (
                 <div key={s.id} style={{ background: "rgba(14,14,20,0.8)", backdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: "clamp(24px, 3vw, 36px)", position: "relative", overflow: "hidden" }}>
                   <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: s.c }} />
