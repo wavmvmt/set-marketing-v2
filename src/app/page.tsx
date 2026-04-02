@@ -10,6 +10,8 @@ export default function Home() {
   const heroRef = useRef<HTMLDivElement>(null);
   const driftVideoRef = useRef<HTMLVideoElement>(null);
   const sec2VideoRef = useRef<HTMLVideoElement>(null);
+  const servicesSectionRef = useRef<HTMLDivElement>(null);
+  const servicesVideoRef = useRef<HTMLVideoElement>(null);
   const methodRef = useRef<HTMLDivElement>(null);
 
   // ── SPLASH ──
@@ -117,6 +119,78 @@ export default function Home() {
             }
           },
         });
+      }
+
+      // ═══ SERVICES: Scroll-driven video + paired tile reveals ═══
+      const svcSection = servicesSectionRef.current;
+      const svcVideo = servicesVideoRef.current;
+      if (svcSection && svcVideo) {
+        await new Promise<void>(r => {
+          if (svcVideo.readyState >= 1) r();
+          else svcVideo.addEventListener("loadedmetadata", () => r(), { once: true });
+        });
+        const svcDur = svcVideo.duration;
+        let svcTarget = 0, svcRender = 0;
+
+        // Video scrub
+        ScrollTrigger.create({
+          trigger: svcSection,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 0,
+          onUpdate: (self) => {
+            const p = self.progress;
+            svcTarget = p * svcDur;
+
+            // 3 pairs of tiles, each gets 1/3 of the scroll
+            const pairs = document.querySelectorAll(".svc-pair");
+            pairs.forEach((pair, i) => {
+              const pairStart = i / 3;
+              const pairEnd = (i + 1) / 3;
+              const fadeIn = pairStart + 0.03;       // fade in over 3% of total scroll
+              const holdStart = pairStart + 0.08;    // fully visible
+              const holdEnd = pairEnd - 0.08;        // start fading
+              const fadeOut = pairEnd - 0.03;        // fully gone
+
+              let opacity = 0;
+              let yOffset = 30;
+
+              if (p < fadeIn) {
+                opacity = 0; yOffset = 30;
+              } else if (p < holdStart) {
+                const t = (p - fadeIn) / (holdStart - fadeIn);
+                opacity = t; yOffset = 30 * (1 - t);
+              } else if (p < holdEnd) {
+                opacity = 1; yOffset = 0;
+              } else if (p < fadeOut) {
+                const t = (p - holdEnd) / (fadeOut - holdEnd);
+                opacity = 1 - t; yOffset = -20 * t;
+              } else {
+                opacity = 0; yOffset = -20;
+              }
+
+              (pair as HTMLElement).style.opacity = String(opacity);
+              (pair as HTMLElement).style.transform = `translateY(${yOffset}px)`;
+            });
+
+            // Section title fades out as first pair appears
+            const svcTitle = document.getElementById("svc-title");
+            if (svcTitle) {
+              if (p < 0.02) { svcTitle.style.opacity = String(p / 0.02); }
+              else if (p < 0.06) { svcTitle.style.opacity = "1"; }
+              else if (p < 0.12) { svcTitle.style.opacity = String(1 - (p - 0.06) / 0.06); }
+              else { svcTitle.style.opacity = "0"; }
+            }
+          },
+        });
+
+        // Lerp video scrub
+        const tickSvc = () => {
+          svcRender += (svcTarget - svcRender) * 0.12;
+          if (Math.abs(svcRender - svcVideo.currentTime) > 0.015) svcVideo.currentTime = svcRender;
+          requestAnimationFrame(tickSvc);
+        };
+        tickSvc();
       }
 
       // ═══ METHOD GATES ═══
@@ -271,27 +345,93 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══ SERVICES ═══ */}
-      <section id="services" style={{ padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: "var(--bg)" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <div className="fade-in" style={{ textAlign: "center", marginBottom: 56 }}>
+      {/* ═══ SERVICES: Scroll-driven video + paired tile reveals ═══
+          600vh scroll distance. Video scrubs through entire section.
+          6 tiles shown as 3 pairs of 2, each pair fades in/holds/fades out
+          across 1/3 of the total scroll. */}
+      <section ref={servicesSectionRef} id="services" style={{ position: "relative", height: "600vh" }}>
+        <div style={{ position: "sticky", top: 0, width: "100%", height: "100vh", overflow: "hidden", background: "#000" }}>
+
+          {/* Scroll-driven video background */}
+          <video
+            ref={servicesVideoRef}
+            muted playsInline preload="auto"
+            style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", minWidth: "100%", minHeight: "100%", width: "auto", height: "auto", objectFit: "cover", filter: "brightness(0.5) saturate(1.2)" }}
+          >
+            <source src="/services-bg.mp4" type="video/mp4" />
+          </video>
+
+          {/* Dark overlay */}
+          <div style={{ position: "absolute", inset: 0, background: "rgba(7,7,10,0.4)", zIndex: 1 }} />
+
+          {/* Section title — fades in then out */}
+          <div id="svc-title" style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", zIndex: 10, textAlign: "center", opacity: 0 }}>
             <span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>02 · What We Build</span>
-            <h2 style={{ fontSize: "clamp(2rem, 4vw, 3.2rem)", marginTop: 16 }}>Revenue <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Architecture</em></h2>
+            <h2 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.2rem, 4.5vw, 3.5rem)", marginTop: 16, color: "var(--text)", textShadow: "0 2px 30px rgba(0,0,0,0.6)" }}>Revenue <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Architecture</em></h2>
           </div>
-          <div className="fade-in-stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 14 }}>
-            {SERVICES.map(s => {
-              const open = expandedService === s.id;
-              return <div key={s.id} onClick={() => setExpandedService(open ? null : s.id)} style={{ background: "var(--bg3)", border: `1px solid ${open ? s.c + "40" : "var(--border)"}`, borderRadius: 12, padding: 28, cursor: "pointer", transition: "all 0.4s", position: "relative", overflow: "hidden" }}>
-                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: s.c, opacity: open ? 1 : 0, transition: "opacity 0.4s" }} />
-                <div style={{ display: "flex", gap: 14, alignItems: "flex-start", marginBottom: 14 }}>
-                  <div style={{ width: 38, height: 38, borderRadius: 8, background: s.c + "15", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1rem", color: s.c, flexShrink: 0 }}>{s.i}</div>
-                  <h3 style={{ fontFamily: "var(--serif)", fontSize: "1.1rem", color: "var(--text)", lineHeight: 1.3 }}>{s.t}</h3>
+
+          {/* 3 pairs of 2 tiles each — stacked absolutely, controlled by scroll */}
+          {[
+            [SERVICES[0], SERVICES[1]],
+            [SERVICES[2], SERVICES[3]],
+            [SERVICES[4], SERVICES[5]],
+          ].map((pair, pairIdx) => (
+            <div
+              key={pairIdx}
+              className="svc-pair"
+              style={{
+                position: "absolute",
+                top: "50%", left: "50%",
+                transform: "translate(-50%, -50%)",
+                zIndex: 10,
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 20,
+                width: "min(90vw, 900px)",
+                opacity: 0,
+                transition: "opacity 0.05s linear, transform 0.05s linear",
+              }}
+            >
+              {pair.map(s => (
+                <div
+                  key={s.id}
+                  style={{
+                    background: "rgba(14,14,20,0.8)",
+                    backdropFilter: "blur(16px)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    borderRadius: 14,
+                    padding: "clamp(24px, 3vw, 36px)",
+                    position: "relative",
+                    overflow: "hidden",
+                  }}
+                >
+                  {/* Accent line */}
+                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: s.c }} />
+
+                  <div style={{ display: "flex", gap: 14, alignItems: "flex-start", marginBottom: 16 }}>
+                    <div style={{
+                      width: 44, height: 44, borderRadius: 10,
+                      background: s.c + "15", display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: "1.1rem", color: s.c, flexShrink: 0
+                    }}>{s.i}</div>
+                    <h3 style={{ fontFamily: "var(--serif)", fontSize: "1.15rem", color: "var(--text)", lineHeight: 1.3 }}>{s.t}</h3>
+                  </div>
+
+                  <p style={{ fontSize: "0.82rem", color: "var(--text2)", lineHeight: 1.65, marginBottom: 16 }}>{s.d}</p>
+
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    {s.tags.map(t => (
+                      <span key={t} style={{
+                        padding: "4px 10px", borderRadius: 14,
+                        fontSize: "0.62rem", fontWeight: 500,
+                        background: s.c + "15", color: s.c,
+                      }}>{t}</span>
+                    ))}
+                  </div>
                 </div>
-                <p style={{ fontSize: "0.8rem", color: "var(--text2)", lineHeight: 1.6, marginBottom: 14 }}>{open ? s.d : s.b}</p>
-                <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>{s.tags.map(t => <span key={t} style={{ padding: "3px 9px", borderRadius: 14, fontSize: "0.62rem", fontWeight: 500, background: s.c + "12", color: s.c }}>{t}</span>)}</div>
-              </div>;
-            })}
-          </div>
+              ))}
+            </div>
+          ))}
         </div>
       </section>
 
