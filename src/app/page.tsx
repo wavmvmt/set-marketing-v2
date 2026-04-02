@@ -298,14 +298,14 @@ export default function Home() {
 
           {/* LAYER 2: Section 2 video + Trust Wall */}
           <div id="sec2-layer" style={{ position: "absolute", inset: 0, zIndex: 2, opacity: 0 }}>
-            <video ref={sec2VideoRef} autoPlay loop muted playsInline preload="auto" style={{ ...vidStyle, filter: "brightness(0.65) saturate(1.2)" }}><source src="/section2-bg.mp4" type="video/mp4" /></video>
-            <div style={{ position: "absolute", inset: 0, background: "rgba(7,7,10,0.45)", zIndex: 1 }} />
+            <video ref={sec2VideoRef} autoPlay loop muted playsInline preload="auto" style={{ ...vidStyle, filter: "brightness(0.9) saturate(1.2)" }}><source src="/section2-bg.mp4" type="video/mp4" /></video>
+            <div style={{ position: "absolute", inset: 0, background: "rgba(7,7,10,0.2)", zIndex: 1 }} />
           </div>
 
           {/* LAYER 3: Services FPV drone video */}
           <div id="svc-layer" style={{ position: "absolute", inset: 0, zIndex: 1, opacity: 0 }}>
-            <video ref={svcVideoRef} muted playsInline preload="auto" style={{ ...vidStyle, filter: "brightness(0.45) saturate(1.2)" }}><source src="/services-bg.mp4" type="video/mp4" /></video>
-            <div style={{ position: "absolute", inset: 0, background: "rgba(7,7,10,0.35)", zIndex: 1 }} />
+            <video ref={svcVideoRef} muted playsInline preload="auto" style={{ ...vidStyle, filter: "brightness(0.8) saturate(1.2)" }}><source src="/services-bg.mp4" type="video/mp4" /></video>
+            <div style={{ position: "absolute", inset: 0, background: "rgba(7,7,10,0.15)", zIndex: 1 }} />
           </div>
 
           {/* OVERLAY: Trust Wall content */}
@@ -333,16 +333,16 @@ export default function Home() {
 
           {/* OVERLAY: Service tile pairs — slide R→L */}
           {[[SERVICES[0], SERVICES[1]], [SERVICES[2], SERVICES[3]], [SERVICES[4], SERVICES[5]]].map((pair, pi) => (
-            <div key={pi} className="svc-pair" style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%) translateX(250px)", zIndex: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, width: "min(90vw, 900px)", opacity: 0 }}>
+            <div key={pi} className="svc-pair" style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%) translateX(250px)", zIndex: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, width: "min(94vw, 1200px)", opacity: 0 }}>
               {pair.map(s => (
-                <div key={s.id} style={{ background: "rgba(14,14,20,0.8)", backdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: "clamp(24px, 3vw, 36px)", position: "relative", overflow: "hidden" }}>
+                <div key={s.id} style={{ background: "rgba(14,14,20,0.8)", backdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: "clamp(32px, 4vw, 48px)", position: "relative", overflow: "hidden" }}>
                   <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: s.c }} />
                   <div style={{ display: "flex", gap: 14, alignItems: "flex-start", marginBottom: 16 }}>
-                    <div style={{ width: 44, height: 44, borderRadius: 10, background: s.c + "15", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.1rem", color: s.c, flexShrink: 0 }}>{s.i}</div>
-                    <h3 style={{ fontFamily: "var(--serif)", fontSize: "1.15rem", color: "var(--text)", lineHeight: 1.3 }}>{s.t}</h3>
+                    <div style={{ width: 52, height: 52, borderRadius: 12, background: s.c + "15", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.3rem", color: s.c, flexShrink: 0 }}>{s.i}</div>
+                    <h3 style={{ fontFamily: "var(--serif)", fontSize: "1.35rem", color: "var(--text)", lineHeight: 1.3 }}>{s.t}</h3>
                   </div>
-                  <p style={{ fontSize: "0.82rem", color: "var(--text2)", lineHeight: 1.65, marginBottom: 16 }}>{s.d}</p>
-                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>{s.tags.map(t => <span key={t} style={{ padding: "4px 10px", borderRadius: 14, fontSize: "0.62rem", fontWeight: 500, background: s.c + "15", color: s.c }}>{t}</span>)}</div>
+                  <p style={{ fontSize: "0.92rem", color: "var(--text2)", lineHeight: 1.65, marginBottom: 16 }}>{s.d}</p>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>{s.tags.map(t => <span key={t} style={{ padding: "5px 12px", borderRadius: 16, fontSize: "0.7rem", fontWeight: 500, background: s.c + "15", color: s.c }}>{t}</span>)}</div>
                 </div>
               ))}
             </div>
