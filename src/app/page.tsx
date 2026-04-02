@@ -123,32 +123,30 @@ export default function Home() {
               svcLayer.style.opacity = "1";
             }
 
-            // ── Trust Wall: fade in 44–52%, fade out 53–58% ──
-            if (p < 0.44) {
+            // ── Trust Wall: appears right when sec2 starts (35%), fades out before services ──
+            if (p < 0.35) {
               trustOverlay.style.opacity = "0";
-              trustOverlay.style.transform = "translateY(30px)";
-            } else if (p < 0.52) {
-              const t = (p - 0.44) / 0.08;
+              trustOverlay.style.transform = "translateY(20px)";
+            } else if (p < 0.39) {
+              const t = (p - 0.35) / 0.04;
               trustOverlay.style.opacity = String(t);
-              trustOverlay.style.transform = `translateY(${30 * (1 - t)}px)`;
-            } else if (p < 0.53) {
+              trustOverlay.style.transform = `translateY(${20 * (1 - t)}px)`;
+            } else if (p < 0.52) {
               trustOverlay.style.opacity = "1";
               trustOverlay.style.transform = "translateY(0)";
-            } else if (p < 0.58) {
-              const t = (p - 0.53) / 0.05;
+            } else if (p < 0.55) {
+              const t = (p - 0.52) / 0.03;
               trustOverlay.style.opacity = String(1 - t);
-              trustOverlay.style.transform = `translateY(${-20 * t}px)`;
             } else {
               trustOverlay.style.opacity = "0";
             }
 
-            // ── Services title: fade in 62–66%, fade out 68–72% ──
+            // ── Revenue Architecture title: stays visible throughout services section ──
             if (svcTitle) {
-              if (p < 0.62) svcTitle.style.opacity = "0";
-              else if (p < 0.66) svcTitle.style.opacity = String((p - 0.62) / 0.04);
-              else if (p < 0.68) svcTitle.style.opacity = "1";
-              else if (p < 0.72) svcTitle.style.opacity = String(1 - (p - 0.68) / 0.04);
-              else svcTitle.style.opacity = "0";
+              if (p < 0.58) svcTitle.style.opacity = "0";
+              else if (p < 0.62) svcTitle.style.opacity = String((p - 0.58) / 0.04);
+              else if (p < 0.96) svcTitle.style.opacity = "1";
+              else svcTitle.style.opacity = String(Math.max(0, 1 - (p - 0.96) / 0.04));
             }
 
             // ── Service tile pairs: slide R→L, 3 pairs across 62–100% ──
@@ -309,25 +307,24 @@ export default function Home() {
 
           {/* OVERLAY: Trust Wall content */}
           <div id="trust-overlay" style={{ position: "absolute", inset: 0, zIndex: 10, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 clamp(20px, 6vw, 80px)", opacity: 0, transform: "translateY(30px)" }}>
-            <div style={{ maxWidth: 1000, width: "100%", textAlign: "center" }}>
-              <span style={{ fontSize: "0.7rem", letterSpacing: "0.3em", color: "#fff", textTransform: "uppercase", textShadow: "0 2px 10px rgba(0,0,0,0.6)", fontWeight: 600 }}>Trusted By</span>
-              <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 14, marginTop: 36, marginBottom: 44 }}>
-                {BRANDS.map(b => <div key={b} style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.12em", color: "#fff", textTransform: "uppercase", padding: "10px 18px", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 3, backdropFilter: "blur(6px)", background: "rgba(0,0,0,0.3)", textShadow: "0 1px 6px rgba(0,0,0,0.5)" }}>{b}</div>)}
+            <div style={{ maxWidth: 1100, width: "100%", textAlign: "center" }}>
+              <span style={{ fontSize: "1.1rem", letterSpacing: "0.35em", color: "#fff", textTransform: "uppercase", textShadow: "0 2px 12px rgba(0,0,0,0.7)", fontWeight: 700 }}>TRUSTED BY</span>
+              <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 16, marginTop: 40, marginBottom: 50 }}>
+                {BRANDS.map(b => <div key={b} style={{ fontSize: "0.85rem", fontWeight: 700, letterSpacing: "0.15em", color: "#fff", textTransform: "uppercase", padding: "12px 22px", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 4, backdropFilter: "blur(8px)", background: "rgba(0,0,0,0.35)", textShadow: "0 1px 8px rgba(0,0,0,0.6)" }}>{b}</div>)}
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
-                {STATS.map(s => <div key={s.l} style={{ textAlign: "center", padding: 14 }}>
-                  <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(2rem, 3.5vw, 3rem)", fontWeight: 300, lineHeight: 1, color: "#fff", textShadow: "0 2px 20px rgba(0,0,0,0.6)" }}>{s.v}</div>
-                  <div style={{ fontSize: "0.7rem", fontWeight: 600, color: "var(--gold)", marginTop: 6, textShadow: "0 1px 8px rgba(0,0,0,0.5)" }}>{s.l}</div>
-                  <div style={{ fontSize: "0.62rem", color: "rgba(255,255,255,0.8)", marginTop: 3, textShadow: "0 1px 6px rgba(0,0,0,0.5)" }}>{s.s}</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20 }}>
+                {STATS.map(s => <div key={s.l} style={{ textAlign: "center", padding: 16 }}>
+                  <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.5rem, 4vw, 3.5rem)", fontWeight: 300, lineHeight: 1, color: "#fff", textShadow: "0 2px 20px rgba(0,0,0,0.7)" }}>{s.v}</div>
+                  <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--gold)", marginTop: 8, textShadow: "0 1px 8px rgba(0,0,0,0.6)" }}>{s.l}</div>
+                  <div style={{ fontSize: "0.72rem", color: "rgba(255,255,255,0.85)", marginTop: 4, fontWeight: 500, textShadow: "0 1px 6px rgba(0,0,0,0.5)" }}>{s.s}</div>
                 </div>)}
               </div>
             </div>
           </div>
 
-          {/* OVERLAY: Services title */}
-          <div id="svc-title" style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", zIndex: 12, textAlign: "center", opacity: 0 }}>
-            <span style={{ fontSize: "0.65rem", letterSpacing: "0.3em", color: "#fff", textTransform: "uppercase", textShadow: "0 2px 10px rgba(0,0,0,0.6)", fontWeight: 600 }}>02 · What We Build</span>
-            <h2 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.2rem, 4.5vw, 3.5rem)", marginTop: 16, color: "#fff", textShadow: "0 2px 30px rgba(0,0,0,0.6)" }}>Revenue <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Architecture</em></h2>
+          {/* OVERLAY: Revenue Architecture title — stays at top center throughout services */}
+          <div id="svc-title" style={{ position: "absolute", top: "clamp(80px, 12vh, 140px)", left: "50%", transform: "translateX(-50%)", zIndex: 12, textAlign: "center", opacity: 0 }}>
+            <h2 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.5rem, 5vw, 4rem)", color: "#fff", textShadow: "0 3px 30px rgba(0,0,0,0.7)", fontWeight: 300 }}>Revenue <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Architecture</em></h2>
           </div>
 
           {/* OVERLAY: Service tile pairs — slide R→L */}
@@ -347,10 +344,12 @@ export default function Home() {
             </div>
           ))}
 
-          {/* Scroll hint */}
-          <div style={{ position: "absolute", bottom: 36, left: "50%", transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, opacity: 0.85, animation: "bob 2.5s ease-in-out infinite", zIndex: 20 }}>
-            <span style={{ fontSize: "0.85rem", letterSpacing: "0.3em", color: "#fff", textTransform: "uppercase", fontWeight: 500, textShadow: "0 2px 10px rgba(0,0,0,0.6)" }}>SCROLL</span>
-            <div style={{ width: 2, height: 36, background: "linear-gradient(to bottom, #fff, transparent)", borderRadius: 1 }} />
+          {/* Scroll hint — large, visible from start */}
+          <div style={{ position: "absolute", bottom: 40, left: "50%", transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", gap: 12, opacity: 0.9, animation: "bob 2.5s ease-in-out infinite", zIndex: 20 }}>
+            <span style={{ fontSize: "1.1rem", letterSpacing: "0.35em", color: "#fff", textTransform: "uppercase", fontWeight: 600, textShadow: "0 2px 12px rgba(0,0,0,0.7)" }}>SCROLL</span>
+            <svg width="24" height="32" viewBox="0 0 24 32" fill="none" style={{ filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.5))" }}>
+              <path d="M12 0L12 28M12 28L2 18M12 28L22 18" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </div>
         </div>
       </section>
@@ -381,8 +380,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══ FOUNDER — Video background, no photo, text overlaid ═══ */}
-      <section id="about" style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+      {/* ═══ FOUNDER — Video background, text right-aligned ═══ */}
+      <section id="about" style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "flex-end", overflow: "hidden" }}>
         {/* Video background — BRIGHT, no dulling */}
         <video autoPlay loop muted playsInline style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 0 }}>
           <source src="/founder-bg.mp4" type="video/mp4" />
@@ -390,7 +389,7 @@ export default function Home() {
         {/* Minimal overlay just for text readability */}
         <div style={{ position: "absolute", inset: 0, zIndex: 1, background: "rgba(7,7,10,0.35)" }} />
 
-        <div style={{ position: "relative", zIndex: 10, maxWidth: 700, padding: "clamp(60px, 10vh, 120px) clamp(20px, 6vw, 60px)", textAlign: "left" }}>
+        <div style={{ position: "relative", zIndex: 10, maxWidth: 620, padding: "clamp(60px, 10vh, 120px) clamp(40px, 6vw, 100px)", textAlign: "right" }}>
           <div className="fade-in" style={{ marginBottom: 40 }}>
             <span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--gold)", textTransform: "uppercase", textShadow: "0 1px 8px rgba(0,0,0,0.5)" }}>04 · Founder & CEO</span>
             <div style={{ fontFamily: "var(--serif)", fontSize: "1.3rem", color: "var(--text)", marginTop: 12, textShadow: "0 1px 10px rgba(0,0,0,0.5)" }}>Chris Marchese</div>
@@ -405,7 +404,7 @@ export default function Home() {
             <p key={i} className="fade-in" style={{ fontFamily: "var(--serif)", fontSize: "clamp(1.05rem, 1.4vw, 1.25rem)", color: i >= 4 ? "var(--gold)" : "var(--text)", fontStyle: i >= 4 ? "italic" : "normal", lineHeight: 1.6, marginBottom: 10, textShadow: "0 1px 10px rgba(0,0,0,0.5)" }}>{l}</p>
           ))}
 
-          <div className="fade-in-stagger" style={{ display: "flex", gap: 14, flexWrap: "wrap", marginTop: 32 }}>
+          <div className="fade-in-stagger" style={{ display: "flex", gap: 14, flexWrap: "wrap", marginTop: 32, justifyContent: "flex-end" }}>
             {["SET Enterprises", "SET Ventures", "SET Sales Academy"].map(e => (
               <div key={e} style={{ padding: "10px 18px", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 6, background: "rgba(14,14,20,0.5)", backdropFilter: "blur(8px)", fontSize: "0.76rem", fontWeight: 500, color: "var(--text)", textShadow: "0 1px 6px rgba(0,0,0,0.4)" }}>{e}</div>
             ))}
