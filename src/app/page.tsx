@@ -108,67 +108,19 @@ export default function Home() {
               svcTarget = ((p - 0.60) / 0.40) * svcDur;
             }
 
-            // ── Layer visibility — FADE THROUGH BLACK (no car overlap) ──
-            const blackOverlay = document.getElementById("black-transition");
-
-            if (p < 0.30) {
-              // Drift fully visible
+            // ── Layer visibility — INSTANT CLEAN CUT (no fade, no overlap) ──
+            if (p < 0.34) {
               driftLayer.style.opacity = "1";
               sec2Layer.style.opacity = "0";
               svcLayer.style.opacity = "0";
-              if (blackOverlay) blackOverlay.style.opacity = "0";
-            } else if (p < 0.34) {
-              // Drift fades to black
-              const f = (p - 0.30) / 0.04;
-              driftLayer.style.opacity = "1";
-              sec2Layer.style.opacity = "0";
-              svcLayer.style.opacity = "0";
-              if (blackOverlay) blackOverlay.style.opacity = String(f);
-            } else if (p < 0.36) {
-              // Full black — swap layers underneath
-              driftLayer.style.opacity = "0";
-              sec2Layer.style.opacity = "1";
-              svcLayer.style.opacity = "0";
-              if (blackOverlay) blackOverlay.style.opacity = "1";
-            } else if (p < 0.40) {
-              // Sec2 emerges from black
-              const f = (p - 0.36) / 0.04;
-              driftLayer.style.opacity = "0";
-              sec2Layer.style.opacity = "1";
-              svcLayer.style.opacity = "0";
-              if (blackOverlay) blackOverlay.style.opacity = String(1 - f);
-            } else if (p < 0.53) {
-              // Sec2 fully visible
-              driftLayer.style.opacity = "0";
-              sec2Layer.style.opacity = "1";
-              svcLayer.style.opacity = "0";
-              if (blackOverlay) blackOverlay.style.opacity = "0";
             } else if (p < 0.56) {
-              // Sec2 fades to black
-              const f = (p - 0.53) / 0.03;
               driftLayer.style.opacity = "0";
               sec2Layer.style.opacity = "1";
               svcLayer.style.opacity = "0";
-              if (blackOverlay) blackOverlay.style.opacity = String(f);
-            } else if (p < 0.58) {
-              // Full black — swap to services
-              driftLayer.style.opacity = "0";
-              sec2Layer.style.opacity = "0";
-              svcLayer.style.opacity = "1";
-              if (blackOverlay) blackOverlay.style.opacity = "1";
-            } else if (p < 0.62) {
-              // Services emerges from black
-              const f = (p - 0.58) / 0.04;
-              driftLayer.style.opacity = "0";
-              sec2Layer.style.opacity = "0";
-              svcLayer.style.opacity = "1";
-              if (blackOverlay) blackOverlay.style.opacity = String(1 - f);
             } else {
-              // Services fully visible
               driftLayer.style.opacity = "0";
               sec2Layer.style.opacity = "0";
               svcLayer.style.opacity = "1";
-              if (blackOverlay) blackOverlay.style.opacity = "0";
             }
 
             // ── Trust Wall: fade in 44–52%, fade out 53–58% ──
@@ -338,9 +290,6 @@ export default function Home() {
           ═══════════════════════════════════════════════════════════════ */}
       <section ref={heroRef} style={{ position: "relative", height: "1500vh" }}>
         <div style={{ position: "sticky", top: 0, width: "100%", height: "100vh", overflow: "hidden", background: "#000" }}>
-
-          {/* BLACK TRANSITION OVERLAY — sits above all video layers, fades to black between scenes */}
-          <div id="black-transition" style={{ position: "absolute", inset: 0, zIndex: 5, background: "#000", opacity: 0, pointerEvents: "none" }} />
 
           {/* LAYER 1: Drift video */}
           <div id="drift-layer" style={{ position: "absolute", inset: 0, zIndex: 3, opacity: 1 }}>
