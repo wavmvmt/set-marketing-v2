@@ -298,8 +298,8 @@ export default function Home() {
 
           {/* LAYER 2: Section 2 video + Trust Wall */}
           <div id="sec2-layer" style={{ position: "absolute", inset: 0, zIndex: 2, opacity: 0 }}>
-            <video ref={sec2VideoRef} autoPlay loop muted playsInline preload="auto" style={{ ...vidStyle, filter: "brightness(0.9) saturate(1.2)" }}><source src="/section2-bg.mp4" type="video/mp4" /></video>
-            <div style={{ position: "absolute", inset: 0, background: "rgba(7,7,10,0.2)", zIndex: 1 }} />
+            <video ref={sec2VideoRef} autoPlay loop muted playsInline preload="auto" style={{ ...vidStyle, filter: "brightness(1.1) saturate(1.2)" }}><source src="/section2-bg.mp4" type="video/mp4" /></video>
+            <div style={{ position: "absolute", inset: 0, background: "rgba(7,7,10,0.1)", zIndex: 1 }} />
           </div>
 
           {/* LAYER 3: Services FPV drone video */}
