@@ -349,9 +349,9 @@ export default function Home() {
           ))}
 
           {/* Scroll hint */}
-          <div style={{ position: "absolute", bottom: 28, left: "50%", transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", gap: 5, opacity: 0.3, animation: "bob 2.5s ease-in-out infinite", zIndex: 20 }}>
-            <span style={{ fontSize: "0.45rem", letterSpacing: "0.2em", color: "#fff", textTransform: "uppercase", textShadow: "0 1px 6px rgba(0,0,0,0.8)" }}>Scroll</span>
-            <div style={{ width: 1, height: 20, background: "linear-gradient(to bottom, rgba(255,255,255,0.4), transparent)" }} />
+          <div style={{ position: "absolute", bottom: 36, left: "50%", transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, opacity: 0.85, animation: "bob 2.5s ease-in-out infinite", zIndex: 20 }}>
+            <span style={{ fontSize: "0.85rem", letterSpacing: "0.3em", color: "#fff", textTransform: "uppercase", fontWeight: 500, textShadow: "0 2px 10px rgba(0,0,0,0.6)" }}>SCROLL</span>
+            <div style={{ width: 2, height: 36, background: "linear-gradient(to bottom, #fff, transparent)", borderRadius: 1 }} />
           </div>
         </div>
       </section>
