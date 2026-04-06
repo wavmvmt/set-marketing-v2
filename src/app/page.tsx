@@ -195,7 +195,7 @@ export default function Home() {
         methodTick();
 
         const methodSteps = document.querySelectorAll(".method-step");
-        const methodBar = document.getElementById("method-progress");
+        // Progress tracking removed for clean cinematic look
 
         ScrollTrigger.create({
           trigger: methodSection,
@@ -209,7 +209,7 @@ export default function Home() {
             methodTarget = p * methodDur;
 
             // Progress bar
-            if (methodBar) methodBar.style.transform = `scaleX(${p})`;
+            // clean — no progress bar UI
 
             // 4 steps: each gets 25% of scroll, with fade in/hold/fade out
             methodSteps.forEach((step, i) => {
@@ -450,77 +450,32 @@ export default function Home() {
       <section ref={methodRef} id="process" style={{ position: "relative", height: "500vh" }}>
         <div style={{ position: "sticky", top: 0, width: "100%", height: "100vh", overflow: "hidden", background: "#000" }}>
 
-          {/* Progress bar */}
-          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, zIndex: 30 }}>
-            <div id="method-progress" style={{ width: "100%", height: "100%", background: "var(--gold)", transformOrigin: "left", transform: "scaleX(0)" }} />
-          </div>
-
-          {/* Scroll-scrub video background */}
+          {/* Scroll-scrub video background — full screen, no overlays */}
           <video ref={methodVideoRef} muted playsInline preload="auto" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}>
             <source src="/method-bg.mp4" type="video/mp4" />
           </video>
 
-          {/* Section title — stays visible throughout */}
-          <div style={{ position: "absolute", top: "clamp(32px, 5vh, 60px)", left: "50%", transform: "translateX(-50%)", zIndex: 20, textAlign: "center" }}>
-            <span style={{ fontSize: "0.65rem", letterSpacing: "0.3em", color: "#fff", textTransform: "uppercase", fontWeight: 600, textShadow: "0 2px 12px rgba(0,0,0,0.9)" }}>The Method</span>
-            <h2 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2rem, 4vw, 3rem)", marginTop: 8, color: "#fff", textShadow: "0 3px 30px rgba(0,0,0,0.9), 0 2px 8px rgba(0,0,0,0.8)" }}>The SET <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Method</em></h2>
-          </div>
-
-          {/* Step progress dots */}
-          <div style={{ position: "absolute", right: "clamp(20px, 3vw, 48px)", top: "50%", transform: "translateY(-50%)", zIndex: 25, display: "flex", flexDirection: "column", gap: 16 }}>
-            {STEPS.map((step, i) => (
-              <div key={step.n} style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: "flex-end" }}>
-                <span style={{ fontSize: "0.6rem", letterSpacing: "0.15em", color: "rgba(255,255,255,0.4)", textTransform: "uppercase", fontWeight: 600, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>{step.n}</span>
-                <div style={{ width: 10, height: 10, borderRadius: "50%", border: "2px solid rgba(255,255,255,0.3)", background: "transparent" }} />
-              </div>
-            ))}
-          </div>
-
-          {/* 4 step overlays — alternate left/right positioning */}
+          {/* 4 step overlays — floating text, no background, looks part of the video */}
           {STEPS.map((step, i) => (
             <div key={step.n} className="method-step" style={{
               position: "absolute",
               top: "50%",
-              left: i % 2 === 0 ? "clamp(24px, 6vw, 80px)" : "auto",
-              right: i % 2 === 1 ? "clamp(24px, 6vw, 80px)" : "auto",
+              left: i % 2 === 0 ? "clamp(32px, 8vw, 120px)" : "auto",
+              right: i % 2 === 1 ? "clamp(32px, 8vw, 120px)" : "auto",
               transform: "translateY(-50%)",
               zIndex: 15,
-              maxWidth: 480,
+              maxWidth: 520,
               opacity: 0,
+              textAlign: i % 2 === 1 ? "right" : "left",
             }}>
-              <div style={{
-                background: "rgba(7, 7, 10, 0.7)",
-                backdropFilter: "blur(20px)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                borderRadius: 16,
-                padding: "clamp(28px, 4vw, 44px)",
-                borderTop: `3px solid ${step.ac}`,
-              }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 16 }}>
-                  <div style={{
-                    width: 56, height: 56, borderRadius: "50%",
-                    background: i === 3 ? "var(--gold)" : `${step.ac}25`,
-                    border: `2px solid ${step.ac}`,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: "1.1rem", fontWeight: 700,
-                    color: i === 3 ? "#000" : step.ac,
-                    flexShrink: 0,
-                  }}>{step.n}</div>
-                  <div>
-                    <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", color: step.ac, textTransform: "uppercase", fontWeight: 600, marginBottom: 4 }}>{step.s}</div>
-                    <h3 style={{ fontFamily: "var(--serif)", fontSize: "clamp(1.5rem, 3vw, 2.2rem)", color: "#fff", lineHeight: 1.2 }}>{step.t}</h3>
-                  </div>
-                </div>
-                <p style={{ fontSize: "0.95rem", color: "rgba(255,255,255,0.8)", lineHeight: 1.7 }}>{step.d}</p>
-              </div>
+              <div style={{ fontSize: "clamp(3rem, 8vw, 6rem)", fontFamily: "var(--serif)", fontWeight: 300, color: "rgba(255,255,255,0.12)", lineHeight: 0.9, marginBottom: 8, textShadow: "0 4px 40px rgba(0,0,0,0.5)" }}>{step.n}</div>
+              <div style={{ fontSize: "0.7rem", letterSpacing: "0.3em", color: "var(--gold)", textTransform: "uppercase", fontWeight: 600, marginBottom: 12, textShadow: "0 2px 20px rgba(0,0,0,0.9), 0 1px 4px rgba(0,0,0,0.9)" }}>{step.s}</div>
+              <h3 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2rem, 4.5vw, 3.5rem)", color: "#fff", lineHeight: 1.1, marginBottom: 14, fontWeight: 400, textShadow: "0 3px 30px rgba(0,0,0,0.9), 0 2px 8px rgba(0,0,0,0.9)" }}>{step.t}</h3>
+              <p style={{ fontSize: "clamp(0.9rem, 1.2vw, 1.05rem)", color: "rgba(255,255,255,0.85)", lineHeight: 1.7, maxWidth: 420, textShadow: "0 2px 16px rgba(0,0,0,0.9), 0 1px 4px rgba(0,0,0,0.9)" }}>{step.d}</p>
             </div>
           ))}
 
-          {/* Scroll hint at bottom */}
-          <div style={{ position: "absolute", bottom: 24, left: "50%", transform: "translateX(-50%)", zIndex: 20, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, opacity: 0.6 }}>
-            <span style={{ fontSize: "0.6rem", letterSpacing: "0.25em", color: "#fff", textTransform: "uppercase", textShadow: "0 1px 6px rgba(0,0,0,0.8)" }}>Scroll</span>
-            <svg width="16" height="20" viewBox="0 0 16 20" fill="none"><path d="M8 0L8 18M8 18L1 11M8 18L15 11" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" /></svg>
-          </div>
+          {/* Clean — no UI chrome, just video + text */}
         </div>
       </section>
 
