@@ -3,36 +3,16 @@
 import { useEffect, useRef, useState } from "react";
 
 export default function Home() {
-  const [splashPhase, setSplashPhase] = useState(0);
-  const [siteReady, setSiteReady] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
   const driftVideoRef = useRef<HTMLVideoElement>(null);
   const sec2VideoRef = useRef<HTMLVideoElement>(null);
   const svcVideoRef = useRef<HTMLVideoElement>(null);
+  const splashVideoRef = useRef<HTMLVideoElement>(null);
   const methodRef = useRef<HTMLDivElement>(null);
-
-  // ── SPLASH ──
-  useEffect(() => {
-    const t1 = setTimeout(() => setSplashPhase(1), 1200);
-    const t2 = setTimeout(() => setSplashPhase(2), 2500);
-    const t3 = setTimeout(() => setSplashPhase(3), 4500);
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
-  }, []);
-
-  const enterSite = () => {
-    setSplashPhase(4);
-    document.body.style.overflow = "auto";
-    setTimeout(() => { setSplashPhase(5); setSiteReady(true); }, 800);
-  };
-
-  useEffect(() => {
-    if (splashPhase < 4) document.body.style.overflow = "hidden";
-  }, [splashPhase]);
 
   // ── GSAP ──
   useEffect(() => {
-    if (!siteReady) return;
     const init = async () => {
       const { gsap } = await import("gsap");
       const { ScrollTrigger } = await import("gsap/ScrollTrigger");
@@ -44,29 +24,32 @@ export default function Home() {
       gsap.ticker.add((t: number) => lenis.raf(t * 1000));
       gsap.ticker.lagSmoothing(0);
 
-      // ═══ UNIFIED HERO: THREE video layers, ONE container ═══
+      // ═══ UNIFIED HERO: FOUR video layers, ONE container ═══
       const hero = heroRef.current;
       const driftVideo = driftVideoRef.current;
       const sec2Video = sec2VideoRef.current;
       const svcVideo = svcVideoRef.current;
+      const splashVideo = splashVideoRef.current;
+      const splashLayer = document.getElementById("splash-layer");
       const driftLayer = document.getElementById("drift-layer");
       const sec2Layer = document.getElementById("sec2-layer");
       const svcLayer = document.getElementById("svc-layer");
       const trustOverlay = document.getElementById("trust-overlay");
       const svcTitle = document.getElementById("svc-title");
 
-      if (hero && driftVideo && sec2Video && svcVideo && driftLayer && sec2Layer && svcLayer && trustOverlay) {
+      if (hero && driftVideo && sec2Video && svcVideo && driftLayer && sec2Layer && svcLayer && trustOverlay && splashLayer) {
         // Wait for videos
         await Promise.all([
           new Promise<void>(r => { if (driftVideo.readyState >= 1) r(); else driftVideo.addEventListener("loadedmetadata", () => r(), { once: true }); }),
           new Promise<void>(r => { if (svcVideo.readyState >= 1) r(); else svcVideo.addEventListener("loadedmetadata", () => r(), { once: true }); }),
         ]);
 
+        // Start splash + sec2 videos looping
+        if (splashVideo) splashVideo.play().catch(() => {});
+        sec2Video.play().catch(() => {});
+
         const driftDur = driftVideo.duration;
         const svcDur = svcVideo.duration;
-
-        // Start sec2 video looping
-        sec2Video.play().catch(() => {});
 
         // Lerp tickers for scroll-driven videos
         let driftTarget = 0, driftRender = 0;
@@ -84,11 +67,12 @@ export default function Home() {
         // ═══ MASTER SCROLL CONTROLLER ═══
         // 1500vh total. One ScrollTrigger. Controls everything.
         //
-        // 0–35%:    Drift video scrubs
-        // 30–42%:   Crossfade drift → sec2
-        // 42–56%:   Sec2 visible + Trust Wall fades in
-        // 53–60%:   Trust Wall fades out + crossfade sec2 → services
-        // 60–100%:  Services video scrubs + tile pairs slide R→L
+        // 0–8%:     Splash video visible (autoplay loop), fading out
+        // 0–50%:    Drift video scrubs (takes over from splash)
+        // 48–55%:   Crossfade drift → sec2
+        // 55–70%:   Sec2 visible + Trust Wall fades in
+        // 68–72%:   Crossfade sec2 → services
+        // 72–100%:  Services video scrubs + tile pairs slide R→L
 
         const svcPairs = document.querySelectorAll(".svc-pair");
 
@@ -100,20 +84,29 @@ export default function Home() {
           onUpdate: (self) => {
             const p = self.progress;
 
-            // ── Drift video scrub: 0–35% ──
-            driftTarget = Math.min(1, p / 0.35) * driftDur;
-
-            // ── Services video scrub: 60–100% ──
-            if (p > 0.60) {
-              svcTarget = ((p - 0.60) / 0.40) * svcDur;
+            // ── Splash layer: visible on load, fades out 0–8% ──
+            if (p < 0.01) {
+              splashLayer.style.opacity = "1";
+            } else if (p < 0.08) {
+              splashLayer.style.opacity = String(1 - (p - 0.01) / 0.07);
+            } else {
+              splashLayer.style.opacity = "0";
             }
 
-            // ── Layer visibility — INSTANT CLEAN CUT (no fade, no overlap) ──
-            if (p < 0.34) {
+            // ── Drift video scrub: 0–50% ──
+            driftTarget = Math.min(1, p / 0.50) * driftDur;
+
+            // ── Services video scrub: 72–100% ──
+            if (p > 0.72) {
+              svcTarget = ((p - 0.72) / 0.28) * svcDur;
+            }
+
+            // ── Layer visibility — INSTANT CLEAN CUT ──
+            if (p < 0.50) {
               driftLayer.style.opacity = "1";
               sec2Layer.style.opacity = "0";
               svcLayer.style.opacity = "0";
-            } else if (p < 0.56) {
+            } else if (p < 0.70) {
               driftLayer.style.opacity = "0";
               sec2Layer.style.opacity = "1";
               svcLayer.style.opacity = "0";
@@ -123,19 +116,19 @@ export default function Home() {
               svcLayer.style.opacity = "1";
             }
 
-            // ── Trust Wall: fades in at 10% scroll, fades out before services ──
-            if (p < 0.10) {
+            // ── Trust Wall: fades in at 20%, fades out at 68% ──
+            if (p < 0.20) {
               trustOverlay.style.opacity = "0";
               trustOverlay.style.transform = "translateY(20px)";
-            } else if (p < 0.14) {
-              const t = (p - 0.10) / 0.04;
+            } else if (p < 0.24) {
+              const t = (p - 0.20) / 0.04;
               trustOverlay.style.opacity = String(t);
               trustOverlay.style.transform = `translateY(${20 * (1 - t)}px)`;
-            } else if (p < 0.52) {
+            } else if (p < 0.65) {
               trustOverlay.style.opacity = "1";
               trustOverlay.style.transform = "translateY(0)";
-            } else if (p < 0.55) {
-              const t = (p - 0.52) / 0.03;
+            } else if (p < 0.68) {
+              const t = (p - 0.65) / 0.03;
               trustOverlay.style.opacity = String(1 - t);
             } else {
               trustOverlay.style.opacity = "0";
@@ -143,18 +136,18 @@ export default function Home() {
 
             // ── Revenue Architecture title: stays visible throughout services section ──
             if (svcTitle) {
-              if (p < 0.58) svcTitle.style.opacity = "0";
-              else if (p < 0.62) svcTitle.style.opacity = String((p - 0.58) / 0.04);
+              if (p < 0.70) svcTitle.style.opacity = "0";
+              else if (p < 0.74) svcTitle.style.opacity = String((p - 0.70) / 0.04);
               else if (p < 0.96) svcTitle.style.opacity = "1";
               else svcTitle.style.opacity = String(Math.max(0, 1 - (p - 0.96) / 0.04));
             }
 
-            // ── Service tile pairs: slide R→L, 3 pairs across 62–100% ──
-            const svcStart = 0.65;
+            // ── Service tile pairs: slide R→L, 3 pairs across 75–98% ──
+            const svcStart = 0.75;
             const svcEnd = 0.98;
             const svcRange = svcEnd - svcStart;
             const pairDuration = svcRange / 3;
-            const slideDistance = 250; // px — full sweep across screen
+            const slideDistance = 250;
 
             svcPairs.forEach((pair, i) => {
               const ps = svcStart + i * pairDuration;
@@ -209,7 +202,7 @@ export default function Home() {
       });
     };
     init();
-  }, [siteReady]);
+  }, []);
 
   // ── DATA ──
   const BRANDS = ["BMW", "Huawei", "W Hotels", "Rick Ross", "Miami Dolphins", "Tissot", "HomeLife", "Marriott", "Lamborghini"];
@@ -248,27 +241,8 @@ export default function Home() {
 
   return (
     <>
-      {/* ═══ SPLASH ═══ */}
-      {splashPhase < 5 && (
-        <div onClick={splashPhase === 3 ? enterSite : undefined} style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: splashPhase === 3 ? "pointer" : "default", opacity: splashPhase === 4 ? 0 : 1, transition: "opacity 0.8s ease" }}>
-          <video autoPlay loop muted playsInline style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 0, filter: "brightness(0.4) saturate(1.2)" }}><source src="/splash-bg-hd.mp4" type="video/mp4" /></video>
-          <div style={{ position: "absolute", inset: 0, zIndex: 1, background: "radial-gradient(ellipse at center, rgba(7,7,10,0.3) 0%, rgba(7,7,10,0.7) 100%)" }} />
-          <div style={{ position: "relative", zIndex: 10, textAlign: "center", padding: "0 24px", maxWidth: 800 }}>
-            <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(3.5rem, 10vw, 7rem)", fontWeight: 300, letterSpacing: "0.4em", color: "var(--gold)", marginBottom: 32, textShadow: "0 0 60px rgba(200,160,80,0.3)" }}>S E T</div>
-            <div style={{ opacity: splashPhase >= 1 ? 1 : 0, transform: splashPhase >= 1 ? "translateY(0)" : "translateY(20px)", transition: "all 1s ease" }}>
-              <div style={{ fontFamily: "var(--sans)", fontSize: "0.65rem", letterSpacing: "0.35em", color: "var(--gold)", textTransform: "uppercase", marginBottom: 20, fontWeight: 500 }}>Revenue Architecture · Toronto & Miami · Est. 2019</div>
-              <h1 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2rem, 5vw, 3.8rem)", fontWeight: 300, lineHeight: 1.1, color: "var(--text)", textShadow: "0 2px 40px rgba(0,0,0,0.6)" }}>We Don&rsquo;t Run <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Campaigns.</em><br />We Install Systems.</h1>
-            </div>
-            <div style={{ marginTop: 48, opacity: splashPhase === 2 ? 1 : 0, display: splashPhase === 2 ? "block" : "none" }}><span style={{ fontFamily: "var(--sans)", fontSize: "0.75rem", letterSpacing: "0.2em", color: "var(--text3)", textTransform: "uppercase" }}>Loading<span><span style={{ animation: "dotPulse 1.4s infinite" }}>.</span><span style={{ animation: "dotPulse 1.4s infinite 0.2s" }}>.</span><span style={{ animation: "dotPulse 1.4s infinite 0.4s" }}>.</span></span></span></div>
-            <div style={{ marginTop: 48, opacity: splashPhase >= 3 && splashPhase < 4 ? 1 : 0, display: splashPhase >= 3 && splashPhase < 5 ? "block" : "none" }}>
-              <div onClick={enterSite} style={{ fontFamily: "var(--sans)", fontSize: "0.85rem", letterSpacing: "0.25em", color: "var(--gold)", textTransform: "uppercase", cursor: "pointer", animation: "flashPulse 1.5s ease-in-out infinite", padding: "16px 32px", border: "1px solid rgba(200,160,80,0.25)", borderRadius: 6, display: "inline-block" }} onMouseEnter={e => { e.currentTarget.style.background = "rgba(200,160,80,0.1)"; }} onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}>Click Here to Enter</div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* ═══ NAV ═══ */}
-      <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, padding: "0 clamp(20px, 4vw, 60px)", height: 68, display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(7,7,10,0.7)", backdropFilter: "blur(16px)", borderBottom: "1px solid var(--border)", opacity: siteReady ? 1 : 0, transition: "opacity 0.5s" }}>
+      <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, padding: "0 clamp(20px, 4vw, 60px)", height: 68, display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(7,7,10,0.7)", backdropFilter: "blur(16px)", borderBottom: "1px solid var(--border)" }}>
         <div style={{ fontFamily: "var(--serif)", fontSize: "1.3rem", fontWeight: 300, letterSpacing: "0.2em", color: "var(--gold)", cursor: "pointer" }} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>SET</div>
         <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
           {["Services", "Results", "About", "Process"].map(l => <a key={l} href={`#${l.toLowerCase()}`} style={{ color: "var(--text2)", fontSize: "0.78rem", textDecoration: "none" }}>{l}</a>)}
@@ -277,17 +251,30 @@ export default function Home() {
       </nav>
 
       {/* ═══════════════════════════════════════════════════════════════
-          UNIFIED HERO: THREE video layers, ONE pinned container
+          UNIFIED HERO: FOUR video layers, ONE pinned container
           1500vh scroll. Never leaves the viewport.
-          
-          0–35%:    Drift video scrubs (Higgsfield title + car smash)
-          30–42%:   Crossfade drift → sec2
-          42–56%:   Sec2 + Trust Wall
-          53–62%:   Crossfade sec2 → services
-          62–100%:  Services FPV drone + tile pairs sliding R→L
+
+          Splash layer: autoplay on load, fades out 0–8%
+          0–50%:    Drift video scrubs
+          48–55%:   Crossfade drift → sec2
+          55–70%:   Sec2 + Trust Wall
+          68–72%:   Crossfade sec2 → services
+          72–100%:  Services FPV drone + tile pairs sliding R→L
           ═══════════════════════════════════════════════════════════════ */}
       <section ref={heroRef} style={{ position: "relative", height: "1500vh" }}>
         <div style={{ position: "sticky", top: 0, width: "100%", height: "100vh", overflow: "hidden", background: "#000" }}>
+
+          {/* LAYER 0: Splash video — autoplay on load, fades out when scrolling begins */}
+          <div id="splash-layer" style={{ position: "absolute", inset: 0, zIndex: 4, opacity: 1 }}>
+            <video ref={splashVideoRef} autoPlay loop muted playsInline preload="auto" style={{ ...vidStyle, filter: "brightness(0.6) saturate(1.2)" }}><source src="/splash-bg-hd.mp4" type="video/mp4" /></video>
+            <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at center, rgba(7,7,10,0.2) 0%, rgba(7,7,10,0.5) 100%)", zIndex: 1 }} />
+            {/* Hero text overlay on splash */}
+            <div style={{ position: "absolute", inset: 0, zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", textAlign: "center" }}>
+              <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(3.5rem, 10vw, 7rem)", fontWeight: 300, letterSpacing: "0.4em", color: "var(--gold)", marginBottom: 32, textShadow: "0 0 60px rgba(200,160,80,0.3)" }}>S E T</div>
+              <div style={{ fontFamily: "var(--sans)", fontSize: "0.65rem", letterSpacing: "0.35em", color: "var(--gold)", textTransform: "uppercase", marginBottom: 20, fontWeight: 500 }}>Revenue Architecture · Toronto & Miami · Est. 2019</div>
+              <h1 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2rem, 5vw, 3.8rem)", fontWeight: 300, lineHeight: 1.1, color: "var(--text)", textShadow: "0 2px 40px rgba(0,0,0,0.6)", maxWidth: 800 }}>We Don&rsquo;t Run <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Campaigns.</em><br />We Install Systems.</h1>
+            </div>
+          </div>
 
           {/* LAYER 1: Drift video */}
           <div id="drift-layer" style={{ position: "absolute", inset: 0, zIndex: 3, opacity: 1 }}>
@@ -470,10 +457,7 @@ export default function Home() {
         <div style={{ borderTop: "1px solid var(--border)", marginTop: 28, paddingTop: 16, display: "flex", justifyContent: "space-between", flexWrap: "wrap" }}><span style={{ fontSize: "0.58rem", color: "var(--text3)" }}>© 2026 SET Marketing · SET Enterprises</span><span style={{ fontSize: "0.58rem", color: "var(--text3)", fontStyle: "italic" }}>Setting The Pace · Toronto · Miami</span></div>
       </footer>
 
-      <style jsx global>{`
-        @keyframes dotPulse { 0%, 20% { opacity: 0; } 40% { opacity: 1; } 60%, 100% { opacity: 0; } }
-        @keyframes flashPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-      `}</style>
+      <style jsx global>{``}</style>
     </>
   );
 }
