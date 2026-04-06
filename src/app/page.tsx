@@ -264,12 +264,24 @@ export default function Home() {
     { v: "12+", l: "Industries Served", s: "Real estate · tech · health" },
   ];
   const SERVICES = [
-    { id: 1, t: "Growth Strategy & Positioning", i: "↗", c: "#22c55e", b: "Define market position, sharpen messaging, build GTM framework.", tags: ["Positioning", "Messaging", "GTM"], d: "We define your market position, sharpen your messaging, and build the go-to-market framework that converts with clarity before a single dollar goes to acquisition." },
-    { id: 2, t: "Paid Acquisition Infrastructure", i: "◎", c: "#f59e0b", b: "High-converting campaigns across Meta, Google, YouTube.", tags: ["Meta", "Google", "YouTube", "CRM"], d: "High-converting campaigns architected from creative to CRM integration. Acquisition systems that generate consistent cash flow." },
-    { id: 3, t: "Conversion & Funnel Optimization", i: "⊘", c: "#ef4444", b: "Find where leads leak. Rebuild click-to-close path.", tags: ["Funnel Audits", "CRO", "Analytics"], d: "We audit your full funnel, identify exactly where leads are leaking, and rebuild the path from click to closed deal." },
-    { id: 4, t: "Fractional CMO & Execution", i: "◈", c: "#8b5cf6", b: "Executive marketing leadership without full-time overhead.", tags: ["Leadership", "Team Mgmt", "KPIs"], d: "We embed into your organization, align marketing with sales, and drive sustained revenue growth." },
-    { id: 5, t: "SET OS: Growth Intelligence", i: "⬡", c: "#3b82f6", b: "Proprietary platform for deal orchestration and automation.", tags: ["Deal Engine", "Intel", "Automation"], d: "SET OS unifies deal orchestration, lead intelligence, CRM automation, and Mission Control reporting into one system." },
-    { id: 6, t: "Brand & Creative Production", i: "✦", c: "#ec4899", b: "Brand identity, storytelling, premium visual systems.", tags: ["Brand", "Video", "Creative"], d: "Full creative division: from BMW and Huawei commercial production to content that drives recognition and revenue." },
+    { id: 1, t: "Growth Strategy & Positioning", i: "↗", c: "#22c55e", b: "Define market position, sharpen messaging, build GTM framework.", tags: ["Positioning", "Messaging", "GTM"], d: "We define your market position, sharpen your messaging, and build the go-to-market framework that converts with clarity before a single dollar goes to acquisition.",
+      deliverables: ["Competitive landscape analysis", "ICP & persona mapping", "Messaging framework & brand positioning", "Go-to-market playbook", "Channel strategy recommendation"],
+      outcome: "A clear, differentiated position in your market with a repeatable playbook to acquire customers profitably." },
+    { id: 2, t: "Paid Acquisition Infrastructure", i: "◎", c: "#f59e0b", b: "High-converting campaigns across Meta, Google, YouTube.", tags: ["Meta", "Google", "YouTube", "CRM"], d: "High-converting campaigns architected from creative to CRM integration. Acquisition systems that generate consistent cash flow.",
+      deliverables: ["Full-funnel ad architecture (Meta, Google, YouTube)", "Creative strategy & production pipeline", "Landing page & conversion optimization", "CRM integration & lead routing", "Weekly performance reporting & optimization"],
+      outcome: "A paid acquisition machine that generates qualified leads on autopilot with full visibility into every dollar spent." },
+    { id: 3, t: "Conversion & Funnel Optimization", i: "⊘", c: "#ef4444", b: "Find where leads leak. Rebuild click-to-close path.", tags: ["Funnel Audits", "CRO", "Analytics"], d: "We audit your full funnel, identify exactly where leads are leaking, and rebuild the path from click to closed deal.",
+      deliverables: ["Full-funnel diagnostic audit", "Heatmap & session recording analysis", "Landing page A/B testing program", "Lead scoring & qualification framework", "Sales handoff optimization"],
+      outcome: "More revenue from the same traffic. Every stage of your funnel tightened, tested, and converting at peak efficiency." },
+    { id: 4, t: "Fractional CMO & Execution", i: "◈", c: "#8b5cf6", b: "Executive marketing leadership without full-time overhead.", tags: ["Leadership", "Team Mgmt", "KPIs"], d: "We embed into your organization, align marketing with sales, and drive sustained revenue growth.",
+      deliverables: ["Executive marketing leadership (10-15 hrs/week)", "Team hiring, training & management", "KPI dashboard & reporting cadence", "Vendor & agency oversight", "Board-ready growth reporting"],
+      outcome: "C-suite marketing leadership at a fraction of the cost. Your team aligned, your metrics clear, your growth compounding." },
+    { id: 5, t: "SET OS: Growth Intelligence", i: "⬡", c: "#3b82f6", b: "Proprietary platform for deal orchestration and automation.", tags: ["Deal Engine", "Intel", "Automation"], d: "SET OS unifies deal orchestration, lead intelligence, CRM automation, and Mission Control reporting into one system.",
+      deliverables: ["Deal Scout — AI-powered lead intelligence", "Mission Control — real-time performance dashboard", "Automated pipeline management", "Custom webhook & CRM integrations", "Growth playbook automation"],
+      outcome: "One platform to see everything, automate everything, and scale everything. No more spreadsheet chaos." },
+    { id: 6, t: "Brand & Creative Production", i: "✦", c: "#ec4899", b: "Brand identity, storytelling, premium visual systems.", tags: ["Brand", "Video", "Creative"], d: "Full creative division: from BMW and Huawei commercial production to content that drives recognition and revenue.",
+      deliverables: ["Brand identity system & style guide", "Video production & commercial shoots", "Social content strategy & production", "Website design & development", "Pitch deck & sales collateral design"],
+      outcome: "A brand that commands attention, earns trust, and converts. From visual identity to video production — all under one roof." },
   ];
   const CASES = [
     { t: "From $250M to $500M", tp: "Revenue OS · 18 Months", b: "Fragmented acquisition, no unified growth infrastructure.", a: "Revenue doubled. CPA dropped 27%. Sales cycle compressed 40%.", q: "SET installed Revenue OS and reduced our CPA by 27%. We doubled revenue in 18 months.", au: "George Pintilie", r: "Founder", m: [{ v: "2×", l: "Revenue" }, { v: "27%", l: "Lower CPA" }, { v: "40%", l: "Faster cycle" }], img: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&q=80" },
@@ -371,17 +383,31 @@ export default function Home() {
                 return (
                 <div key={s.id} onClick={() => setExpandedService(isOpen ? null : s.id)} style={{ background: "rgba(14,14,20,0.85)", backdropFilter: "blur(16px)", border: `1px solid ${isOpen ? s.c + "40" : "rgba(255,255,255,0.08)"}`, borderRadius: 14, padding: "clamp(28px, 3.5vw, 44px)", position: "relative", overflow: "hidden", cursor: "pointer", transition: "all 0.4s ease", boxShadow: isOpen ? `0 0 40px ${s.c}20` : "none" }}>
                   <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: isOpen ? 3 : 2, background: s.c, transition: "height 0.3s" }} />
-                  <div style={{ display: "flex", gap: 14, alignItems: "flex-start", marginBottom: isOpen ? 16 : 8 }}>
+                  {/* Always visible: icon, title, description, tags */}
+                  <div style={{ display: "flex", gap: 14, alignItems: "flex-start", marginBottom: 14 }}>
                     <div style={{ width: 52, height: 52, borderRadius: 12, background: s.c + "15", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.3rem", color: s.c, flexShrink: 0 }}>{s.i}</div>
                     <div style={{ flex: 1 }}>
                       <h3 style={{ fontFamily: "var(--serif)", fontSize: "1.4rem", color: "var(--text)", lineHeight: 1.3 }}>{s.t}</h3>
-                      {!isOpen && <p style={{ fontSize: "0.85rem", color: "var(--text3)", lineHeight: 1.5, marginTop: 6 }}>{s.b}</p>}
                     </div>
                     <div style={{ color: "var(--text3)", fontSize: "1.2rem", transition: "transform 0.3s", transform: isOpen ? "rotate(45deg)" : "rotate(0deg)", flexShrink: 0, marginTop: 4 }}>+</div>
                   </div>
-                  <div style={{ maxHeight: isOpen ? 300 : 0, opacity: isOpen ? 1 : 0, overflow: "hidden", transition: "max-height 0.4s ease, opacity 0.3s ease" }}>
-                    <p style={{ fontSize: "0.95rem", color: "var(--text2)", lineHeight: 1.7, marginBottom: 16 }}>{s.d}</p>
-                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>{s.tags.map(t => <span key={t} style={{ padding: "6px 14px", borderRadius: 16, fontSize: "0.72rem", fontWeight: 500, background: s.c + "15", color: s.c }}>{t}</span>)}</div>
+                  <p style={{ fontSize: "0.92rem", color: "var(--text2)", lineHeight: 1.65, marginBottom: 14 }}>{s.d}</p>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: isOpen ? 16 : 0 }}>{s.tags.map(t => <span key={t} style={{ padding: "5px 12px", borderRadius: 16, fontSize: "0.7rem", fontWeight: 500, background: s.c + "15", color: s.c }}>{t}</span>)}</div>
+                  {/* Expanded: deliverables + outcome */}
+                  <div style={{ maxHeight: isOpen ? 500 : 0, opacity: isOpen ? 1 : 0, overflow: "hidden", transition: "max-height 0.5s ease, opacity 0.4s ease" }}>
+                    <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 16 }}>
+                      <div style={{ fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.2em", color: s.c, textTransform: "uppercase", marginBottom: 12 }}>What You Get</div>
+                      {s.deliverables.map((del, di) => (
+                        <div key={di} style={{ display: "flex", gap: 10, alignItems: "flex-start", marginBottom: 8 }}>
+                          <div style={{ width: 5, height: 5, borderRadius: "50%", background: s.c, marginTop: 7, flexShrink: 0 }} />
+                          <span style={{ fontSize: "0.88rem", color: "var(--text2)", lineHeight: 1.5 }}>{del}</span>
+                        </div>
+                      ))}
+                      <div style={{ marginTop: 16, padding: "14px 18px", background: s.c + "10", borderLeft: `3px solid ${s.c}`, borderRadius: "0 8px 8px 0" }}>
+                        <div style={{ fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.2em", color: s.c, textTransform: "uppercase", marginBottom: 6 }}>The Outcome</div>
+                        <p style={{ fontSize: "0.88rem", color: "var(--text)", lineHeight: 1.6, fontStyle: "italic" }}>{s.outcome}</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 );
