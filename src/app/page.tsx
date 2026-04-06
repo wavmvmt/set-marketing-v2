@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 export default function Home() {
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [expandedService, setExpandedService] = useState<number | null>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const driftVideoRef = useRef<HTMLVideoElement>(null);
   const sec2VideoRef = useRef<HTMLVideoElement>(null);
@@ -365,17 +366,26 @@ export default function Home() {
           {/* OVERLAY: Service tile pairs — slide R→L */}
           {[[SERVICES[0], SERVICES[1]], [SERVICES[2], SERVICES[3]], [SERVICES[4], SERVICES[5]]].map((pair, pi) => (
             <div key={pi} className="svc-pair" style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%) translateX(250px)", zIndex: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, width: "min(94vw, 1200px)", opacity: 0 }}>
-              {pair.map(s => (
-                <div key={s.id} style={{ background: "rgba(14,14,20,0.8)", backdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: "clamp(32px, 4vw, 48px)", position: "relative", overflow: "hidden" }}>
-                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: s.c }} />
-                  <div style={{ display: "flex", gap: 14, alignItems: "flex-start", marginBottom: 16 }}>
+              {pair.map(s => {
+                const isOpen = expandedService === s.id;
+                return (
+                <div key={s.id} onClick={() => setExpandedService(isOpen ? null : s.id)} style={{ background: "rgba(14,14,20,0.85)", backdropFilter: "blur(16px)", border: `1px solid ${isOpen ? s.c + "40" : "rgba(255,255,255,0.08)"}`, borderRadius: 14, padding: "clamp(28px, 3.5vw, 44px)", position: "relative", overflow: "hidden", cursor: "pointer", transition: "all 0.4s ease", boxShadow: isOpen ? `0 0 40px ${s.c}20` : "none" }}>
+                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: isOpen ? 3 : 2, background: s.c, transition: "height 0.3s" }} />
+                  <div style={{ display: "flex", gap: 14, alignItems: "flex-start", marginBottom: isOpen ? 16 : 8 }}>
                     <div style={{ width: 52, height: 52, borderRadius: 12, background: s.c + "15", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.3rem", color: s.c, flexShrink: 0 }}>{s.i}</div>
-                    <h3 style={{ fontFamily: "var(--serif)", fontSize: "1.35rem", color: "var(--text)", lineHeight: 1.3 }}>{s.t}</h3>
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{ fontFamily: "var(--serif)", fontSize: "1.4rem", color: "var(--text)", lineHeight: 1.3 }}>{s.t}</h3>
+                      {!isOpen && <p style={{ fontSize: "0.85rem", color: "var(--text3)", lineHeight: 1.5, marginTop: 6 }}>{s.b}</p>}
+                    </div>
+                    <div style={{ color: "var(--text3)", fontSize: "1.2rem", transition: "transform 0.3s", transform: isOpen ? "rotate(45deg)" : "rotate(0deg)", flexShrink: 0, marginTop: 4 }}>+</div>
                   </div>
-                  <p style={{ fontSize: "0.92rem", color: "var(--text2)", lineHeight: 1.65, marginBottom: 16 }}>{s.d}</p>
-                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>{s.tags.map(t => <span key={t} style={{ padding: "5px 12px", borderRadius: 16, fontSize: "0.7rem", fontWeight: 500, background: s.c + "15", color: s.c }}>{t}</span>)}</div>
+                  <div style={{ maxHeight: isOpen ? 300 : 0, opacity: isOpen ? 1 : 0, overflow: "hidden", transition: "max-height 0.4s ease, opacity 0.3s ease" }}>
+                    <p style={{ fontSize: "0.95rem", color: "var(--text2)", lineHeight: 1.7, marginBottom: 16 }}>{s.d}</p>
+                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>{s.tags.map(t => <span key={t} style={{ padding: "6px 14px", borderRadius: 16, fontSize: "0.72rem", fontWeight: 500, background: s.c + "15", color: s.c }}>{t}</span>)}</div>
+                  </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           ))}
 
