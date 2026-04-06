@@ -393,22 +393,22 @@ export default function Home() {
       <section id="results" style={{ padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: "var(--bg2)" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
           <div className="fade-in" style={{ textAlign: "center", marginBottom: 56 }}>
-            <span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>03 · Client Results</span>
-            <h2 style={{ fontSize: "clamp(2rem, 4vw, 3.2rem)", marginTop: 16 }}>Real Numbers. <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Real</em> Impact.</h2>
+            <span style={{ fontSize: "0.75rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>03 · Client Results</span>
+            <h2 style={{ fontSize: "clamp(2.5rem, 5vw, 4rem)", marginTop: 16 }}>Real Numbers. <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Real</em> Impact.</h2>
           </div>
           <div className="fade-in-stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: 20 }}>
             {CASES.map((c, i) => <div key={i} style={{ background: "var(--bg3)", border: "1px solid var(--border)", borderRadius: 14, overflow: "hidden", transition: "all 0.5s" }} onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-8px)"; e.currentTarget.style.boxShadow = "0 20px 60px rgba(0,0,0,0.5)"; }} onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}>
               <div style={{ height: 180, overflow: "hidden", position: "relative" }}>
                 <img src={c.img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0.45) saturate(1.3)", transition: "transform 0.6s" }} onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.05)")} onMouseLeave={e => (e.currentTarget.style.transform = "")} />
                 <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, var(--bg3), transparent 60%)" }} />
-                <div style={{ position: "absolute", bottom: 16, left: 20 }}><span style={{ fontSize: "0.58rem", color: "var(--text3)" }}>{c.tp}</span><h3 style={{ fontFamily: "var(--serif)", fontSize: "1.5rem", color: "var(--text)", marginTop: 4 }}>{c.t}</h3></div>
+                <div style={{ position: "absolute", bottom: 16, left: 20 }}><span style={{ fontSize: "0.72rem", color: "var(--text3)" }}>{c.tp}</span><h3 style={{ fontFamily: "var(--serif)", fontSize: "1.8rem", color: "var(--text)", marginTop: 4 }}>{c.t}</h3></div>
               </div>
               <div style={{ padding: "20px 24px 28px" }}>
-                <div style={{ marginBottom: 16 }}><span style={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.15em", color: "var(--text3)", textTransform: "uppercase" }}>Before</span><p style={{ fontSize: "0.78rem", color: "var(--text2)", lineHeight: 1.5, marginTop: 4 }}>{c.b}</p></div>
+                <div style={{ marginBottom: 16 }}><span style={{ fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.15em", color: "var(--text3)", textTransform: "uppercase" }}>Before</span><p style={{ fontSize: "0.92rem", color: "var(--text2)", lineHeight: 1.6, marginTop: 6 }}>{c.b}</p></div>
                 <div style={{ height: 1, background: "var(--border)", marginBottom: 16 }} />
-                <div style={{ marginBottom: 18 }}><span style={{ fontSize: "0.55rem", fontWeight: 700, letterSpacing: "0.15em", color: "var(--gold)", textTransform: "uppercase" }}>After</span><p style={{ fontSize: "0.78rem", color: "var(--text)", lineHeight: 1.5, marginTop: 4 }}>{c.a}</p></div>
-                <div style={{ display: "flex", gap: 12, marginBottom: 18 }}>{c.m.map(m => <div key={m.l} style={{ flex: 1, textAlign: "center" }}><div style={{ fontFamily: "var(--serif)", fontSize: "1.3rem", color: "var(--gold)" }}>{m.v}</div><div style={{ fontSize: "0.58rem", color: "var(--text3)" }}>{m.l}</div></div>)}</div>
-                <div style={{ borderLeft: "2px solid var(--gold-dim)", paddingLeft: 14 }}><p style={{ fontSize: "0.76rem", color: "var(--text2)", fontStyle: "italic", lineHeight: 1.5 }}>&ldquo;{c.q}&rdquo;</p><div style={{ marginTop: 6, fontSize: "0.7rem" }}><span style={{ color: "var(--text)", fontWeight: 500 }}>{c.au}</span><span style={{ color: "var(--text3)", marginLeft: 6 }}>{c.r}</span></div></div>
+                <div style={{ marginBottom: 18 }}><span style={{ fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.15em", color: "var(--gold)", textTransform: "uppercase" }}>After</span><p style={{ fontSize: "0.92rem", color: "var(--text)", lineHeight: 1.6, marginTop: 6 }}>{c.a}</p></div>
+                <div style={{ display: "flex", gap: 12, marginBottom: 18 }}>{c.m.map(m => <div key={m.l} style={{ flex: 1, textAlign: "center" }}><div style={{ fontFamily: "var(--serif)", fontSize: "1.6rem", color: "var(--gold)" }}>{m.v}</div><div style={{ fontSize: "0.72rem", color: "var(--text3)" }}>{m.l}</div></div>)}</div>
+                <div style={{ borderLeft: "2px solid var(--gold-dim)", paddingLeft: 14 }}><p style={{ fontSize: "0.88rem", color: "var(--text2)", fontStyle: "italic", lineHeight: 1.6 }}>&ldquo;{c.q}&rdquo;</p><div style={{ marginTop: 8, fontSize: "0.82rem" }}><span style={{ color: "var(--text)", fontWeight: 500 }}>{c.au}</span><span style={{ color: "var(--text3)", marginLeft: 6 }}>{c.r}</span></div></div>
               </div>
             </div>)}
           </div>
@@ -467,10 +467,10 @@ export default function Home() {
               opacity: 0,
               textAlign: i % 2 === 1 ? "right" : "left",
             }}>
-              <div style={{ fontSize: "clamp(3rem, 8vw, 6rem)", fontFamily: "var(--serif)", fontWeight: 300, color: "rgba(255,255,255,0.12)", lineHeight: 0.9, marginBottom: 8, textShadow: "0 4px 40px rgba(0,0,0,0.5)" }}>{step.n}</div>
-              <div style={{ fontSize: "0.7rem", letterSpacing: "0.3em", color: "var(--gold)", textTransform: "uppercase", fontWeight: 600, marginBottom: 12, textShadow: "0 2px 20px rgba(0,0,0,0.9), 0 1px 4px rgba(0,0,0,0.9)" }}>{step.s}</div>
-              <h3 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2rem, 4.5vw, 3.5rem)", color: "#fff", lineHeight: 1.1, marginBottom: 14, fontWeight: 400, textShadow: "0 3px 30px rgba(0,0,0,0.9), 0 2px 8px rgba(0,0,0,0.9)" }}>{step.t}</h3>
-              <p style={{ fontSize: "clamp(0.9rem, 1.2vw, 1.05rem)", color: "rgba(255,255,255,0.85)", lineHeight: 1.7, maxWidth: 420, textShadow: "0 2px 16px rgba(0,0,0,0.9), 0 1px 4px rgba(0,0,0,0.9)" }}>{step.d}</p>
+              <div style={{ fontSize: "clamp(5rem, 12vw, 10rem)", fontFamily: "var(--serif)", fontWeight: 300, color: "rgba(255,255,255,0.08)", lineHeight: 0.85, marginBottom: 12, textShadow: "0 4px 40px rgba(0,0,0,0.5)" }}>{step.n}</div>
+              <div style={{ fontSize: "clamp(0.85rem, 1.2vw, 1rem)", letterSpacing: "0.35em", color: "var(--gold)", textTransform: "uppercase", fontWeight: 700, marginBottom: 16, textShadow: "0 2px 20px rgba(0,0,0,0.95), 0 1px 6px rgba(0,0,0,0.95)" }}>{step.s}</div>
+              <h3 style={{ fontFamily: "var(--serif)", fontSize: "clamp(3rem, 6vw, 5rem)", color: "#fff", lineHeight: 1.05, marginBottom: 20, fontWeight: 400, textShadow: "0 4px 40px rgba(0,0,0,0.95), 0 2px 10px rgba(0,0,0,0.95), 0 0 80px rgba(0,0,0,0.6)" }}>{step.t}</h3>
+              <p style={{ fontSize: "clamp(1.1rem, 1.6vw, 1.35rem)", color: "#fff", lineHeight: 1.7, maxWidth: 520, fontWeight: 400, textShadow: "0 2px 20px rgba(0,0,0,0.95), 0 1px 6px rgba(0,0,0,0.95), 0 0 60px rgba(0,0,0,0.5)" }}>{step.d}</p>
             </div>
           ))}
 
@@ -481,12 +481,12 @@ export default function Home() {
       {/* ═══ TESTIMONIALS ═══ */}
       <section style={{ padding: "clamp(60px, 10vh, 100px) clamp(20px, 6vw, 80px)", background: "var(--bg)" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <div className="fade-in" style={{ textAlign: "center", marginBottom: 44 }}><span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>06 · Client Voices</span><h2 style={{ fontSize: "clamp(1.8rem, 3vw, 2.4rem)", marginTop: 16 }}>Operators Who <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Scaled</em></h2></div>
+          <div className="fade-in" style={{ textAlign: "center", marginBottom: 44 }}><span style={{ fontSize: "0.75rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>06 · Client Voices</span><h2 style={{ fontSize: "clamp(2.5rem, 4vw, 3.5rem)", marginTop: 16 }}>Operators Who <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Scaled</em></h2></div>
           <div className="fade-in-stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 16 }}>
             {VOICES.map((v, i) => <div key={i} style={{ background: "var(--bg3)", border: "1px solid var(--border)", borderRadius: 12, padding: 26, transition: "all 0.4s" }} onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--border2)"; e.currentTarget.style.transform = "translateY(-3px)"; }} onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.transform = ""; }}>
-              <div style={{ display: "flex", gap: 2, marginBottom: 14 }}>{[1,2,3,4,5].map(s => <span key={s} style={{ color: "var(--star)", fontSize: "0.5rem", opacity: 0.4 }}>★</span>)}</div>
-              <p style={{ fontSize: "0.8rem", color: "var(--text2)", lineHeight: 1.65, fontStyle: "italic", marginBottom: 18 }}>&ldquo;{v.q}&rdquo;</p>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}><div style={{ width: 32, height: 32, borderRadius: "50%", background: "var(--gold-dim)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--serif)", fontSize: "0.8rem", color: "var(--gold)" }}>{v.a[0]}</div><div><div style={{ fontSize: "0.75rem", fontWeight: 500 }}>{v.a}</div><div style={{ fontSize: "0.62rem", color: "var(--text3)" }}>{v.r}</div></div></div>
+              <div style={{ display: "flex", gap: 3, marginBottom: 14 }}>{[1,2,3,4,5].map(s => <span key={s} style={{ color: "var(--star)", fontSize: "0.7rem", opacity: 0.5 }}>★</span>)}</div>
+              <p style={{ fontSize: "0.95rem", color: "var(--text2)", lineHeight: 1.7, fontStyle: "italic", marginBottom: 20 }}>&ldquo;{v.q}&rdquo;</p>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}><div style={{ width: 38, height: 38, borderRadius: "50%", background: "var(--gold-dim)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--serif)", fontSize: "1rem", color: "var(--gold)" }}>{v.a[0]}</div><div><div style={{ fontSize: "0.88rem", fontWeight: 500 }}>{v.a}</div><div style={{ fontSize: "0.75rem", color: "var(--text3)" }}>{v.r}</div></div></div>
             </div>)}
           </div>
         </div>
@@ -495,13 +495,13 @@ export default function Home() {
       {/* ═══ CTA ═══ */}
       <section id="contact" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: "var(--bg2)" }}>
         {!formSubmitted ? <>
-          <div className="fade-in" style={{ textAlign: "center", marginBottom: 50 }}><h2 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.5rem, 5.5vw, 4.5rem)", fontWeight: 300, lineHeight: 1.1, marginBottom: 20 }}>Ready to <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Install</em> the System?</h2><p style={{ fontSize: "0.9rem", color: "var(--text2)", maxWidth: 450, margin: "0 auto", lineHeight: 1.6 }}>We work with a select number of operators each quarter.</p></div>
+          <div className="fade-in" style={{ textAlign: "center", marginBottom: 50 }}><h2 style={{ fontFamily: "var(--serif)", fontSize: "clamp(3rem, 6vw, 5rem)", fontWeight: 300, lineHeight: 1.1, marginBottom: 20 }}>Ready to <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Install</em> the System?</h2><p style={{ fontSize: "1.05rem", color: "var(--text2)", maxWidth: 500, margin: "0 auto", lineHeight: 1.7 }}>We work with a select number of operators each quarter.</p></div>
           <div className="fade-in" style={{ width: "100%", maxWidth: 500, background: "var(--bg3)", border: "1px solid var(--border)", borderRadius: 20, padding: "clamp(28px, 4vw, 44px)" }}>
             <form onSubmit={e => { e.preventDefault(); setFormSubmitted(true); }} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              <div><label style={{ fontSize: "0.62rem", letterSpacing: "0.1em", color: "var(--text3)", textTransform: "uppercase", marginBottom: 6, display: "block" }}>Your Name</label><input className="form-input" placeholder="Full name" required /></div>
-              <div><label style={{ fontSize: "0.62rem", letterSpacing: "0.1em", color: "var(--text3)", textTransform: "uppercase", marginBottom: 6, display: "block" }}>Best Contact</label><input className="form-input" placeholder="Phone or email" required /></div>
-              <div><label style={{ fontSize: "0.62rem", letterSpacing: "0.1em", color: "var(--text3)", textTransform: "uppercase", marginBottom: 6, display: "block" }}>Annual Revenue</label><select className="form-select" required defaultValue=""><option value="" disabled>Select range</option><option>$500K–$1M</option><option>$1M–$5M</option><option>$5M–$20M</option><option>$20M+</option></select></div>
-              <div><label style={{ fontSize: "0.62rem", letterSpacing: "0.1em", color: "var(--text3)", textTransform: "uppercase", marginBottom: 6, display: "block" }}>Growth Obstacle</label><select className="form-select" required defaultValue=""><option value="" disabled>Select</option><option>Lead generation</option><option>Conversion rate</option><option>Team / systems</option><option>Scaling profitably</option></select></div>
+              <div><label style={{ fontSize: "0.72rem", letterSpacing: "0.12em", color: "var(--text3)", textTransform: "uppercase", marginBottom: 8, display: "block" }}>Your Name</label><input className="form-input" placeholder="Full name" required /></div>
+              <div><label style={{ fontSize: "0.72rem", letterSpacing: "0.12em", color: "var(--text3)", textTransform: "uppercase", marginBottom: 8, display: "block" }}>Best Contact</label><input className="form-input" placeholder="Phone or email" required /></div>
+              <div><label style={{ fontSize: "0.72rem", letterSpacing: "0.12em", color: "var(--text3)", textTransform: "uppercase", marginBottom: 8, display: "block" }}>Annual Revenue</label><select className="form-select" required defaultValue=""><option value="" disabled>Select range</option><option>$500K–$1M</option><option>$1M–$5M</option><option>$5M–$20M</option><option>$20M+</option></select></div>
+              <div><label style={{ fontSize: "0.72rem", letterSpacing: "0.12em", color: "var(--text3)", textTransform: "uppercase", marginBottom: 8, display: "block" }}>Growth Obstacle</label><select className="form-select" required defaultValue=""><option value="" disabled>Select</option><option>Lead generation</option><option>Conversion rate</option><option>Team / systems</option><option>Scaling profitably</option></select></div>
               <button type="submit" className="btn-gold" style={{ width: "100%", marginTop: 6, padding: 18 }}>Apply for Q2 →</button>
               <p style={{ textAlign: "center", fontSize: "0.6rem", color: "var(--text3)" }}>Confidential · No commitment · 45-min session</p>
             </form>
