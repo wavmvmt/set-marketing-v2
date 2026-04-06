@@ -287,8 +287,7 @@ export default function Home() {
 
           {/* LAYER 3: Services FPV drone video */}
           <div id="svc-layer" style={{ position: "absolute", inset: 0, zIndex: 1, opacity: 0 }}>
-            <video ref={svcVideoRef} muted playsInline preload="auto" style={{ ...vidStyle, filter: "brightness(0.8) saturate(1.2)" }}><source src="/services-bg.mp4" type="video/mp4" /></video>
-            <div style={{ position: "absolute", inset: 0, background: "rgba(7,7,10,0.15)", zIndex: 1 }} />
+            <video ref={svcVideoRef} muted playsInline preload="auto" style={{ ...vidStyle, filter: "saturate(1.2)" }}><source src="/services-bg.mp4" type="video/mp4" /></video>
           </div>
 
           {/* OVERLAY: Trust Wall content */}
@@ -310,7 +309,7 @@ export default function Home() {
 
           {/* OVERLAY: Revenue Architecture title — stays at top center throughout services */}
           <div id="svc-title" style={{ position: "absolute", top: "clamp(80px, 12vh, 140px)", left: "50%", transform: "translateX(-50%)", zIndex: 12, textAlign: "center", opacity: 0 }}>
-            <h2 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.5rem, 5vw, 4rem)", color: "#fff", textShadow: "0 3px 30px rgba(0,0,0,0.7)", fontWeight: 300 }}>Revenue <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Architecture</em></h2>
+            <h2 style={{ fontFamily: "var(--serif)", fontSize: "clamp(3rem, 6vw, 5rem)", color: "#fff", textShadow: "0 4px 40px rgba(0,0,0,0.9), 0 2px 10px rgba(0,0,0,0.8)", fontWeight: 400, letterSpacing: "0.02em" }}>Revenue <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Architecture</em></h2>
           </div>
 
           {/* OVERLAY: Service tile pairs — slide R→L */}
@@ -368,31 +367,29 @@ export default function Home() {
 
       {/* ═══ FOUNDER — Video background, text right-aligned ═══ */}
       <section id="about" style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "flex-end", overflow: "hidden" }}>
-        {/* Video background — BRIGHT, no dulling */}
+        {/* Video background — full brightness, no overlay */}
         <video autoPlay loop muted playsInline style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 0 }}>
           <source src="/founder-bg.mp4" type="video/mp4" />
         </video>
-        {/* Minimal overlay just for text readability */}
-        <div style={{ position: "absolute", inset: 0, zIndex: 1, background: "rgba(7,7,10,0.35)" }} />
 
         <div style={{ position: "relative", zIndex: 10, maxWidth: 620, padding: "clamp(60px, 10vh, 120px) clamp(40px, 6vw, 100px)", textAlign: "right" }}>
           <div className="fade-in" style={{ marginBottom: 40 }}>
-            <span style={{ fontSize: "0.58rem", letterSpacing: "0.3em", color: "var(--gold)", textTransform: "uppercase", textShadow: "0 1px 8px rgba(0,0,0,0.5)" }}>04 · Founder & CEO</span>
-            <div style={{ fontFamily: "var(--serif)", fontSize: "1.3rem", color: "var(--text)", marginTop: 12, textShadow: "0 1px 10px rgba(0,0,0,0.5)" }}>Chris Marchese</div>
-            <div style={{ fontSize: "0.65rem", color: "var(--text2)", marginTop: 4, textShadow: "0 1px 6px rgba(0,0,0,0.5)" }}>Founder & CEO · Toronto & Miami</div>
+            <span style={{ fontSize: "0.75rem", letterSpacing: "0.3em", color: "var(--gold)", textTransform: "uppercase", fontWeight: 600, textShadow: "0 2px 12px rgba(0,0,0,0.9), 0 1px 4px rgba(0,0,0,0.9)" }}>Founder & CEO</span>
+            <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(2rem, 4vw, 3rem)", color: "#fff", marginTop: 12, fontWeight: 400, textShadow: "0 3px 20px rgba(0,0,0,0.9), 0 2px 6px rgba(0,0,0,0.9)" }}>Chris Marchese</div>
+            <div style={{ fontSize: "0.85rem", color: "#fff", marginTop: 8, fontWeight: 500, textShadow: "0 2px 10px rgba(0,0,0,0.9), 0 1px 3px rgba(0,0,0,0.9)" }}>Toronto & Miami</div>
           </div>
 
-          <h2 className="fade-in" style={{ fontSize: "clamp(2rem, 3.5vw, 3rem)", lineHeight: 1.2, marginBottom: 36, textShadow: "0 2px 20px rgba(0,0,0,0.5)" }}>
-            <span style={{ background: "linear-gradient(135deg, #c8a050, #e8c878)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>$500M+</span> in client revenue.<br />System-first.
+          <h2 className="fade-in" style={{ fontSize: "clamp(2rem, 3.5vw, 3rem)", lineHeight: 1.2, marginBottom: 36, color: "#fff", textShadow: "0 3px 30px rgba(0,0,0,0.9), 0 2px 8px rgba(0,0,0,0.9)" }}>
+            <span style={{ background: "linear-gradient(135deg, #c8a050, #e8c878)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.9))" }}>$500M+</span> in client revenue.<br />System-first.
           </h2>
 
           {["12 years as an industrial millwright.", "No trust fund. No shortcuts.", "Just pattern recognition and an obsession", "with what actually moves people to act.", "That obsession became Strategic Emotional Targeting.", "That framework became SET."].map((l, i) => (
-            <p key={i} className="fade-in" style={{ fontFamily: "var(--serif)", fontSize: "clamp(1.05rem, 1.4vw, 1.25rem)", color: i >= 4 ? "var(--gold)" : "var(--text)", fontStyle: i >= 4 ? "italic" : "normal", lineHeight: 1.6, marginBottom: 10, textShadow: "0 1px 10px rgba(0,0,0,0.5)" }}>{l}</p>
+            <p key={i} className="fade-in" style={{ fontFamily: "var(--serif)", fontSize: "clamp(1.05rem, 1.4vw, 1.25rem)", color: i >= 4 ? "var(--gold)" : "#fff", fontStyle: i >= 4 ? "italic" : "normal", lineHeight: 1.6, marginBottom: 10, textShadow: "0 2px 16px rgba(0,0,0,0.9), 0 1px 4px rgba(0,0,0,0.9)" }}>{l}</p>
           ))}
 
           <div className="fade-in-stagger" style={{ display: "flex", gap: 14, flexWrap: "wrap", marginTop: 32, justifyContent: "flex-end" }}>
             {["SET Enterprises", "SET Ventures", "SET Sales Academy"].map(e => (
-              <div key={e} style={{ padding: "10px 18px", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 6, background: "rgba(14,14,20,0.5)", backdropFilter: "blur(8px)", fontSize: "0.76rem", fontWeight: 500, color: "var(--text)", textShadow: "0 1px 6px rgba(0,0,0,0.4)" }}>{e}</div>
+              <div key={e} style={{ padding: "10px 18px", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 6, background: "rgba(14,14,20,0.6)", backdropFilter: "blur(12px)", fontSize: "0.76rem", fontWeight: 600, color: "#fff", textShadow: "0 2px 8px rgba(0,0,0,0.9)" }}>{e}</div>
             ))}
           </div>
         </div>
