@@ -316,13 +316,12 @@ export default function Home() {
 
           {/* LAYER 0: Splash video — autoplay on load, fades out when scrolling begins */}
           <div id="splash-layer" style={{ position: "absolute", inset: 0, zIndex: 4, opacity: 1 }}>
-            <video ref={splashVideoRef} autoPlay loop muted playsInline preload="auto" style={{ ...vidStyle, filter: "brightness(0.6) saturate(1.2)" }}><source src="/splash-bg-hd.mp4" type="video/mp4" /></video>
-            <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at center, rgba(7,7,10,0.2) 0%, rgba(7,7,10,0.5) 100%)", zIndex: 1 }} />
+            <video ref={splashVideoRef} autoPlay loop muted playsInline preload="auto" style={{ ...vidStyle, filter: "saturate(1.2)" }}><source src="/splash-bg-hd.mp4" type="video/mp4" /></video>
             {/* Hero text overlay on splash */}
             <div style={{ position: "absolute", inset: 0, zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", textAlign: "center" }}>
-              <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(3.5rem, 10vw, 7rem)", fontWeight: 300, letterSpacing: "0.4em", color: "var(--gold)", marginBottom: 32, textShadow: "0 0 60px rgba(200,160,80,0.3)" }}>S E T</div>
-              <div style={{ fontFamily: "var(--sans)", fontSize: "0.65rem", letterSpacing: "0.35em", color: "var(--gold)", textTransform: "uppercase", marginBottom: 20, fontWeight: 500 }}>Revenue Architecture · Toronto & Miami · Est. 2019</div>
-              <h1 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2rem, 5vw, 3.8rem)", fontWeight: 300, lineHeight: 1.1, color: "var(--text)", textShadow: "0 2px 40px rgba(0,0,0,0.6)", maxWidth: 800 }}>We Don&rsquo;t Run <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Campaigns.</em><br />We Install Systems.</h1>
+              <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(3.5rem, 10vw, 7rem)", fontWeight: 300, letterSpacing: "0.4em", color: "var(--gold)", marginBottom: 32, textShadow: "0 0 80px rgba(200,160,80,0.4), 0 4px 40px rgba(0,0,0,0.9)" }}>S E T</div>
+              <div style={{ fontFamily: "var(--sans)", fontSize: "0.65rem", letterSpacing: "0.35em", color: "var(--gold)", textTransform: "uppercase", marginBottom: 20, fontWeight: 600, textShadow: "0 2px 16px rgba(0,0,0,0.9), 0 1px 4px rgba(0,0,0,0.9)" }}>Revenue Architecture · Toronto & Miami · Est. 2019</div>
+              <h1 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2rem, 5vw, 3.8rem)", fontWeight: 300, lineHeight: 1.1, color: "#fff", textShadow: "0 3px 30px rgba(0,0,0,0.9), 0 2px 8px rgba(0,0,0,0.9)", maxWidth: 800 }}>We Don&rsquo;t Run <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Campaigns.</em><br />We Install Systems.</h1>
             </div>
           </div>
 
