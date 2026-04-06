@@ -9,6 +9,7 @@ export default function Home() {
   const sec2VideoRef = useRef<HTMLVideoElement>(null);
   const svcVideoRef = useRef<HTMLVideoElement>(null);
   const splashVideoRef = useRef<HTMLVideoElement>(null);
+  const methodVideoRef = useRef<HTMLVideoElement>(null);
   const methodRef = useRef<HTMLDivElement>(null);
 
   // ── GSAP ──
@@ -178,17 +179,67 @@ export default function Home() {
         });
       }
 
-      // ═══ METHOD GATES ═══
-      if (methodRef.current) {
-        const mtl = gsap.timeline({ scrollTrigger: { trigger: methodRef.current, start: "top top", end: "+=300%", scrub: 1.5, pin: true, anticipatePin: 1 } });
-        document.querySelectorAll(".method-gate").forEach((gate, i) => {
-          const o = i * 0.25;
-          mtl.fromTo(gate, { scale: 0.3, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.2, ease: "power2.out" }, o);
-          mtl.to(gate, { duration: 0.05 }, o + 0.2);
-          if (i < 3) mtl.to(gate, { scale: 2.2, opacity: 0, duration: 0.15, ease: "power2.in" }, o + 0.25);
+      // ═══ METHOD: Scroll-scrub video with step overlays ═══
+      const methodVideo = methodVideoRef.current;
+      const methodSection = methodRef.current;
+      if (methodSection && methodVideo) {
+        await new Promise<void>(r => { if (methodVideo.readyState >= 1) r(); else methodVideo.addEventListener("loadedmetadata", () => r(), { once: true }); });
+        const methodDur = methodVideo.duration;
+        let methodTarget = 0, methodRender = 0;
+
+        const methodTick = () => {
+          methodRender += (methodTarget - methodRender) * 0.12;
+          if (Math.abs(methodRender - methodVideo.currentTime) > 0.015) methodVideo.currentTime = methodRender;
+          requestAnimationFrame(methodTick);
+        };
+        methodTick();
+
+        const methodSteps = document.querySelectorAll(".method-step");
+        const methodBar = document.getElementById("method-progress");
+
+        ScrollTrigger.create({
+          trigger: methodSection,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 0,
+          onUpdate: (self) => {
+            const p = self.progress;
+
+            // Scrub video across full scroll
+            methodTarget = p * methodDur;
+
+            // Progress bar
+            if (methodBar) methodBar.style.transform = `scaleX(${p})`;
+
+            // 4 steps: each gets 25% of scroll, with fade in/hold/fade out
+            methodSteps.forEach((step, i) => {
+              const stepStart = i * 0.25;
+              const stepEnd = stepStart + 0.25;
+              const fadeIn = stepStart + 0.03;
+              const holdEnd = stepEnd - 0.05;
+
+              let opacity = 0;
+              let yOffset = 30;
+
+              if (p < stepStart) {
+                opacity = 0; yOffset = 30;
+              } else if (p < fadeIn) {
+                const t = (p - stepStart) / (fadeIn - stepStart);
+                opacity = t; yOffset = 30 * (1 - t);
+              } else if (p < holdEnd) {
+                opacity = 1; yOffset = 0;
+              } else if (p < stepEnd) {
+                const t = (p - holdEnd) / (stepEnd - holdEnd);
+                opacity = 1 - t; yOffset = -20 * t;
+              } else {
+                opacity = 0; yOffset = -20;
+              }
+
+              (step as HTMLElement).style.opacity = String(opacity);
+              (step as HTMLElement).style.transform = `translateY(${yOffset}px)`;
+            });
+          },
         });
-        const bar = document.getElementById("method-progress");
-        if (bar) mtl.to(bar, { scaleX: 1, ease: "none", duration: 1 }, 0);
       }
 
       // ═══ FADE-INS ═══
@@ -395,22 +446,82 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══ METHOD ═══ */}
-      <section ref={methodRef} id="process" style={{ position: "relative", height: "100vh", overflow: "hidden", background: "var(--bg2)" }}>
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, zIndex: 30 }}><div id="method-progress" style={{ width: "100%", height: "100%", background: "var(--gold)", transformOrigin: "left", transform: "scaleX(0)" }} /></div>
-        <div style={{ position: "absolute", top: 40, left: 0, right: 0, textAlign: "center", zIndex: 20 }}><span style={{ fontSize: "0.55rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>05 · Walk Through The Method</span><h2 style={{ fontFamily: "var(--serif)", fontSize: "clamp(1.6rem, 3vw, 2.4rem)", marginTop: 10 }}>The SET <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Method</em></h2></div>
-        {STEPS.map((step, i) => (
-          <div key={step.n} className="method-gate" style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", opacity: i === 0 ? 1 : 0, scale: i === 0 ? "1" : "0.3" }}>
-            <div style={{ position: "absolute", inset: "10%", borderRadius: 24, border: `1px solid ${step.ac}30`, boxShadow: `0 0 ${30 + i * 20}px ${step.ac}15`, pointerEvents: "none" }} />
-            <div style={{ textAlign: "center", maxWidth: 600, padding: "0 24px", position: "relative", zIndex: 5 }}>
-              <div style={{ width: 64, height: 64, borderRadius: "50%", background: i === 3 ? "var(--gold)" : `${step.ac}20`, border: `2px solid ${step.ac}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem", fontWeight: 700, color: i === 3 ? "var(--bg)" : step.ac, margin: "0 auto 20px" }}>{step.n}</div>
-              <div style={{ fontSize: "0.65rem", letterSpacing: "0.2em", color: step.ac, textTransform: "uppercase", fontWeight: 600, marginBottom: 16 }}>{step.s}</div>
-              <h3 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2rem, 4vw, 3rem)", color: "var(--text)", marginBottom: 16 }}>{step.t}</h3>
-              <p style={{ fontSize: "1rem", color: "var(--text2)", lineHeight: 1.7 }}>{step.d}</p>
-              <div style={{ marginTop: 32, display: "flex", gap: 8, justifyContent: "center" }}>{STEPS.map((_, j) => <div key={j} style={{ width: j === i ? 24 : 8, height: 8, borderRadius: 4, background: j === i ? step.ac : "rgba(255,255,255,0.1)" }} />)}</div>
-            </div>
+      {/* ═══ METHOD — Scroll-scrub video with step overlays ═══ */}
+      <section ref={methodRef} id="process" style={{ position: "relative", height: "500vh" }}>
+        <div style={{ position: "sticky", top: 0, width: "100%", height: "100vh", overflow: "hidden", background: "#000" }}>
+
+          {/* Progress bar */}
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, zIndex: 30 }}>
+            <div id="method-progress" style={{ width: "100%", height: "100%", background: "var(--gold)", transformOrigin: "left", transform: "scaleX(0)" }} />
           </div>
-        ))}
+
+          {/* Scroll-scrub video background */}
+          <video ref={methodVideoRef} muted playsInline preload="auto" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}>
+            <source src="/method-bg.mp4" type="video/mp4" />
+          </video>
+
+          {/* Section title — stays visible throughout */}
+          <div style={{ position: "absolute", top: "clamp(32px, 5vh, 60px)", left: "50%", transform: "translateX(-50%)", zIndex: 20, textAlign: "center" }}>
+            <span style={{ fontSize: "0.65rem", letterSpacing: "0.3em", color: "#fff", textTransform: "uppercase", fontWeight: 600, textShadow: "0 2px 12px rgba(0,0,0,0.9)" }}>The Method</span>
+            <h2 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2rem, 4vw, 3rem)", marginTop: 8, color: "#fff", textShadow: "0 3px 30px rgba(0,0,0,0.9), 0 2px 8px rgba(0,0,0,0.8)" }}>The SET <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Method</em></h2>
+          </div>
+
+          {/* Step progress dots */}
+          <div style={{ position: "absolute", right: "clamp(20px, 3vw, 48px)", top: "50%", transform: "translateY(-50%)", zIndex: 25, display: "flex", flexDirection: "column", gap: 16 }}>
+            {STEPS.map((step, i) => (
+              <div key={step.n} style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: "flex-end" }}>
+                <span style={{ fontSize: "0.6rem", letterSpacing: "0.15em", color: "rgba(255,255,255,0.4)", textTransform: "uppercase", fontWeight: 600, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>{step.n}</span>
+                <div style={{ width: 10, height: 10, borderRadius: "50%", border: "2px solid rgba(255,255,255,0.3)", background: "transparent" }} />
+              </div>
+            ))}
+          </div>
+
+          {/* 4 step overlays — alternate left/right positioning */}
+          {STEPS.map((step, i) => (
+            <div key={step.n} className="method-step" style={{
+              position: "absolute",
+              top: "50%",
+              left: i % 2 === 0 ? "clamp(24px, 6vw, 80px)" : "auto",
+              right: i % 2 === 1 ? "clamp(24px, 6vw, 80px)" : "auto",
+              transform: "translateY(-50%)",
+              zIndex: 15,
+              maxWidth: 480,
+              opacity: 0,
+            }}>
+              <div style={{
+                background: "rgba(7, 7, 10, 0.7)",
+                backdropFilter: "blur(20px)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: 16,
+                padding: "clamp(28px, 4vw, 44px)",
+                borderTop: `3px solid ${step.ac}`,
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 16 }}>
+                  <div style={{
+                    width: 56, height: 56, borderRadius: "50%",
+                    background: i === 3 ? "var(--gold)" : `${step.ac}25`,
+                    border: `2px solid ${step.ac}`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: "1.1rem", fontWeight: 700,
+                    color: i === 3 ? "#000" : step.ac,
+                    flexShrink: 0,
+                  }}>{step.n}</div>
+                  <div>
+                    <div style={{ fontSize: "0.6rem", letterSpacing: "0.2em", color: step.ac, textTransform: "uppercase", fontWeight: 600, marginBottom: 4 }}>{step.s}</div>
+                    <h3 style={{ fontFamily: "var(--serif)", fontSize: "clamp(1.5rem, 3vw, 2.2rem)", color: "#fff", lineHeight: 1.2 }}>{step.t}</h3>
+                  </div>
+                </div>
+                <p style={{ fontSize: "0.95rem", color: "rgba(255,255,255,0.8)", lineHeight: 1.7 }}>{step.d}</p>
+              </div>
+            </div>
+          ))}
+
+          {/* Scroll hint at bottom */}
+          <div style={{ position: "absolute", bottom: 24, left: "50%", transform: "translateX(-50%)", zIndex: 20, display: "flex", flexDirection: "column", alignItems: "center", gap: 6, opacity: 0.6 }}>
+            <span style={{ fontSize: "0.6rem", letterSpacing: "0.25em", color: "#fff", textTransform: "uppercase", textShadow: "0 1px 6px rgba(0,0,0,0.8)" }}>Scroll</span>
+            <svg width="16" height="20" viewBox="0 0 16 20" fill="none"><path d="M8 0L8 18M8 18L1 11M8 18L15 11" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" /></svg>
+          </div>
+        </div>
       </section>
 
       {/* ═══ TESTIMONIALS ═══ */}
