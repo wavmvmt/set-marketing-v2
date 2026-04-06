@@ -69,10 +69,9 @@ export default function Home() {
         //
         // 0–8%:     Splash video visible (autoplay loop), fading out
         // 0–50%:    Drift video scrubs (takes over from splash)
-        // 48–55%:   Crossfade drift → sec2
-        // 55–70%:   Sec2 visible + Trust Wall fades in
-        // 68–72%:   Crossfade sec2 → services
-        // 72–100%:  Services video scrubs + tile pairs slide R→L
+        // 50–70%:   Sec2 visible
+        // 52–68%:   Trust Wall fades in/out (during sec2)
+        // 70–100%:  Services video scrubs + tile pairs slide R→L
 
         const svcPairs = document.querySelectorAll(".svc-pair");
 
@@ -116,12 +115,12 @@ export default function Home() {
               svcLayer.style.opacity = "1";
             }
 
-            // ── Trust Wall: fades in at 20%, fades out at 68% ──
-            if (p < 0.20) {
+            // ── Trust Wall: fades in at 52% (with sec2), fades out at 68% ──
+            if (p < 0.52) {
               trustOverlay.style.opacity = "0";
               trustOverlay.style.transform = "translateY(20px)";
-            } else if (p < 0.24) {
-              const t = (p - 0.20) / 0.04;
+            } else if (p < 0.56) {
+              const t = (p - 0.52) / 0.04;
               trustOverlay.style.opacity = String(t);
               trustOverlay.style.transform = `translateY(${20 * (1 - t)}px)`;
             } else if (p < 0.65) {
