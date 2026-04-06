@@ -345,9 +345,9 @@ export default function Home() {
             <div style={{ maxWidth: 1100, width: "100%", textAlign: "center" }}>
               <span style={{ fontSize: "1.1rem", letterSpacing: "0.35em", color: "#fff", textTransform: "uppercase", textShadow: "0 2px 12px rgba(0,0,0,0.7)", fontWeight: 700 }}>TRUSTED BY</span>
               <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 16, marginTop: 40, marginBottom: 50 }}>
-                {BRANDS.map(b => <div key={b} style={{ fontSize: "0.85rem", fontWeight: 700, letterSpacing: "0.15em", color: "#fff", textTransform: "uppercase", padding: "12px 22px", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 4, backdropFilter: "blur(8px)", background: "rgba(0,0,0,0.35)", textShadow: "0 1px 8px rgba(0,0,0,0.6)" }}>{b}</div>)}
+                {BRANDS.map(b => <div key={b} style={{ fontSize: "clamp(0.65rem, 1.5vw, 0.85rem)", fontWeight: 700, letterSpacing: "0.15em", color: "#fff", textTransform: "uppercase", padding: "clamp(8px, 1.5vw, 12px) clamp(14px, 2vw, 22px)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 4, backdropFilter: "blur(8px)", background: "rgba(0,0,0,0.35)", textShadow: "0 1px 8px rgba(0,0,0,0.6)" }}>{b}</div>)}
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 20 }}>
                 {STATS.map(s => <div key={s.l} style={{ textAlign: "center", padding: 16 }}>
                   <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.5rem, 4vw, 3.5rem)", fontWeight: 300, lineHeight: 1, color: "#fff", textShadow: "0 2px 20px rgba(0,0,0,0.7)" }}>{s.v}</div>
                   <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--gold)", marginTop: 8, textShadow: "0 1px 8px rgba(0,0,0,0.6)" }}>{s.l}</div>
@@ -458,12 +458,11 @@ export default function Home() {
           {STEPS.map((step, i) => (
             <div key={step.n} className="method-step" style={{
               position: "absolute",
-              top: "50%",
-              left: i % 2 === 0 ? "clamp(32px, 8vw, 120px)" : "auto",
-              right: i % 2 === 1 ? "clamp(32px, 8vw, 120px)" : "auto",
-              transform: "translateY(-50%)",
+              top: "clamp(80px, 12vh, 140px)",
+              left: i % 2 === 0 ? "clamp(24px, 6vw, 120px)" : "auto",
+              right: i % 2 === 1 ? "clamp(24px, 6vw, 120px)" : "auto",
               zIndex: 15,
-              maxWidth: 520,
+              maxWidth: "min(520px, 85vw)",
               opacity: 0,
               textAlign: i % 2 === 1 ? "right" : "left",
             }}>
