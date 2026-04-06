@@ -425,6 +425,51 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ═══ SERVICES — Static grid, all 6 clickable ═══ */}
+      <section id="services" style={{ padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: "var(--bg)" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <div className="fade-in" style={{ textAlign: "center", marginBottom: 56 }}>
+            <span style={{ fontSize: "0.75rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>02 · What We Build</span>
+            <h2 style={{ fontSize: "clamp(2.5rem, 5vw, 4rem)", marginTop: 16 }}>Revenue <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Architecture</em></h2>
+            <p style={{ fontSize: "1rem", color: "var(--text2)", maxWidth: 500, margin: "16px auto 0", lineHeight: 1.7 }}>Six integrated systems. One growth engine. Click any service to explore.</p>
+          </div>
+          <div className="fade-in-stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: 20 }}>
+            {SERVICES.map(s => {
+              const isOpen = expandedService === s.id;
+              return (
+              <div key={s.id} onClick={() => setExpandedService(isOpen ? null : s.id)} style={{ background: "var(--bg3)", border: `1px solid ${isOpen ? s.c + "40" : "var(--border)"}`, borderRadius: 14, padding: "clamp(24px, 3vw, 36px)", position: "relative", overflow: "hidden", cursor: "pointer", transition: "all 0.4s ease", boxShadow: isOpen ? `0 0 40px ${s.c}15` : "none" }} onMouseEnter={e => { if (!isOpen) e.currentTarget.style.borderColor = "var(--border2)"; e.currentTarget.style.transform = "translateY(-4px)"; }} onMouseLeave={e => { if (!isOpen) e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.transform = ""; }}>
+                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: isOpen ? 3 : 2, background: s.c, transition: "height 0.3s" }} />
+                <div style={{ display: "flex", gap: 14, alignItems: "flex-start", marginBottom: 14 }}>
+                  <div style={{ width: 48, height: 48, borderRadius: 12, background: s.c + "15", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem", color: s.c, flexShrink: 0 }}>{s.i}</div>
+                  <div style={{ flex: 1 }}>
+                    <h3 style={{ fontFamily: "var(--serif)", fontSize: "1.35rem", color: "var(--text)", lineHeight: 1.3 }}>{s.t}</h3>
+                  </div>
+                  <div style={{ color: "var(--text3)", fontSize: "1.2rem", transition: "transform 0.3s", transform: isOpen ? "rotate(45deg)" : "rotate(0deg)", flexShrink: 0, marginTop: 4 }}>+</div>
+                </div>
+                <p style={{ fontSize: "0.9rem", color: "var(--text2)", lineHeight: 1.65, marginBottom: 12 }}>{s.d}</p>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: isOpen ? 16 : 0 }}>{s.tags.map(t => <span key={t} style={{ padding: "5px 12px", borderRadius: 16, fontSize: "0.68rem", fontWeight: 500, background: s.c + "15", color: s.c }}>{t}</span>)}</div>
+                <div style={{ maxHeight: isOpen ? 500 : 0, opacity: isOpen ? 1 : 0, overflow: "hidden", transition: "max-height 0.5s ease, opacity 0.4s ease" }}>
+                  <div style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
+                    <div style={{ fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.2em", color: s.c, textTransform: "uppercase", marginBottom: 12 }}>What You Get</div>
+                    {s.deliverables.map((del, di) => (
+                      <div key={di} style={{ display: "flex", gap: 10, alignItems: "flex-start", marginBottom: 8 }}>
+                        <div style={{ width: 5, height: 5, borderRadius: "50%", background: s.c, marginTop: 7, flexShrink: 0 }} />
+                        <span style={{ fontSize: "0.85rem", color: "var(--text2)", lineHeight: 1.5 }}>{del}</span>
+                      </div>
+                    ))}
+                    <div style={{ marginTop: 16, padding: "14px 18px", background: s.c + "10", borderLeft: `3px solid ${s.c}`, borderRadius: "0 8px 8px 0" }}>
+                      <div style={{ fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.2em", color: s.c, textTransform: "uppercase", marginBottom: 6 }}>The Outcome</div>
+                      <p style={{ fontSize: "0.85rem", color: "var(--text)", lineHeight: 1.6, fontStyle: "italic" }}>{s.outcome}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* ═══ CASE STUDIES ═══ */}
       <section id="results" style={{ padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: "var(--bg2)" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
@@ -453,10 +498,14 @@ export default function Home() {
 
       {/* ═══ FOUNDER — Video background, text right-aligned ═══ */}
       <section id="about" style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "flex-end", overflow: "hidden" }}>
-        {/* Video background — full brightness, no overlay */}
+        {/* Video background */}
         <video autoPlay loop muted playsInline style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 0 }}>
           <source src="/founder-bg.mp4" type="video/mp4" />
         </video>
+        {/* Directional gradient — dark on right (text side), transparent on left (video shows) */}
+        <div style={{ position: "absolute", inset: 0, zIndex: 1, background: "linear-gradient(to right, transparent 20%, rgba(7,7,10,0.6) 55%, rgba(7,7,10,0.85) 100%)" }} />
+        {/* Bottom gradient for lower text */}
+        <div style={{ position: "absolute", inset: 0, zIndex: 1, background: "linear-gradient(to top, rgba(7,7,10,0.7) 0%, transparent 40%)" }} />
 
         <div style={{ position: "relative", zIndex: 10, maxWidth: 620, padding: "clamp(60px, 10vh, 120px) clamp(40px, 6vw, 100px)", textAlign: "right" }}>
           <div className="fade-in" style={{ marginBottom: 40 }}>
