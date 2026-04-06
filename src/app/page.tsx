@@ -502,7 +502,7 @@ export default function Home() {
               opacity: 0,
               textAlign: i % 2 === 1 ? "right" : "left",
             }}>
-              <div style={{ fontSize: "clamp(5rem, 12vw, 10rem)", fontFamily: "var(--serif)", fontWeight: 300, color: "rgba(255,255,255,0.08)", lineHeight: 0.85, marginBottom: 12, textShadow: "0 4px 40px rgba(0,0,0,0.5)" }}>{step.n}</div>
+              <div style={{ fontSize: "clamp(5rem, 12vw, 10rem)", fontFamily: "var(--serif)", fontWeight: 300, color: "transparent", WebkitTextStroke: "1.5px rgba(200,160,80,0.5)", lineHeight: 0.85, marginBottom: 12, textShadow: "0 4px 40px rgba(0,0,0,0.7)" }}>{step.n}</div>
               <div style={{ fontSize: "clamp(0.85rem, 1.2vw, 1rem)", letterSpacing: "0.35em", color: "var(--gold)", textTransform: "uppercase", fontWeight: 700, marginBottom: 16, textShadow: "0 2px 20px rgba(0,0,0,0.95), 0 1px 6px rgba(0,0,0,0.95)" }}>{step.s}</div>
               <h3 style={{ fontFamily: "var(--serif)", fontSize: "clamp(3rem, 6vw, 5rem)", color: "#fff", lineHeight: 1.05, marginBottom: 20, fontWeight: 400, textShadow: "0 4px 40px rgba(0,0,0,0.95), 0 2px 10px rgba(0,0,0,0.95), 0 0 80px rgba(0,0,0,0.6)" }}>{step.t}</h3>
               <p style={{ fontSize: "clamp(1.1rem, 1.6vw, 1.35rem)", color: "#fff", lineHeight: 1.7, maxWidth: 520, fontWeight: 400, textShadow: "0 2px 20px rgba(0,0,0,0.95), 0 1px 6px rgba(0,0,0,0.95), 0 0 60px rgba(0,0,0,0.5)" }}>{step.d}</p>
