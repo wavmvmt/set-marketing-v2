@@ -492,38 +492,32 @@ export default function Home() {
           {/* OVERLAY: Service tile pairs — slide R→L */}
           {[[SERVICES[0], SERVICES[1]], [SERVICES[2], SERVICES[3]], [SERVICES[4], SERVICES[5]]].map((pair, pi) => (
             <div key={pi} className="svc-pair" style={{ position: "absolute", top: "55%", left: "50%", transform: "translate(-50%, -50%) translateX(250px)", zIndex: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, width: "min(94vw, 1200px)", opacity: 0, willChange: "opacity, transform" }}>
-              {pair.map(s => {
-                const isOpen = expandedService === s.id;
-                return (
-                <div key={s.id} onClick={() => setExpandedService(isOpen ? null : s.id)} style={{ ...mobileBlur("blur(16px)", "rgba(14,14,20,0.85)", "rgba(14,14,20,0.95)"), border: `1px solid ${isOpen ? s.c + "40" : "rgba(255,255,255,0.08)"}`, borderRadius: 14, padding: "clamp(28px, 3.5vw, 44px)", position: "relative", overflow: "hidden", cursor: "pointer", transition: "all 0.4s ease", boxShadow: isOpen ? `0 0 40px ${s.c}20` : "none" }}>
-                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: isOpen ? 3 : 2, background: s.c, transition: "height 0.3s" }} />
-                  <div style={{ display: "flex", gap: 14, alignItems: "flex-start", marginBottom: 14 }}>
+              {pair.map(s => (
+                <div key={s.id} style={{ ...mobileBlur("blur(16px)", "rgba(14,14,20,0.85)", "rgba(14,14,20,0.95)"), border: `1px solid ${s.c + "40"}`, borderRadius: 14, padding: "clamp(24px, 3vw, 36px)", position: "relative", overflow: "hidden", boxShadow: `0 0 40px ${s.c}15` }}>
+                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: s.c }} />
+                  <div style={{ display: "flex", gap: 14, alignItems: "flex-start", marginBottom: 12 }}>
                     <div style={{ width: 52, height: 52, borderRadius: 12, background: s.c + "15", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem", color: s.c, flexShrink: 0 }}>{s.i}</div>
                     <div style={{ flex: 1 }}>
-                      <h3 style={{ fontFamily: "var(--serif)", fontSize: "2rem", color: "var(--text)", lineHeight: 1.3 }}>{s.t}</h3>
+                      <h3 style={{ fontFamily: "var(--serif)", fontSize: "2rem", color: "#fff", lineHeight: 1.3 }}>{s.t}</h3>
                     </div>
-                    <div style={{ color: "var(--text3)", fontSize: "1.5rem", transition: "transform 0.3s", transform: isOpen ? "rotate(45deg)" : "rotate(0deg)", flexShrink: 0, marginTop: 4 }}>+</div>
                   </div>
-                  <p style={{ fontSize: "1.4rem", color: "var(--text2)", lineHeight: 1.65, marginBottom: 14 }}>{s.d}</p>
-                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: isOpen ? 16 : 0 }}>{s.tags.map(t => <span key={t} style={{ padding: "5px 12px", borderRadius: 16, fontSize: "1.05rem", fontWeight: 500, background: s.c + "15", color: s.c }}>{t}</span>)}</div>
-                  <div style={{ maxHeight: isOpen ? 500 : 0, opacity: isOpen ? 1 : 0, overflow: "hidden", transition: "max-height 0.5s ease, opacity 0.4s ease" }}>
-                    <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 16 }}>
-                      <div style={{ fontSize: "1.05rem", fontWeight: 700, letterSpacing: "0.2em", color: s.c, textTransform: "uppercase", marginBottom: 12 }}>What You Get</div>
-                      {s.deliverables.map((del, di) => (
-                        <div key={di} style={{ display: "flex", gap: 10, alignItems: "flex-start", marginBottom: 8 }}>
-                          <div style={{ width: 5, height: 5, borderRadius: "50%", background: s.c, marginTop: 7, flexShrink: 0 }} />
-                          <span style={{ fontSize: "1.35rem", color: "var(--text2)", lineHeight: 1.5 }}>{del}</span>
-                        </div>
-                      ))}
-                      <div style={{ marginTop: 16, padding: "14px 18px", background: s.c + "10", borderLeft: `3px solid ${s.c}`, borderRadius: "0 8px 8px 0" }}>
-                        <div style={{ fontSize: "1rem", fontWeight: 700, letterSpacing: "0.2em", color: s.c, textTransform: "uppercase", marginBottom: 6 }}>The Outcome</div>
-                        <p style={{ fontSize: "1.35rem", color: "var(--text)", lineHeight: 1.6, fontStyle: "italic" }}>{s.outcome}</p>
+                  <p style={{ fontSize: "1.3rem", color: "#fff", lineHeight: 1.65, marginBottom: 12 }}>{s.d}</p>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>{s.tags.map(t => <span key={t} style={{ padding: "5px 12px", borderRadius: 16, fontSize: "1.05rem", fontWeight: 500, background: s.c + "15", color: s.c }}>{t}</span>)}</div>
+                  <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 14 }}>
+                    <div style={{ fontSize: "1.05rem", fontWeight: 700, letterSpacing: "0.2em", color: s.c, textTransform: "uppercase", marginBottom: 10 }}>What You Get</div>
+                    {s.deliverables.map((del, di) => (
+                      <div key={di} style={{ display: "flex", gap: 10, alignItems: "flex-start", marginBottom: 6 }}>
+                        <div style={{ width: 5, height: 5, borderRadius: "50%", background: s.c, marginTop: 7, flexShrink: 0 }} />
+                        <span style={{ fontSize: "1.2rem", color: "#fff", lineHeight: 1.5 }}>{del}</span>
                       </div>
+                    ))}
+                    <div style={{ marginTop: 14, padding: "12px 16px", background: s.c + "10", borderLeft: `3px solid ${s.c}`, borderRadius: "0 8px 8px 0" }}>
+                      <div style={{ fontSize: "1rem", fontWeight: 700, letterSpacing: "0.2em", color: s.c, textTransform: "uppercase", marginBottom: 6 }}>The Outcome</div>
+                      <p style={{ fontSize: "1.2rem", color: "#fff", lineHeight: 1.6, fontStyle: "italic" }}>{s.outcome}</p>
                     </div>
                   </div>
                 </div>
-                );
-              })}
+              ))}
             </div>
           ))}
 
