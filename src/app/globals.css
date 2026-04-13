@@ -47,7 +47,7 @@ body::after {
 .btn-gold {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 16px 40px; background: var(--gold); color: var(--bg);
-  font-family: var(--sans); font-weight: 600; font-size: 0.82rem;
+  font-family: var(--sans); font-weight: 600; font-size: 1.3rem;
   letter-spacing: 0.1em; text-transform: uppercase;
   border: none; border-radius: 4px; cursor: pointer;
   transition: all 0.4s var(--smooth);
@@ -58,7 +58,7 @@ body::after {
 .btn-ghost {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 15px 32px; background: transparent; color: var(--gold);
-  font-family: var(--sans); font-weight: 500; font-size: 0.82rem;
+  font-family: var(--sans); font-weight: 500; font-size: 1.3rem;
   letter-spacing: 0.06em; border: 1px solid rgba(200,160,80,0.25);
   border-radius: 4px; cursor: pointer; transition: all 0.4s var(--smooth);
 }
@@ -68,7 +68,7 @@ body::after {
 .form-input {
   background: rgba(255,255,255,0.03); border: 1px solid var(--border);
   border-radius: 8px; padding: 16px 20px; color: var(--text);
-  font-family: var(--sans); font-size: 0.9rem; width: 100%;
+  font-family: var(--sans); font-size: 1.35rem; width: 100%;
   outline: none; transition: border-color 0.3s, box-shadow 0.3s;
 }
 .form-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-dim); }
@@ -78,7 +78,7 @@ body::after {
   appearance: none;
   background: rgba(255,255,255,0.03) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%235a5666' d='M5 7L0 2h10z'/%3E%3C/svg%3E") no-repeat right 18px center;
   border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px;
-  color: var(--text); font-family: var(--sans); font-size: 0.9rem;
+  color: var(--text); font-family: var(--sans); font-size: 1.35rem;
   width: 100%; cursor: pointer; outline: none; transition: border-color 0.3s;
 }
 .form-select:focus { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-dim); }
@@ -112,9 +112,9 @@ body::after {
 
 /* ── MOBILE OPTIMIZATION ── */
 @media (max-width: 768px) {
-  h1 { font-size: 2.2rem !important; }
-  h2 { font-size: 1.6rem !important; }
-  h3 { font-size: 1.3rem !important; }
+  h1 { font-size: 3rem !important; }
+  h2 { font-size: 2.2rem !important; }
+  h3 { font-size: 1.8rem !important; }
 
   /* Nav */
   nav { height: 56px !important; }
@@ -145,7 +145,7 @@ body::after {
 
 /* ── SMALL MOBILE ── */
 @media (max-width: 480px) {
-  h1 { font-size: 1.8rem !important; }
-  h2 { font-size: 1.4rem !important; }
-  nav .btn-gold { padding: 8px 16px !important; font-size: 0.65rem !important; }
+  h1 { font-size: 2.4rem !important; }
+  h2 { font-size: 1.8rem !important; }
+  nav .btn-gold { padding: 8px 16px !important; font-size: 0.8rem !important; }
 }
