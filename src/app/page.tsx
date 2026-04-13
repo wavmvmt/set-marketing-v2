@@ -36,7 +36,13 @@ export default function Home() {
       // Lenis smooth scroll — desktop only (saves RAF overhead on mobile)
       if (!mobile) {
         const LenisModule = await import("lenis");
-        const lenis = new LenisModule.default({ duration: 1.0, easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), smoothWheel: true });
+        const lenis = new LenisModule.default({
+          duration: 1.2,
+          easing: (t: number) => t === 1 ? 1 : 1 - Math.pow(2, -10 * t), // expo ease out — smooth but not sluggish
+          smoothWheel: true,
+          wheelMultiplier: 1.0,
+          touchMultiplier: 1.8,
+        });
         lenis.on("scroll", ScrollTrigger.update);
         gsap.ticker.add((t: number) => lenis.raf(t * 1000));
         gsap.ticker.lagSmoothing(0);
@@ -74,20 +80,26 @@ export default function Home() {
       const svcTitle = document.getElementById("svc-title");
 
       if (hero && driftVideo && sec2Video && svcVideo && driftLayer && sec2Layer && svcLayer && trustOverlay && splashLayer) {
-        // Wait for drift video metadata (need duration for scrub calc)
-        await new Promise<void>(r => { if (driftVideo.readyState >= 1) r(); else driftVideo.addEventListener("loadedmetadata", () => r(), { once: true }); });
-
-        // Track video readiness for crossfade safety
-        let sec2Ready = sec2Video.readyState >= 2;
-        let svcReady = svcVideo.readyState >= 2;
-        sec2Video.addEventListener("canplay", () => { sec2Ready = true; }, { once: true });
-        svcVideo.addEventListener("canplay", () => { svcReady = true; }, { once: true });
-
-        // Start splash video
-        if (splashVideo) splashVideo.play().catch(() => {});
+        // Wait for drift video to be sufficiently buffered for seeking
+        await new Promise<void>(r => {
+          if (driftVideo.readyState >= 3) r(); // HAVE_FUTURE_DATA
+          else {
+            const onReady = () => r();
+            driftVideo.addEventListener("canplay", onReady, { once: true });
+            // Fallback: if metadata loads but canplay doesn't fire quickly, proceed anyway
+            if (driftVideo.readyState >= 1) setTimeout(r, 800);
+          }
+        });
 
         const driftDur = driftVideo.duration;
         let svcDur = 0;
+
+        // svc video: preload="auto" so browser is already buffering — grab duration when ready
+        if (svcVideo.readyState >= 1) {
+          svcDur = svcVideo.duration;
+        } else {
+          svcVideo.addEventListener("loadedmetadata", () => { svcDur = svcVideo.duration; }, { once: true });
+        }
 
         // Lerp state for scroll-driven videos
         let driftTarget = 0, driftRender = 0;
@@ -97,27 +109,25 @@ export default function Home() {
         let frameCount = 0;
         const tick = () => {
           frameCount++;
-          // On mobile, skip every other frame for video seeks
-          const shouldSeek = !mobile || frameCount % 2 === 0;
 
           // Hero drift video scrub
-          driftRender += (driftTarget - driftRender) * 0.12;
-          if (shouldSeek && Math.abs(driftRender - driftVideo.currentTime) > 0.015) {
+          driftRender += (driftTarget - driftRender) * 0.18;
+          if (Math.abs(driftRender - driftVideo.currentTime) > 0.01) {
             driftVideo.currentTime = driftRender;
           }
 
           // Hero services video scrub
           if (svcDur > 0) {
-            svcRender += (svcTarget - svcRender) * 0.12;
-            if (shouldSeek && Math.abs(svcRender - svcVideo.currentTime) > 0.015) {
+            svcRender += (svcTarget - svcRender) * 0.18;
+            if (Math.abs(svcRender - svcVideo.currentTime) > 0.01) {
               svcVideo.currentTime = svcRender;
             }
           }
 
           // Method video scrub
           if (methodReady && methodDur > 0 && methodVideo) {
-            methodRender += (methodTarget - methodRender) * 0.12;
-            if (shouldSeek && Math.abs(methodRender - methodVideo.currentTime) > 0.015) {
+            methodRender += (methodTarget - methodRender) * 0.18;
+            if (Math.abs(methodRender - methodVideo.currentTime) > 0.01) {
               methodVideo.currentTime = methodRender;
             }
           }
@@ -144,17 +154,18 @@ export default function Home() {
           onUpdate: (self) => {
             const p = self.progress;
 
-            // ── Lazy load sec2 video at 40% ──
-            if (!sec2Loaded && p > 0.38) {
+            // ── Lazy load sec2 video at 20% (crossfade at 48% — needs buffer time) ──
+            if (!sec2Loaded && p > 0.18) {
               sec2Loaded = true;
               sec2Video.load();
               sec2Video.play().catch(() => {});
             }
 
-            // ── Lazy load svc video at 60% ──
-            if (!svcLoaded && p > 0.58) {
+            // ── Lazy load svc video at 35% (scrub starts 72%, crossfade at 68% — needs full buffer) ──
+            if (!svcLoaded && p > 0.32) {
               svcLoaded = true;
-              svcVideo.load();
+              // svc video uses preload="auto" so browser is already buffering,
+              // but we still need duration — get it here
               svcVideo.addEventListener("loadedmetadata", () => { svcDur = svcVideo.duration; }, { once: true });
               if (svcVideo.readyState >= 1) svcDur = svcVideo.duration;
             }
@@ -322,16 +333,18 @@ export default function Home() {
             founderVideo.play().catch(() => {});
             obs.disconnect();
           }
-        }, { rootMargin: "500px" });
+        }, { rootMargin: "800px" });
         obs.observe(founderVideo);
       }
       if (methodVideo) {
         const obs = new IntersectionObserver((entries) => {
           if (entries[0].isIntersecting) {
+            // preload="metadata" already gave us duration;
+            // now trigger full load for smooth scrubbing
             methodVideo.load();
             obs.disconnect();
           }
-        }, { rootMargin: "500px" });
+        }, { rootMargin: "1000px" });  // Load 1000px before entering viewport
         obs.observe(methodVideo);
       }
 
@@ -430,19 +443,19 @@ export default function Home() {
             </div>
           </div>
 
-          {/* LAYER 1: Drift video — preload metadata only */}
+          {/* LAYER 1: Drift video — preload auto required for smooth scrubbing */}
           <div id="drift-layer" style={{ position: "absolute", inset: 0, zIndex: 3, opacity: 1, willChange: "opacity" }}>
-            <video ref={driftVideoRef} muted playsInline preload="metadata" style={vidStyle}><source src="/hero-drift.mp4" type="video/mp4" /></video>
+            <video ref={driftVideoRef} muted playsInline preload="auto" style={{ ...vidStyle, transform: "translate(-50%, -50%) translateZ(0)" }}><source src="/hero-drift.mp4" type="video/mp4" /></video>
           </div>
 
-          {/* LAYER 2: Section 2 video + Trust Wall — lazy loaded at 40% scroll */}
+          {/* LAYER 2: Section 2 video + Trust Wall — preload metadata, play on scroll */}
           <div id="sec2-layer" style={{ position: "absolute", inset: 0, zIndex: 2, opacity: 0, willChange: "opacity" }}>
-            <video ref={sec2VideoRef} autoPlay loop muted playsInline preload="none" style={{ ...vidStyle, filter: "brightness(1.1) saturate(1.2)" }}><source src="/section2-bg.mp4" type="video/mp4" /></video>
+            <video ref={sec2VideoRef} autoPlay loop muted playsInline preload="metadata" style={{ ...vidStyle, filter: "brightness(1.1) saturate(1.2)" }}><source src="/section2-bg.mp4" type="video/mp4" /></video>
           </div>
 
-          {/* LAYER 3: Services FPV drone video — lazy loaded at 60% scroll */}
+          {/* LAYER 3: Services FPV drone video — preload auto required for smooth scrubbing */}
           <div id="svc-layer" style={{ position: "absolute", inset: 0, zIndex: 1, opacity: 0, willChange: "opacity" }}>
-            <video ref={svcVideoRef} muted playsInline preload="none" style={{ ...vidStyle, filter: "saturate(1.2)" }}><source src="/services-bg.mp4" type="video/mp4" /></video>
+            <video ref={svcVideoRef} muted playsInline preload="auto" style={{ ...vidStyle, filter: "saturate(1.2)", transform: "translate(-50%, -50%) translateZ(0)" }}><source src="/services-bg.mp4" type="video/mp4" /></video>
           </div>
 
           {/* OVERLAY: Trust Wall content */}
@@ -621,7 +634,7 @@ export default function Home() {
       <section ref={methodRef} id="process" style={{ position: "relative", height: "500vh" }}>
         <div style={{ position: "sticky", top: 0, width: "100%", height: "100vh", overflow: "hidden", background: "var(--bg)" }}>
 
-          <video ref={methodVideoRef} muted playsInline preload="none" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}>
+          <video ref={methodVideoRef} muted playsInline preload="metadata" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", transform: "translateZ(0)" }}>
             <source src="/method-bg.mp4" type="video/mp4" />
           </video>
 
