@@ -101,6 +101,15 @@ export default function Home() {
           svcVideo.addEventListener("loadedmetadata", () => { svcDur = svcVideo.duration; }, { once: true });
         }
 
+        // Track video readiness for crossfade safety
+        let sec2Ready = sec2Video.readyState >= 2;
+        let svcReady = svcVideo.readyState >= 2;
+        sec2Video.addEventListener("canplay", () => { sec2Ready = true; }, { once: true });
+        svcVideo.addEventListener("canplay", () => { svcReady = true; }, { once: true });
+
+        // Start splash video
+        if (splashVideo) splashVideo.play().catch(() => {});
+
         // Lerp state for scroll-driven videos
         let driftTarget = 0, driftRender = 0;
         let svcTarget = 0, svcRender = 0;
