@@ -284,7 +284,7 @@ export default function Home() {
               }
 
               (pair as HTMLElement).style.opacity = String(opacity);
-              (pair as HTMLElement).style.transform = `translate(-50%, -50%) translateX(${xOffset}px)`;
+              (pair as HTMLElement).style.transform = `translate(-50%, -45%) translateX(${xOffset}px)`;
             });
           },
         });
@@ -446,9 +446,9 @@ export default function Home() {
             <video ref={splashVideoRef} autoPlay loop muted playsInline preload="auto" style={{ ...vidStyle, filter: "saturate(1.2)" }}><source src="/splash-bg-hd.mp4" type="video/mp4" /></video>
             {/* Hero text overlay on splash */}
             <div style={{ position: "absolute", inset: 0, zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", textAlign: "center" }}>
-              <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(4.5rem, 12vw, 9rem)", fontWeight: 300, letterSpacing: "0.4em", color: "var(--gold)", marginBottom: 32, textShadow: textShadow("0 0 80px rgba(200,160,80,0.4), 0 4px 40px rgba(0,0,0,0.9)", "0 4px 40px rgba(0,0,0,0.9)") }}>S E T</div>
-              <div style={{ fontFamily: "var(--sans)", fontSize: "1.05rem", letterSpacing: "0.35em", color: "var(--gold)", textTransform: "uppercase", marginBottom: 20, fontWeight: 600, textShadow: "0 2px 16px rgba(0,0,0,0.9)" }}>Revenue Architecture · Toronto & Miami · Est. 2019</div>
-              <h1 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.8rem, 6vw, 5rem)", fontWeight: 300, lineHeight: 1.1, color: "#fff", textShadow: "0 3px 30px rgba(0,0,0,0.9)", maxWidth: 800 }}>We Don&rsquo;t Run <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Campaigns.</em><br />We Install Systems.</h1>
+              <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(4.5rem, 12vw, 9rem)", fontWeight: 300, letterSpacing: "0.4em", color: "var(--gold)", marginBottom: 32, textShadow: "var(--text-halo-gold)" }}>S E T</div>
+              <div style={{ fontFamily: "var(--sans)", fontSize: "1.05rem", letterSpacing: "0.35em", color: "var(--gold)", textTransform: "uppercase", marginBottom: 20, fontWeight: 600, textShadow: "var(--text-halo-gold)" }}>Revenue Architecture · Toronto & Miami · Est. 2019</div>
+              <h1 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.8rem, 6vw, 5rem)", fontWeight: 300, lineHeight: 1.1, color: "#fff", textShadow: "var(--text-halo)", maxWidth: 800 }}>We Don&rsquo;t Run <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Campaigns.</em><br />We Install Systems.</h1>
             </div>
           </div>
 
@@ -470,28 +470,28 @@ export default function Home() {
           {/* OVERLAY: Trust Wall content */}
           <div id="trust-overlay" style={{ position: "absolute", inset: 0, zIndex: 10, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 clamp(20px, 6vw, 80px)", opacity: 0, transform: "translateY(30px)", willChange: "opacity, transform" }}>
             <div style={{ maxWidth: 1100, width: "100%", textAlign: "center" }}>
-              <span style={{ fontSize: "1.4rem", letterSpacing: "0.35em", color: "#fff", textTransform: "uppercase", textShadow: "0 2px 12px rgba(0,0,0,0.7)", fontWeight: 700 }}>TRUSTED BY</span>
+              <span style={{ fontSize: "1.4rem", letterSpacing: "0.35em", color: "#fff", textTransform: "uppercase", textShadow: "var(--text-halo)", fontWeight: 700 }}>TRUSTED BY</span>
               <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 16, marginTop: 40, marginBottom: 50 }}>
-                {BRANDS.map(b => <div key={b} style={{ fontSize: "clamp(0.85rem, 1.8vw, 1.1rem)", fontWeight: 700, letterSpacing: "0.15em", color: "#fff", textTransform: "uppercase", padding: "clamp(8px, 1.5vw, 12px) clamp(14px, 2vw, 22px)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 4, ...mobileBlur("blur(8px)", "rgba(0,0,0,0.35)", "rgba(0,0,0,0.6)"), textShadow: "0 1px 8px rgba(0,0,0,0.6)" }}>{b}</div>)}
+                {BRANDS.map(b => <div key={b} style={{ fontSize: "clamp(0.85rem, 1.8vw, 1.1rem)", fontWeight: 700, letterSpacing: "0.15em", color: "#fff", textTransform: "uppercase", padding: "clamp(8px, 1.5vw, 12px) clamp(14px, 2vw, 22px)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 4, ...mobileBlur("blur(8px)", "rgba(0,0,0,0.35)", "rgba(0,0,0,0.6)"), textShadow: "var(--text-halo)" }}>{b}</div>)}
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 20 }}>
                 {STATS.map(s => <div key={s.l} style={{ textAlign: "center", padding: 16 }}>
-                  <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(3.2rem, 5vw, 4.5rem)", fontWeight: 300, lineHeight: 1, color: "#fff", textShadow: "0 2px 20px rgba(0,0,0,0.7)" }}>{s.v}</div>
-                  <div style={{ fontSize: "1.3rem", fontWeight: 700, color: "var(--gold)", marginTop: 8, textShadow: "0 1px 8px rgba(0,0,0,0.6)" }}>{s.l}</div>
-                  <div style={{ fontSize: "1.1rem", color: "rgba(255,255,255,0.85)", marginTop: 4, fontWeight: 500, textShadow: "0 1px 6px rgba(0,0,0,0.5)" }}>{s.s}</div>
+                  <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(3.2rem, 5vw, 4.5rem)", fontWeight: 300, lineHeight: 1, color: "#fff", textShadow: "var(--text-halo)" }}>{s.v}</div>
+                  <div style={{ fontSize: "1.3rem", fontWeight: 700, color: "var(--gold)", marginTop: 8, textShadow: "var(--text-halo-gold)" }}>{s.l}</div>
+                  <div style={{ fontSize: "1.1rem", color: "rgba(255,255,255,0.85)", marginTop: 4, fontWeight: 500, textShadow: "var(--text-halo)" }}>{s.s}</div>
                 </div>)}
               </div>
             </div>
           </div>
 
           {/* OVERLAY: Revenue Architecture title */}
-          <div id="svc-title" style={{ position: "absolute", top: "clamp(80px, 12vh, 140px)", left: "50%", transform: "translateX(-50%)", zIndex: 12, textAlign: "center", opacity: 0, willChange: "opacity" }}>
-            <h2 style={{ fontFamily: "var(--serif)", fontSize: "clamp(3.8rem, 7vw, 6rem)", color: "#fff", textShadow: "0 4px 40px rgba(0,0,0,0.9)", fontWeight: 400, letterSpacing: "0.02em" }}>Revenue <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Architecture</em></h2>
+          <div id="svc-title" style={{ position: "absolute", top: "clamp(24px, 4vh, 60px)", left: "50%", transform: "translateX(-50%)", zIndex: 14, textAlign: "center", opacity: 0, willChange: "opacity" }}>
+            <h2 style={{ fontFamily: "var(--serif)", fontSize: "clamp(3.8rem, 7vw, 6rem)", color: "#fff", textShadow: "var(--text-halo)", fontWeight: 400, letterSpacing: "0.02em" }}>Revenue <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Architecture</em></h2>
           </div>
 
           {/* OVERLAY: Service tile pairs — slide R→L */}
           {[[SERVICES[0], SERVICES[1]], [SERVICES[2], SERVICES[3]], [SERVICES[4], SERVICES[5]]].map((pair, pi) => (
-            <div key={pi} className="svc-pair" style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%) translateX(250px)", zIndex: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, width: "min(94vw, 1200px)", opacity: 0, willChange: "opacity, transform" }}>
+            <div key={pi} className="svc-pair" style={{ position: "absolute", top: "55%", left: "50%", transform: "translate(-50%, -50%) translateX(250px)", zIndex: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, width: "min(94vw, 1200px)", opacity: 0, willChange: "opacity, transform" }}>
               {pair.map(s => {
                 const isOpen = expandedService === s.id;
                 return (
@@ -529,7 +529,7 @@ export default function Home() {
 
           {/* Scroll hint */}
           <div style={{ position: "absolute", bottom: 40, left: "50%", transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", gap: 12, opacity: 0.9, animation: "bob 2.5s ease-in-out infinite", zIndex: 20 }}>
-            <span style={{ fontSize: "1.4rem", letterSpacing: "0.35em", color: "#fff", textTransform: "uppercase", fontWeight: 600, textShadow: "0 2px 12px rgba(0,0,0,0.7)" }}>SCROLL</span>
+            <span style={{ fontSize: "1.4rem", letterSpacing: "0.35em", color: "#fff", textTransform: "uppercase", fontWeight: 600, textShadow: "var(--text-halo)" }}>SCROLL</span>
             <svg width="24" height="32" viewBox="0 0 24 32" fill="none" style={{ filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.5))" }}>
               <path d="M12 0L12 28M12 28L2 18M12 28L22 18" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
@@ -573,22 +573,22 @@ export default function Home() {
 
         <div style={{ position: "relative", zIndex: 10, maxWidth: 620, padding: "clamp(60px, 10vh, 120px) clamp(40px, 6vw, 100px)", textAlign: "right" }}>
           <div className="fade-in" style={{ marginBottom: 40 }}>
-            <span style={{ fontSize: "1.2rem", letterSpacing: "0.3em", color: "var(--gold)", textTransform: "uppercase", fontWeight: 600, textShadow: "0 2px 12px rgba(0,0,0,0.9)" }}>Founder & CEO</span>
-            <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.6rem, 5vw, 3.8rem)", color: "#fff", marginTop: 12, fontWeight: 400, textShadow: "0 3px 20px rgba(0,0,0,0.9)" }}>Chris Marchese</div>
-            <div style={{ fontSize: "1.3rem", color: "#fff", marginTop: 8, fontWeight: 500, textShadow: "0 2px 10px rgba(0,0,0,0.9)" }}>Toronto & Miami</div>
+            <span style={{ fontSize: "1.2rem", letterSpacing: "0.3em", color: "var(--gold)", textTransform: "uppercase", fontWeight: 600, textShadow: "var(--text-halo-gold)" }}>Founder & CEO</span>
+            <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.6rem, 5vw, 3.8rem)", color: "#fff", marginTop: 12, fontWeight: 400, textShadow: "var(--text-halo)" }}>Chris Marchese</div>
+            <div style={{ fontSize: "1.3rem", color: "#fff", marginTop: 8, fontWeight: 500, textShadow: "var(--text-halo)" }}>Toronto & Miami</div>
           </div>
 
-          <h2 className="fade-in" style={{ fontSize: "clamp(2.6rem, 4.5vw, 3.8rem)", lineHeight: 1.2, marginBottom: 36, color: "#fff", textShadow: "0 3px 30px rgba(0,0,0,0.9)" }}>
+          <h2 className="fade-in" style={{ fontSize: "clamp(2.6rem, 4.5vw, 3.8rem)", lineHeight: 1.2, marginBottom: 36, color: "#fff", textShadow: "var(--text-halo)" }}>
             <span style={{ background: "linear-gradient(135deg, #c8a050, #e8c878)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.9))" }}>$500M+</span> in client revenue.<br />System-first.
           </h2>
 
           {["12 years as an industrial millwright.", "No trust fund. No shortcuts.", "Just pattern recognition and an obsession", "with what actually moves people to act.", "That obsession became Strategic Emotional Targeting.", "That framework became SET."].map((l, i) => (
-            <p key={i} className="fade-in" style={{ fontFamily: "var(--serif)", fontSize: "clamp(1.3rem, 1.8vw, 1.55rem)", color: i >= 4 ? "var(--gold)" : "#fff", fontStyle: i >= 4 ? "italic" : "normal", lineHeight: 1.6, marginBottom: 10, textShadow: "0 2px 16px rgba(0,0,0,0.9)" }}>{l}</p>
+            <p key={i} className="fade-in" style={{ fontFamily: "var(--serif)", fontSize: "clamp(1.3rem, 1.8vw, 1.55rem)", color: i >= 4 ? "var(--gold)" : "#fff", fontStyle: i >= 4 ? "italic" : "normal", lineHeight: 1.6, marginBottom: 10, textShadow: "var(--text-halo)" }}>{l}</p>
           ))}
 
           <div className="fade-in-stagger" style={{ display: "flex", gap: 14, flexWrap: "wrap", marginTop: 32, justifyContent: "flex-end" }}>
             {["SET Enterprises", "SET Ventures", "SET Sales Academy"].map(e => (
-              <div key={e} style={{ padding: "10px 18px", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 6, ...mobileBlur("blur(12px)", "rgba(14,14,20,0.6)", "rgba(14,14,20,0.85)"), fontSize: "1.15rem", fontWeight: 600, color: "#fff", textShadow: "0 2px 8px rgba(0,0,0,0.9)" }}>{e}</div>
+              <div key={e} style={{ padding: "10px 18px", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 6, ...mobileBlur("blur(12px)", "rgba(14,14,20,0.6)", "rgba(14,14,20,0.85)"), fontSize: "1.15rem", fontWeight: 600, color: "#fff", textShadow: "var(--text-halo)" }}>{e}</div>
             ))}
           </div>
         </div>
@@ -614,10 +614,10 @@ export default function Home() {
               textAlign: i % 2 === 1 ? "right" : "left",
               willChange: "opacity, transform",
             }}>
-              <div style={{ fontSize: "clamp(6rem, 14vw, 12rem)", fontFamily: "var(--serif)", fontWeight: 300, color: "transparent", WebkitTextStroke: "1.5px rgba(200,160,80,0.5)", lineHeight: 0.85, marginBottom: 12, textShadow: "0 4px 40px rgba(0,0,0,0.7)" }}>{step.n}</div>
-              <div style={{ fontSize: "clamp(1.05rem, 1.5vw, 1.25rem)", letterSpacing: "0.35em", color: "var(--gold)", textTransform: "uppercase", fontWeight: 700, marginBottom: 16, textShadow: "0 2px 20px rgba(0,0,0,0.95)" }}>{step.s}</div>
-              <h3 style={{ fontFamily: "var(--serif)", fontSize: "clamp(3.8rem, 7vw, 6rem)", color: "#fff", lineHeight: 1.05, marginBottom: 20, fontWeight: 400, textShadow: textShadow("0 4px 40px rgba(0,0,0,0.95), 0 2px 10px rgba(0,0,0,0.95), 0 0 80px rgba(0,0,0,0.6)", "0 4px 40px rgba(0,0,0,0.95)") }}>{step.t}</h3>
-              <p style={{ fontSize: "clamp(1.35rem, 2vw, 1.65rem)", color: "#fff", lineHeight: 1.7, maxWidth: 520, fontWeight: 400, textShadow: textShadow("0 2px 20px rgba(0,0,0,0.95), 0 1px 6px rgba(0,0,0,0.95), 0 0 60px rgba(0,0,0,0.5)", "0 2px 20px rgba(0,0,0,0.95)") }}>{step.d}</p>
+              <div style={{ fontSize: "clamp(6rem, 14vw, 12rem)", fontFamily: "var(--serif)", fontWeight: 300, color: "var(--gold)", lineHeight: 0.85, marginBottom: 12, opacity: 0.7, textShadow: "var(--text-halo-gold)" }}>{step.n}</div>
+              <div style={{ fontSize: "clamp(1.05rem, 1.5vw, 1.25rem)", letterSpacing: "0.35em", color: "var(--gold)", textTransform: "uppercase", fontWeight: 700, marginBottom: 16, textShadow: "var(--text-halo-gold)" }}>{step.s}</div>
+              <h3 style={{ fontFamily: "var(--serif)", fontSize: "clamp(3.8rem, 7vw, 6rem)", color: "#fff", lineHeight: 1.05, marginBottom: 20, fontWeight: 400, textShadow: "var(--text-halo)" }}>{step.t}</h3>
+              <p style={{ fontSize: "clamp(1.35rem, 2vw, 1.65rem)", color: "#fff", lineHeight: 1.7, maxWidth: 520, fontWeight: 400, textShadow: "var(--text-halo)" }}>{step.d}</p>
             </div>
           ))}
         </div>
