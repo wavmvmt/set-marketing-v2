@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import { useEffect, useRef, useState } from "react";
 
 export default function Home() {
@@ -340,17 +342,17 @@ export default function Home() {
 
           {/* LAYER 1: Drift video */}
           <div id="drift-layer" style={{ position: "absolute", inset: 0, zIndex: 3, opacity: 1 }}>
-            <video ref={driftVideoRef} muted playsInline preload="auto" style={vidStyle}><source src="/hero-drift.mp4" type="video/mp4" /></video>
+            <video ref={driftVideoRef} muted playsInline preload="metadata" style={vidStyle}><source src="/hero-drift.mp4" type="video/mp4" /></video>
           </div>
 
           {/* LAYER 2: Section 2 video + Trust Wall */}
           <div id="sec2-layer" style={{ position: "absolute", inset: 0, zIndex: 2, opacity: 0 }}>
-            <video ref={sec2VideoRef} autoPlay loop muted playsInline preload="auto" style={{ ...vidStyle, filter: "brightness(1.1) saturate(1.2)" }}><source src="/section2-bg.mp4" type="video/mp4" /></video>
+            <video ref={sec2VideoRef} autoPlay loop muted playsInline preload="none" style={{ ...vidStyle, filter: "brightness(1.1) saturate(1.2)" }}><source src="/section2-bg.mp4" type="video/mp4" /></video>
           </div>
 
           {/* LAYER 3: Services FPV drone video */}
           <div id="svc-layer" style={{ position: "absolute", inset: 0, zIndex: 1, opacity: 0 }}>
-            <video ref={svcVideoRef} muted playsInline preload="auto" style={{ ...vidStyle, filter: "saturate(1.2)" }}><source src="/services-bg.mp4" type="video/mp4" /></video>
+            <video ref={svcVideoRef} muted playsInline preload="none" style={{ ...vidStyle, filter: "saturate(1.2)" }}><source src="/services-bg.mp4" type="video/mp4" /></video>
           </div>
 
           {/* OVERLAY: Trust Wall content */}
@@ -480,7 +482,7 @@ export default function Home() {
           <div className="fade-in-stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: 20 }}>
             {CASES.map((c, i) => <div key={i} style={{ background: "var(--bg3)", border: "1px solid var(--border)", borderRadius: 14, overflow: "hidden", transition: "all 0.5s" }} onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-8px)"; e.currentTarget.style.boxShadow = "0 20px 60px rgba(0,0,0,0.5)"; }} onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}>
               <div style={{ height: 180, overflow: "hidden", position: "relative" }}>
-                <img src={c.img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0.45) saturate(1.3)", transition: "transform 0.6s" }} onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.05)")} onMouseLeave={e => (e.currentTarget.style.transform = "")} />
+                <Image src={c.img} alt="" fill style={{ objectFit: "cover", filter: "brightness(0.45) saturate(1.3)", transition: "transform 0.6s" }} sizes="(max-width: 768px) 100vw, 33vw" />
                 <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, var(--bg3), transparent 60%)" }} />
                 <div style={{ position: "absolute", bottom: 16, left: 20 }}><span style={{ fontSize: "0.72rem", color: "var(--text3)" }}>{c.tp}</span><h3 style={{ fontFamily: "var(--serif)", fontSize: "1.8rem", color: "var(--text)", marginTop: 4 }}>{c.t}</h3></div>
               </div>
@@ -535,7 +537,7 @@ export default function Home() {
         <div style={{ position: "sticky", top: 0, width: "100%", height: "100vh", overflow: "hidden", background: "#000" }}>
 
           {/* Scroll-scrub video background — full screen, no overlays */}
-          <video ref={methodVideoRef} muted playsInline preload="auto" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}>
+          <video ref={methodVideoRef} muted playsInline preload="none" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}>
             <source src="/method-bg.mp4" type="video/mp4" />
           </video>
 
