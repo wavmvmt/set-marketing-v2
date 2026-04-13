@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 
 export default function Home() {
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [expandedService, setExpandedService] = useState<number | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
   const driftVideoRef = useRef<HTMLVideoElement>(null);
   const sec2VideoRef = useRef<HTMLVideoElement>(null);
@@ -12,19 +14,51 @@ export default function Home() {
   const splashVideoRef = useRef<HTMLVideoElement>(null);
   const methodVideoRef = useRef<HTMLVideoElement>(null);
   const methodRef = useRef<HTMLDivElement>(null);
+  const founderVideoRef = useRef<HTMLVideoElement>(null);
 
-  // ── GSAP ──
+  // ── Mobile detection ──
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  // ── GSAP + Scroll ──
   useEffect(() => {
     const init = async () => {
+      const mobile = window.matchMedia("(max-width: 768px)").matches;
       const { gsap } = await import("gsap");
       const { ScrollTrigger } = await import("gsap/ScrollTrigger");
       gsap.registerPlugin(ScrollTrigger);
 
-      const LenisModule = await import("lenis");
-      const lenis = new LenisModule.default({ duration: 1.0, easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), smoothWheel: true });
-      lenis.on("scroll", ScrollTrigger.update);
-      gsap.ticker.add((t: number) => lenis.raf(t * 1000));
-      gsap.ticker.lagSmoothing(0);
+      // Lenis smooth scroll — desktop only (saves RAF overhead on mobile)
+      if (!mobile) {
+        const LenisModule = await import("lenis");
+        const lenis = new LenisModule.default({ duration: 1.0, easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), smoothWheel: true });
+        lenis.on("scroll", ScrollTrigger.update);
+        gsap.ticker.add((t: number) => lenis.raf(t * 1000));
+        gsap.ticker.lagSmoothing(0);
+      }
+
+      // ═══ METHOD: shared state (hoisted to init scope for merged RAF) ═══
+      const methodVideo = methodVideoRef.current;
+      const methodSection = methodRef.current;
+      let methodDur = 0;
+      let methodTarget = 0, methodRender = 0;
+      let methodReady = false;
+
+      if (methodVideo) {
+        methodVideo.addEventListener("loadedmetadata", () => {
+          methodDur = methodVideo.duration;
+          methodReady = true;
+        }, { once: true });
+        if (methodVideo.readyState >= 1) {
+          methodDur = methodVideo.duration;
+          methodReady = true;
+        }
+      }
 
       // ═══ UNIFIED HERO: FOUR video layers, ONE container ═══
       const hero = heroRef.current;
@@ -40,42 +74,67 @@ export default function Home() {
       const svcTitle = document.getElementById("svc-title");
 
       if (hero && driftVideo && sec2Video && svcVideo && driftLayer && sec2Layer && svcLayer && trustOverlay && splashLayer) {
-        // Wait for videos
-        await Promise.all([
-          new Promise<void>(r => { if (driftVideo.readyState >= 1) r(); else driftVideo.addEventListener("loadedmetadata", () => r(), { once: true }); }),
-          new Promise<void>(r => { if (svcVideo.readyState >= 1) r(); else svcVideo.addEventListener("loadedmetadata", () => r(), { once: true }); }),
-        ]);
+        // Wait for drift video metadata (need duration for scrub calc)
+        await new Promise<void>(r => { if (driftVideo.readyState >= 1) r(); else driftVideo.addEventListener("loadedmetadata", () => r(), { once: true }); });
 
-        // Start splash + sec2 videos looping
+        // Track video readiness for crossfade safety
+        let sec2Ready = sec2Video.readyState >= 2;
+        let svcReady = svcVideo.readyState >= 2;
+        sec2Video.addEventListener("canplay", () => { sec2Ready = true; }, { once: true });
+        svcVideo.addEventListener("canplay", () => { svcReady = true; }, { once: true });
+
+        // Start splash video
         if (splashVideo) splashVideo.play().catch(() => {});
-        sec2Video.play().catch(() => {});
 
         const driftDur = driftVideo.duration;
-        const svcDur = svcVideo.duration;
+        let svcDur = 0;
 
-        // Lerp tickers for scroll-driven videos
+        // Lerp state for scroll-driven videos
         let driftTarget = 0, driftRender = 0;
         let svcTarget = 0, svcRender = 0;
 
+        // ═══ SINGLE MERGED RAF LOOP ═══
+        let frameCount = 0;
         const tick = () => {
+          frameCount++;
+          // On mobile, skip every other frame for video seeks
+          const shouldSeek = !mobile || frameCount % 2 === 0;
+
+          // Hero drift video scrub
           driftRender += (driftTarget - driftRender) * 0.12;
-          if (Math.abs(driftRender - driftVideo.currentTime) > 0.015) driftVideo.currentTime = driftRender;
-          svcRender += (svcTarget - svcRender) * 0.12;
-          if (Math.abs(svcRender - svcVideo.currentTime) > 0.015) svcVideo.currentTime = svcRender;
+          if (shouldSeek && Math.abs(driftRender - driftVideo.currentTime) > 0.015) {
+            driftVideo.currentTime = driftRender;
+          }
+
+          // Hero services video scrub
+          if (svcDur > 0) {
+            svcRender += (svcTarget - svcRender) * 0.12;
+            if (shouldSeek && Math.abs(svcRender - svcVideo.currentTime) > 0.015) {
+              svcVideo.currentTime = svcRender;
+            }
+          }
+
+          // Method video scrub
+          if (methodReady && methodDur > 0 && methodVideo) {
+            methodRender += (methodTarget - methodRender) * 0.12;
+            if (shouldSeek && Math.abs(methodRender - methodVideo.currentTime) > 0.015) {
+              methodVideo.currentTime = methodRender;
+            }
+          }
+
           requestAnimationFrame(tick);
         };
         tick();
 
-        // ═══ MASTER SCROLL CONTROLLER ═══
-        // 1500vh total. One ScrollTrigger. Controls everything.
-        //
-        // 0–8%:     Splash video visible (autoplay loop), fading out
-        // 0–50%:    Drift video scrubs (takes over from splash)
-        // 50–70%:   Sec2 visible
-        // 52–68%:   Trust Wall fades in/out (during sec2)
-        // 70–100%:  Services video scrubs + tile pairs slide R→L
+        // Lazy-load sec2 and svc videos on scroll progress
+        let sec2Loaded = false, svcLoaded = false;
 
+        // ═══ MASTER SCROLL CONTROLLER ═══
         const svcPairs = document.querySelectorAll(".svc-pair");
+
+        // Cache previous values to skip redundant style writes
+        let prevSplashOp = "", prevDriftOp = "", prevSec2Op = "", prevSvcOp = "";
+        let prevTrustOp = "", prevTrustTx = "", prevSvcTitleOp = "";
 
         ScrollTrigger.create({
           trigger: hero,
@@ -85,65 +144,96 @@ export default function Home() {
           onUpdate: (self) => {
             const p = self.progress;
 
-            // ── Splash layer: visible on load, fades out 0–8% ──
-            if (p < 0.01) {
-              splashLayer.style.opacity = "1";
-            } else if (p < 0.08) {
-              splashLayer.style.opacity = String(1 - (p - 0.01) / 0.07);
-            } else {
-              splashLayer.style.opacity = "0";
+            // ── Lazy load sec2 video at 40% ──
+            if (!sec2Loaded && p > 0.38) {
+              sec2Loaded = true;
+              sec2Video.load();
+              sec2Video.play().catch(() => {});
             }
+
+            // ── Lazy load svc video at 60% ──
+            if (!svcLoaded && p > 0.58) {
+              svcLoaded = true;
+              svcVideo.load();
+              svcVideo.addEventListener("loadedmetadata", () => { svcDur = svcVideo.duration; }, { once: true });
+              if (svcVideo.readyState >= 1) svcDur = svcVideo.duration;
+            }
+
+            // ── Splash layer: visible on load, fades out 0–8% ──
+            let splashOp: string;
+            if (p < 0.01) splashOp = "1";
+            else if (p < 0.08) splashOp = String(1 - (p - 0.01) / 0.07);
+            else splashOp = "0";
+            if (splashOp !== prevSplashOp) { splashLayer.style.opacity = splashOp; prevSplashOp = splashOp; }
 
             // ── Drift video scrub: 0–50% ──
             driftTarget = Math.min(1, p / 0.50) * driftDur;
 
             // ── Services video scrub: 72–100% ──
-            if (p > 0.72) {
+            if (p > 0.72 && svcDur > 0) {
               svcTarget = ((p - 0.72) / 0.28) * svcDur;
             }
 
-            // ── Layer visibility — INSTANT CLEAN CUT ──
-            if (p < 0.50) {
-              driftLayer.style.opacity = "1";
-              sec2Layer.style.opacity = "0";
-              svcLayer.style.opacity = "0";
-            } else if (p < 0.70) {
-              driftLayer.style.opacity = "0";
-              sec2Layer.style.opacity = "1";
-              svcLayer.style.opacity = "0";
+            // ── Layer visibility — CROSSFADE with 4% overlap ──
+            let driftOp: string, sec2Op: string, svcOp: string;
+            if (p < 0.48) {
+              driftOp = "1"; sec2Op = "0"; svcOp = "0";
+            } else if (p < 0.52) {
+              // Crossfade drift → sec2 (hold drift if sec2 not ready)
+              const t = (p - 0.48) / 0.04;
+              if (sec2Ready) {
+                driftOp = String(1 - t); sec2Op = String(t);
+              } else {
+                driftOp = "1"; sec2Op = "0";
+              }
+              svcOp = "0";
+            } else if (p < 0.68) {
+              driftOp = "0"; sec2Op = "1"; svcOp = "0";
+            } else if (p < 0.72) {
+              // Crossfade sec2 → svc (hold sec2 if svc not ready)
+              const t = (p - 0.68) / 0.04;
+              driftOp = "0";
+              if (svcReady) {
+                sec2Op = String(1 - t); svcOp = String(t);
+              } else {
+                sec2Op = "1"; svcOp = "0";
+              }
             } else {
-              driftLayer.style.opacity = "0";
-              sec2Layer.style.opacity = "0";
-              svcLayer.style.opacity = "1";
+              driftOp = "0"; sec2Op = "0"; svcOp = "1";
             }
+            if (driftOp !== prevDriftOp) { driftLayer.style.opacity = driftOp; prevDriftOp = driftOp; }
+            if (sec2Op !== prevSec2Op) { sec2Layer.style.opacity = sec2Op; prevSec2Op = sec2Op; }
+            if (svcOp !== prevSvcOp) { svcLayer.style.opacity = svcOp; prevSvcOp = svcOp; }
 
-            // ── Trust Wall: fades in at 52% (with sec2), fades out at 68% ──
+            // ── Trust Wall: fades in at 52%, fades out at 68% ──
+            let trustOp: string, trustTx: string;
             if (p < 0.52) {
-              trustOverlay.style.opacity = "0";
-              trustOverlay.style.transform = "translateY(20px)";
+              trustOp = "0"; trustTx = "translateY(20px)";
             } else if (p < 0.56) {
               const t = (p - 0.52) / 0.04;
-              trustOverlay.style.opacity = String(t);
-              trustOverlay.style.transform = `translateY(${20 * (1 - t)}px)`;
+              trustOp = String(t); trustTx = `translateY(${20 * (1 - t)}px)`;
             } else if (p < 0.65) {
-              trustOverlay.style.opacity = "1";
-              trustOverlay.style.transform = "translateY(0)";
+              trustOp = "1"; trustTx = "translateY(0)";
             } else if (p < 0.68) {
               const t = (p - 0.65) / 0.03;
-              trustOverlay.style.opacity = String(1 - t);
+              trustOp = String(1 - t); trustTx = "translateY(0)";
             } else {
-              trustOverlay.style.opacity = "0";
+              trustOp = "0"; trustTx = "translateY(0)";
             }
+            if (trustOp !== prevTrustOp) { trustOverlay.style.opacity = trustOp; prevTrustOp = trustOp; }
+            if (trustTx !== prevTrustTx) { trustOverlay.style.transform = trustTx; prevTrustTx = trustTx; }
 
-            // ── Revenue Architecture title: stays visible throughout services section ──
+            // ── Revenue Architecture title ──
+            let svcTitleOp: string;
             if (svcTitle) {
-              if (p < 0.70) svcTitle.style.opacity = "0";
-              else if (p < 0.74) svcTitle.style.opacity = String((p - 0.70) / 0.04);
-              else if (p < 0.96) svcTitle.style.opacity = "1";
-              else svcTitle.style.opacity = String(Math.max(0, 1 - (p - 0.96) / 0.04));
+              if (p < 0.70) svcTitleOp = "0";
+              else if (p < 0.74) svcTitleOp = String((p - 0.70) / 0.04);
+              else if (p < 0.96) svcTitleOp = "1";
+              else svcTitleOp = String(Math.max(0, 1 - (p - 0.96) / 0.04));
+              if (svcTitleOp !== prevSvcTitleOp) { svcTitle.style.opacity = svcTitleOp; prevSvcTitleOp = svcTitleOp; }
             }
 
-            // ── Service tile pairs: slide R→L, 3 pairs across 75–98% ──
+            // ── Service tile pairs: slide R→L ──
             const svcStart = 0.75;
             const svcEnd = 0.98;
             const svcRange = svcEnd - svcStart;
@@ -180,23 +270,9 @@ export default function Home() {
         });
       }
 
-      // ═══ METHOD: Scroll-scrub video with step overlays ═══
-      const methodVideo = methodVideoRef.current;
-      const methodSection = methodRef.current;
+      // ═══ METHOD: ScrollTrigger (video scrub handled in merged RAF) ═══
       if (methodSection && methodVideo) {
-        await new Promise<void>(r => { if (methodVideo.readyState >= 1) r(); else methodVideo.addEventListener("loadedmetadata", () => r(), { once: true }); });
-        const methodDur = methodVideo.duration;
-        let methodTarget = 0, methodRender = 0;
-
-        const methodTick = () => {
-          methodRender += (methodTarget - methodRender) * 0.12;
-          if (Math.abs(methodRender - methodVideo.currentTime) > 0.015) methodVideo.currentTime = methodRender;
-          requestAnimationFrame(methodTick);
-        };
-        methodTick();
-
         const methodSteps = document.querySelectorAll(".method-step");
-        // Progress tracking removed for clean cinematic look
 
         ScrollTrigger.create({
           trigger: methodSection,
@@ -205,14 +281,8 @@ export default function Home() {
           scrub: 0,
           onUpdate: (self) => {
             const p = self.progress;
-
-            // Scrub video across full scroll
             methodTarget = p * methodDur;
 
-            // Progress bar
-            // clean — no progress bar UI
-
-            // 4 steps: each gets 25% of scroll, with fade in/hold/fade out
             methodSteps.forEach((step, i) => {
               const stepStart = i * 0.25;
               const stepEnd = stepStart + 0.25;
@@ -241,6 +311,28 @@ export default function Home() {
             });
           },
         });
+      }
+
+      // ═══ LAZY LOAD: Founder + Method videos via IntersectionObserver ═══
+      const founderVideo = founderVideoRef.current;
+      if (founderVideo) {
+        const obs = new IntersectionObserver((entries) => {
+          if (entries[0].isIntersecting) {
+            founderVideo.load();
+            founderVideo.play().catch(() => {});
+            obs.disconnect();
+          }
+        }, { rootMargin: "500px" });
+        obs.observe(founderVideo);
+      }
+      if (methodVideo) {
+        const obs = new IntersectionObserver((entries) => {
+          if (entries[0].isIntersecting) {
+            methodVideo.load();
+            obs.disconnect();
+          }
+        }, { rootMargin: "500px" });
+        obs.observe(methodVideo);
       }
 
       // ═══ FADE-INS ═══
@@ -301,11 +393,17 @@ export default function Home() {
   ];
 
   const vidStyle: React.CSSProperties = { position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", minWidth: "100%", minHeight: "100%", width: "auto", height: "auto", objectFit: "cover" };
+  // Mobile-safe blur: skip backdrop-filter on mobile, increase bg opacity
+  const mobileBlur = (blur: string, bg: string, mobileBg: string) =>
+    isMobile ? { background: mobileBg } : { backdropFilter: blur, background: bg };
+  // Simplified text shadow for mobile
+  const textShadow = (desktop: string, mobile?: string) =>
+    isMobile && mobile ? mobile : desktop;
 
   return (
     <>
       {/* ═══ NAV ═══ */}
-      <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, padding: "0 clamp(20px, 4vw, 60px)", height: 68, display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(7,7,10,0.7)", backdropFilter: "blur(16px)", borderBottom: "1px solid var(--border)" }}>
+      <nav style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 100, padding: "0 clamp(20px, 4vw, 60px)", height: 68, display: "flex", alignItems: "center", justifyContent: "space-between", ...mobileBlur("blur(16px)", "rgba(7,7,10,0.7)", "rgba(7,7,10,0.92)"), borderBottom: "1px solid var(--border)" }}>
         <div style={{ fontFamily: "var(--serif)", fontSize: "1.3rem", fontWeight: 300, letterSpacing: "0.2em", color: "var(--gold)", cursor: "pointer" }} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>SET</div>
         <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
           {["Services", "Results", "About", "Process"].map(l => <a key={l} href={`#${l.toLowerCase()}`} style={{ color: "var(--text2)", fontSize: "0.78rem", textDecoration: "none" }}>{l}</a>)}
@@ -315,50 +413,44 @@ export default function Home() {
 
       {/* ═══════════════════════════════════════════════════════════════
           UNIFIED HERO: FOUR video layers, ONE pinned container
-          1500vh scroll. Never leaves the viewport.
-
-          Splash layer: autoplay on load, fades out 0–8%
-          0–50%:    Drift video scrubs
-          48–55%:   Crossfade drift → sec2
-          55–70%:   Sec2 + Trust Wall
-          68–72%:   Crossfade sec2 → services
-          72–100%:  Services FPV drone + tile pairs sliding R→L
+          1500vh scroll.
+          Crossfade zones at 48-52% and 68-72% to prevent black flashes.
           ═══════════════════════════════════════════════════════════════ */}
       <section ref={heroRef} style={{ position: "relative", height: "1500vh" }}>
-        <div style={{ position: "sticky", top: 0, width: "100%", height: "100vh", overflow: "hidden", background: "#000" }}>
+        <div style={{ position: "sticky", top: 0, width: "100%", height: "100vh", overflow: "hidden", background: "var(--bg)" }}>
 
           {/* LAYER 0: Splash video — autoplay on load, fades out when scrolling begins */}
-          <div id="splash-layer" style={{ position: "absolute", inset: 0, zIndex: 4, opacity: 1 }}>
+          <div id="splash-layer" style={{ position: "absolute", inset: 0, zIndex: 4, opacity: 1, willChange: "opacity" }}>
             <video ref={splashVideoRef} autoPlay loop muted playsInline preload="auto" style={{ ...vidStyle, filter: "saturate(1.2)" }}><source src="/splash-bg-hd.mp4" type="video/mp4" /></video>
             {/* Hero text overlay on splash */}
             <div style={{ position: "absolute", inset: 0, zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", textAlign: "center" }}>
-              <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(3.5rem, 10vw, 7rem)", fontWeight: 300, letterSpacing: "0.4em", color: "var(--gold)", marginBottom: 32, textShadow: "0 0 80px rgba(200,160,80,0.4), 0 4px 40px rgba(0,0,0,0.9)" }}>S E T</div>
-              <div style={{ fontFamily: "var(--sans)", fontSize: "0.65rem", letterSpacing: "0.35em", color: "var(--gold)", textTransform: "uppercase", marginBottom: 20, fontWeight: 600, textShadow: "0 2px 16px rgba(0,0,0,0.9), 0 1px 4px rgba(0,0,0,0.9)" }}>Revenue Architecture · Toronto & Miami · Est. 2019</div>
-              <h1 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2rem, 5vw, 3.8rem)", fontWeight: 300, lineHeight: 1.1, color: "#fff", textShadow: "0 3px 30px rgba(0,0,0,0.9), 0 2px 8px rgba(0,0,0,0.9)", maxWidth: 800 }}>We Don&rsquo;t Run <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Campaigns.</em><br />We Install Systems.</h1>
+              <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(3.5rem, 10vw, 7rem)", fontWeight: 300, letterSpacing: "0.4em", color: "var(--gold)", marginBottom: 32, textShadow: textShadow("0 0 80px rgba(200,160,80,0.4), 0 4px 40px rgba(0,0,0,0.9)", "0 4px 40px rgba(0,0,0,0.9)") }}>S E T</div>
+              <div style={{ fontFamily: "var(--sans)", fontSize: "0.65rem", letterSpacing: "0.35em", color: "var(--gold)", textTransform: "uppercase", marginBottom: 20, fontWeight: 600, textShadow: "0 2px 16px rgba(0,0,0,0.9)" }}>Revenue Architecture · Toronto & Miami · Est. 2019</div>
+              <h1 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2rem, 5vw, 3.8rem)", fontWeight: 300, lineHeight: 1.1, color: "#fff", textShadow: "0 3px 30px rgba(0,0,0,0.9)", maxWidth: 800 }}>We Don&rsquo;t Run <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Campaigns.</em><br />We Install Systems.</h1>
             </div>
           </div>
 
-          {/* LAYER 1: Drift video */}
-          <div id="drift-layer" style={{ position: "absolute", inset: 0, zIndex: 3, opacity: 1 }}>
-            <video ref={driftVideoRef} muted playsInline preload="auto" style={vidStyle}><source src="/hero-drift.mp4" type="video/mp4" /></video>
+          {/* LAYER 1: Drift video — preload metadata only */}
+          <div id="drift-layer" style={{ position: "absolute", inset: 0, zIndex: 3, opacity: 1, willChange: "opacity" }}>
+            <video ref={driftVideoRef} muted playsInline preload="metadata" style={vidStyle}><source src="/hero-drift.mp4" type="video/mp4" /></video>
           </div>
 
-          {/* LAYER 2: Section 2 video + Trust Wall */}
-          <div id="sec2-layer" style={{ position: "absolute", inset: 0, zIndex: 2, opacity: 0 }}>
-            <video ref={sec2VideoRef} autoPlay loop muted playsInline preload="auto" style={{ ...vidStyle, filter: "brightness(1.1) saturate(1.2)" }}><source src="/section2-bg.mp4" type="video/mp4" /></video>
+          {/* LAYER 2: Section 2 video + Trust Wall — lazy loaded at 40% scroll */}
+          <div id="sec2-layer" style={{ position: "absolute", inset: 0, zIndex: 2, opacity: 0, willChange: "opacity" }}>
+            <video ref={sec2VideoRef} autoPlay loop muted playsInline preload="none" style={{ ...vidStyle, filter: "brightness(1.1) saturate(1.2)" }}><source src="/section2-bg.mp4" type="video/mp4" /></video>
           </div>
 
-          {/* LAYER 3: Services FPV drone video */}
-          <div id="svc-layer" style={{ position: "absolute", inset: 0, zIndex: 1, opacity: 0 }}>
-            <video ref={svcVideoRef} muted playsInline preload="auto" style={{ ...vidStyle, filter: "saturate(1.2)" }}><source src="/services-bg.mp4" type="video/mp4" /></video>
+          {/* LAYER 3: Services FPV drone video — lazy loaded at 60% scroll */}
+          <div id="svc-layer" style={{ position: "absolute", inset: 0, zIndex: 1, opacity: 0, willChange: "opacity" }}>
+            <video ref={svcVideoRef} muted playsInline preload="none" style={{ ...vidStyle, filter: "saturate(1.2)" }}><source src="/services-bg.mp4" type="video/mp4" /></video>
           </div>
 
           {/* OVERLAY: Trust Wall content */}
-          <div id="trust-overlay" style={{ position: "absolute", inset: 0, zIndex: 10, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 clamp(20px, 6vw, 80px)", opacity: 0, transform: "translateY(30px)" }}>
+          <div id="trust-overlay" style={{ position: "absolute", inset: 0, zIndex: 10, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 clamp(20px, 6vw, 80px)", opacity: 0, transform: "translateY(30px)", willChange: "opacity, transform" }}>
             <div style={{ maxWidth: 1100, width: "100%", textAlign: "center" }}>
               <span style={{ fontSize: "1.1rem", letterSpacing: "0.35em", color: "#fff", textTransform: "uppercase", textShadow: "0 2px 12px rgba(0,0,0,0.7)", fontWeight: 700 }}>TRUSTED BY</span>
               <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 16, marginTop: 40, marginBottom: 50 }}>
-                {BRANDS.map(b => <div key={b} style={{ fontSize: "clamp(0.65rem, 1.5vw, 0.85rem)", fontWeight: 700, letterSpacing: "0.15em", color: "#fff", textTransform: "uppercase", padding: "clamp(8px, 1.5vw, 12px) clamp(14px, 2vw, 22px)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 4, backdropFilter: "blur(8px)", background: "rgba(0,0,0,0.35)", textShadow: "0 1px 8px rgba(0,0,0,0.6)" }}>{b}</div>)}
+                {BRANDS.map(b => <div key={b} style={{ fontSize: "clamp(0.65rem, 1.5vw, 0.85rem)", fontWeight: 700, letterSpacing: "0.15em", color: "#fff", textTransform: "uppercase", padding: "clamp(8px, 1.5vw, 12px) clamp(14px, 2vw, 22px)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 4, ...mobileBlur("blur(8px)", "rgba(0,0,0,0.35)", "rgba(0,0,0,0.6)"), textShadow: "0 1px 8px rgba(0,0,0,0.6)" }}>{b}</div>)}
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 20 }}>
                 {STATS.map(s => <div key={s.l} style={{ textAlign: "center", padding: 16 }}>
@@ -370,20 +462,19 @@ export default function Home() {
             </div>
           </div>
 
-          {/* OVERLAY: Revenue Architecture title — stays at top center throughout services */}
-          <div id="svc-title" style={{ position: "absolute", top: "clamp(80px, 12vh, 140px)", left: "50%", transform: "translateX(-50%)", zIndex: 12, textAlign: "center", opacity: 0 }}>
-            <h2 style={{ fontFamily: "var(--serif)", fontSize: "clamp(3rem, 6vw, 5rem)", color: "#fff", textShadow: "0 4px 40px rgba(0,0,0,0.9), 0 2px 10px rgba(0,0,0,0.8)", fontWeight: 400, letterSpacing: "0.02em" }}>Revenue <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Architecture</em></h2>
+          {/* OVERLAY: Revenue Architecture title */}
+          <div id="svc-title" style={{ position: "absolute", top: "clamp(80px, 12vh, 140px)", left: "50%", transform: "translateX(-50%)", zIndex: 12, textAlign: "center", opacity: 0, willChange: "opacity" }}>
+            <h2 style={{ fontFamily: "var(--serif)", fontSize: "clamp(3rem, 6vw, 5rem)", color: "#fff", textShadow: "0 4px 40px rgba(0,0,0,0.9)", fontWeight: 400, letterSpacing: "0.02em" }}>Revenue <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Architecture</em></h2>
           </div>
 
           {/* OVERLAY: Service tile pairs — slide R→L */}
           {[[SERVICES[0], SERVICES[1]], [SERVICES[2], SERVICES[3]], [SERVICES[4], SERVICES[5]]].map((pair, pi) => (
-            <div key={pi} className="svc-pair" style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%) translateX(250px)", zIndex: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, width: "min(94vw, 1200px)", opacity: 0 }}>
+            <div key={pi} className="svc-pair" style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%) translateX(250px)", zIndex: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, width: "min(94vw, 1200px)", opacity: 0, willChange: "opacity, transform" }}>
               {pair.map(s => {
                 const isOpen = expandedService === s.id;
                 return (
-                <div key={s.id} onClick={() => setExpandedService(isOpen ? null : s.id)} style={{ background: "rgba(14,14,20,0.85)", backdropFilter: "blur(16px)", border: `1px solid ${isOpen ? s.c + "40" : "rgba(255,255,255,0.08)"}`, borderRadius: 14, padding: "clamp(28px, 3.5vw, 44px)", position: "relative", overflow: "hidden", cursor: "pointer", transition: "all 0.4s ease", boxShadow: isOpen ? `0 0 40px ${s.c}20` : "none" }}>
+                <div key={s.id} onClick={() => setExpandedService(isOpen ? null : s.id)} style={{ ...mobileBlur("blur(16px)", "rgba(14,14,20,0.85)", "rgba(14,14,20,0.95)"), border: `1px solid ${isOpen ? s.c + "40" : "rgba(255,255,255,0.08)"}`, borderRadius: 14, padding: "clamp(28px, 3.5vw, 44px)", position: "relative", overflow: "hidden", cursor: "pointer", transition: "all 0.4s ease", boxShadow: isOpen ? `0 0 40px ${s.c}20` : "none" }}>
                   <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: isOpen ? 3 : 2, background: s.c, transition: "height 0.3s" }} />
-                  {/* Always visible: icon, title, description, tags */}
                   <div style={{ display: "flex", gap: 14, alignItems: "flex-start", marginBottom: 14 }}>
                     <div style={{ width: 52, height: 52, borderRadius: 12, background: s.c + "15", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.3rem", color: s.c, flexShrink: 0 }}>{s.i}</div>
                     <div style={{ flex: 1 }}>
@@ -393,7 +484,6 @@ export default function Home() {
                   </div>
                   <p style={{ fontSize: "0.92rem", color: "var(--text2)", lineHeight: 1.65, marginBottom: 14 }}>{s.d}</p>
                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: isOpen ? 16 : 0 }}>{s.tags.map(t => <span key={t} style={{ padding: "5px 12px", borderRadius: 16, fontSize: "0.7rem", fontWeight: 500, background: s.c + "15", color: s.c }}>{t}</span>)}</div>
-                  {/* Expanded: deliverables + outcome */}
                   <div style={{ maxHeight: isOpen ? 500 : 0, opacity: isOpen ? 1 : 0, overflow: "hidden", transition: "max-height 0.5s ease, opacity 0.4s ease" }}>
                     <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 16 }}>
                       <div style={{ fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.2em", color: s.c, textTransform: "uppercase", marginBottom: 12 }}>What You Get</div>
@@ -415,7 +505,7 @@ export default function Home() {
             </div>
           ))}
 
-          {/* Scroll hint — large, visible from start */}
+          {/* Scroll hint */}
           <div style={{ position: "absolute", bottom: 40, left: "50%", transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", gap: 12, opacity: 0.9, animation: "bob 2.5s ease-in-out infinite", zIndex: 20 }}>
             <span style={{ fontSize: "1.1rem", letterSpacing: "0.35em", color: "#fff", textTransform: "uppercase", fontWeight: 600, textShadow: "0 2px 12px rgba(0,0,0,0.7)" }}>SCROLL</span>
             <svg width="24" height="32" viewBox="0 0 24 32" fill="none" style={{ filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.5))" }}>
@@ -480,7 +570,7 @@ export default function Home() {
           <div className="fade-in-stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: 20 }}>
             {CASES.map((c, i) => <div key={i} style={{ background: "var(--bg3)", border: "1px solid var(--border)", borderRadius: 14, overflow: "hidden", transition: "all 0.5s" }} onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-8px)"; e.currentTarget.style.boxShadow = "0 20px 60px rgba(0,0,0,0.5)"; }} onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}>
               <div style={{ height: 180, overflow: "hidden", position: "relative" }}>
-                <img src={c.img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0.45) saturate(1.3)", transition: "transform 0.6s" }} onMouseEnter={e => (e.currentTarget.style.transform = "scale(1.05)")} onMouseLeave={e => (e.currentTarget.style.transform = "")} />
+                <Image src={c.img} alt="" fill sizes="(max-width: 768px) 100vw, 33vw" style={{ objectFit: "cover", filter: "brightness(0.45) saturate(1.3)" }} />
                 <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, var(--bg3), transparent 60%)" }} />
                 <div style={{ position: "absolute", bottom: 16, left: 20 }}><span style={{ fontSize: "0.72rem", color: "var(--text3)" }}>{c.tp}</span><h3 style={{ fontFamily: "var(--serif)", fontSize: "1.8rem", color: "var(--text)", marginTop: 4 }}>{c.t}</h3></div>
               </div>
@@ -496,50 +586,45 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══ FOUNDER — Video background, text right-aligned ═══ */}
+      {/* ═══ FOUNDER — Video background (lazy loaded), text right-aligned ═══ */}
       <section id="about" style={{ position: "relative", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "flex-end", overflow: "hidden" }}>
-        {/* Video background */}
-        <video autoPlay loop muted playsInline style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 0 }}>
+        <video ref={founderVideoRef} autoPlay loop muted playsInline preload="none" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 0 }}>
           <source src="/founder-bg.mp4" type="video/mp4" />
         </video>
-        {/* Directional gradient — dark on right (text side), transparent on left (video shows) */}
         <div style={{ position: "absolute", inset: 0, zIndex: 1, background: "linear-gradient(to right, transparent 20%, rgba(7,7,10,0.6) 55%, rgba(7,7,10,0.85) 100%)" }} />
-        {/* Bottom gradient for lower text */}
         <div style={{ position: "absolute", inset: 0, zIndex: 1, background: "linear-gradient(to top, rgba(7,7,10,0.7) 0%, transparent 40%)" }} />
 
         <div style={{ position: "relative", zIndex: 10, maxWidth: 620, padding: "clamp(60px, 10vh, 120px) clamp(40px, 6vw, 100px)", textAlign: "right" }}>
           <div className="fade-in" style={{ marginBottom: 40 }}>
-            <span style={{ fontSize: "0.75rem", letterSpacing: "0.3em", color: "var(--gold)", textTransform: "uppercase", fontWeight: 600, textShadow: "0 2px 12px rgba(0,0,0,0.9), 0 1px 4px rgba(0,0,0,0.9)" }}>Founder & CEO</span>
-            <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(2rem, 4vw, 3rem)", color: "#fff", marginTop: 12, fontWeight: 400, textShadow: "0 3px 20px rgba(0,0,0,0.9), 0 2px 6px rgba(0,0,0,0.9)" }}>Chris Marchese</div>
-            <div style={{ fontSize: "0.85rem", color: "#fff", marginTop: 8, fontWeight: 500, textShadow: "0 2px 10px rgba(0,0,0,0.9), 0 1px 3px rgba(0,0,0,0.9)" }}>Toronto & Miami</div>
+            <span style={{ fontSize: "0.75rem", letterSpacing: "0.3em", color: "var(--gold)", textTransform: "uppercase", fontWeight: 600, textShadow: "0 2px 12px rgba(0,0,0,0.9)" }}>Founder & CEO</span>
+            <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(2rem, 4vw, 3rem)", color: "#fff", marginTop: 12, fontWeight: 400, textShadow: "0 3px 20px rgba(0,0,0,0.9)" }}>Chris Marchese</div>
+            <div style={{ fontSize: "0.85rem", color: "#fff", marginTop: 8, fontWeight: 500, textShadow: "0 2px 10px rgba(0,0,0,0.9)" }}>Toronto & Miami</div>
           </div>
 
-          <h2 className="fade-in" style={{ fontSize: "clamp(2rem, 3.5vw, 3rem)", lineHeight: 1.2, marginBottom: 36, color: "#fff", textShadow: "0 3px 30px rgba(0,0,0,0.9), 0 2px 8px rgba(0,0,0,0.9)" }}>
+          <h2 className="fade-in" style={{ fontSize: "clamp(2rem, 3.5vw, 3rem)", lineHeight: 1.2, marginBottom: 36, color: "#fff", textShadow: "0 3px 30px rgba(0,0,0,0.9)" }}>
             <span style={{ background: "linear-gradient(135deg, #c8a050, #e8c878)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.9))" }}>$500M+</span> in client revenue.<br />System-first.
           </h2>
 
           {["12 years as an industrial millwright.", "No trust fund. No shortcuts.", "Just pattern recognition and an obsession", "with what actually moves people to act.", "That obsession became Strategic Emotional Targeting.", "That framework became SET."].map((l, i) => (
-            <p key={i} className="fade-in" style={{ fontFamily: "var(--serif)", fontSize: "clamp(1.05rem, 1.4vw, 1.25rem)", color: i >= 4 ? "var(--gold)" : "#fff", fontStyle: i >= 4 ? "italic" : "normal", lineHeight: 1.6, marginBottom: 10, textShadow: "0 2px 16px rgba(0,0,0,0.9), 0 1px 4px rgba(0,0,0,0.9)" }}>{l}</p>
+            <p key={i} className="fade-in" style={{ fontFamily: "var(--serif)", fontSize: "clamp(1.05rem, 1.4vw, 1.25rem)", color: i >= 4 ? "var(--gold)" : "#fff", fontStyle: i >= 4 ? "italic" : "normal", lineHeight: 1.6, marginBottom: 10, textShadow: "0 2px 16px rgba(0,0,0,0.9)" }}>{l}</p>
           ))}
 
           <div className="fade-in-stagger" style={{ display: "flex", gap: 14, flexWrap: "wrap", marginTop: 32, justifyContent: "flex-end" }}>
             {["SET Enterprises", "SET Ventures", "SET Sales Academy"].map(e => (
-              <div key={e} style={{ padding: "10px 18px", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 6, background: "rgba(14,14,20,0.6)", backdropFilter: "blur(12px)", fontSize: "0.76rem", fontWeight: 600, color: "#fff", textShadow: "0 2px 8px rgba(0,0,0,0.9)" }}>{e}</div>
+              <div key={e} style={{ padding: "10px 18px", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 6, ...mobileBlur("blur(12px)", "rgba(14,14,20,0.6)", "rgba(14,14,20,0.85)"), fontSize: "0.76rem", fontWeight: 600, color: "#fff", textShadow: "0 2px 8px rgba(0,0,0,0.9)" }}>{e}</div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ═══ METHOD — Scroll-scrub video with step overlays ═══ */}
+      {/* ═══ METHOD — Scroll-scrub video with step overlays (lazy loaded) ═══ */}
       <section ref={methodRef} id="process" style={{ position: "relative", height: "500vh" }}>
-        <div style={{ position: "sticky", top: 0, width: "100%", height: "100vh", overflow: "hidden", background: "#000" }}>
+        <div style={{ position: "sticky", top: 0, width: "100%", height: "100vh", overflow: "hidden", background: "var(--bg)" }}>
 
-          {/* Scroll-scrub video background — full screen, no overlays */}
-          <video ref={methodVideoRef} muted playsInline preload="auto" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}>
+          <video ref={methodVideoRef} muted playsInline preload="none" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}>
             <source src="/method-bg.mp4" type="video/mp4" />
           </video>
 
-          {/* 4 step overlays — floating text, no background, looks part of the video */}
           {STEPS.map((step, i) => (
             <div key={step.n} className="method-step" style={{
               position: "absolute",
@@ -550,15 +635,14 @@ export default function Home() {
               maxWidth: "min(520px, 85vw)",
               opacity: 0,
               textAlign: i % 2 === 1 ? "right" : "left",
+              willChange: "opacity, transform",
             }}>
               <div style={{ fontSize: "clamp(5rem, 12vw, 10rem)", fontFamily: "var(--serif)", fontWeight: 300, color: "transparent", WebkitTextStroke: "1.5px rgba(200,160,80,0.5)", lineHeight: 0.85, marginBottom: 12, textShadow: "0 4px 40px rgba(0,0,0,0.7)" }}>{step.n}</div>
-              <div style={{ fontSize: "clamp(0.85rem, 1.2vw, 1rem)", letterSpacing: "0.35em", color: "var(--gold)", textTransform: "uppercase", fontWeight: 700, marginBottom: 16, textShadow: "0 2px 20px rgba(0,0,0,0.95), 0 1px 6px rgba(0,0,0,0.95)" }}>{step.s}</div>
-              <h3 style={{ fontFamily: "var(--serif)", fontSize: "clamp(3rem, 6vw, 5rem)", color: "#fff", lineHeight: 1.05, marginBottom: 20, fontWeight: 400, textShadow: "0 4px 40px rgba(0,0,0,0.95), 0 2px 10px rgba(0,0,0,0.95), 0 0 80px rgba(0,0,0,0.6)" }}>{step.t}</h3>
-              <p style={{ fontSize: "clamp(1.1rem, 1.6vw, 1.35rem)", color: "#fff", lineHeight: 1.7, maxWidth: 520, fontWeight: 400, textShadow: "0 2px 20px rgba(0,0,0,0.95), 0 1px 6px rgba(0,0,0,0.95), 0 0 60px rgba(0,0,0,0.5)" }}>{step.d}</p>
+              <div style={{ fontSize: "clamp(0.85rem, 1.2vw, 1rem)", letterSpacing: "0.35em", color: "var(--gold)", textTransform: "uppercase", fontWeight: 700, marginBottom: 16, textShadow: "0 2px 20px rgba(0,0,0,0.95)" }}>{step.s}</div>
+              <h3 style={{ fontFamily: "var(--serif)", fontSize: "clamp(3rem, 6vw, 5rem)", color: "#fff", lineHeight: 1.05, marginBottom: 20, fontWeight: 400, textShadow: textShadow("0 4px 40px rgba(0,0,0,0.95), 0 2px 10px rgba(0,0,0,0.95), 0 0 80px rgba(0,0,0,0.6)", "0 4px 40px rgba(0,0,0,0.95)") }}>{step.t}</h3>
+              <p style={{ fontSize: "clamp(1.1rem, 1.6vw, 1.35rem)", color: "#fff", lineHeight: 1.7, maxWidth: 520, fontWeight: 400, textShadow: textShadow("0 2px 20px rgba(0,0,0,0.95), 0 1px 6px rgba(0,0,0,0.95), 0 0 60px rgba(0,0,0,0.5)", "0 2px 20px rgba(0,0,0,0.95)") }}>{step.d}</p>
             </div>
           ))}
-
-          {/* Clean — no UI chrome, just video + text */}
         </div>
       </section>
 
@@ -601,8 +685,6 @@ export default function Home() {
         </div>
         <div style={{ borderTop: "1px solid var(--border)", marginTop: 28, paddingTop: 16, display: "flex", justifyContent: "space-between", flexWrap: "wrap" }}><span style={{ fontSize: "0.58rem", color: "var(--text3)" }}>© 2026 SET Marketing · SET Enterprises</span><span style={{ fontSize: "0.58rem", color: "var(--text3)", fontStyle: "italic" }}>Setting The Pace · Toronto · Miami</span></div>
       </footer>
-
-      <style jsx global>{``}</style>
     </>
   );
 }
