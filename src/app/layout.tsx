@@ -26,6 +26,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${cormorant.variable} ${dmSans.variable}`}>
+      <head>
+        <link rel="preload" as="video" href="/splash-bg-hd.mp4" type="video/mp4" />
+      </head>
       <body>{children}</body>
     </html>
   );
