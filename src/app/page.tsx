@@ -476,13 +476,16 @@ export default function Home() {
           1500vh scroll.
           Crossfade zones at 48-52% and 68-72% to prevent black flashes.
           ═══════════════════════════════════════════════════════════════ */}
-      <section ref={heroRef} id="services" style={{ position: "relative", height: "550vh" }}>
+      <section ref={heroRef} id="services" style={{ position: "relative", height: "300vh" }}>
         <div style={{ position: "sticky", top: 0, width: "100%", height: "100vh", overflow: "hidden", background: "var(--bg)" }}>
 
           {/* LAYER 0: Splash video — autoplay on load, fades out when scrolling begins */}
           <div id="splash-layer" style={{ position: "absolute", inset: 0, zIndex: 4, opacity: 1, willChange: "opacity" }}>
             <video ref={splashVideoRef} autoPlay loop muted playsInline preload="auto" style={{ ...vidStyle, filter: "saturate(1.2)" }}><source src="/splash-bg-hd.mp4" type="video/mp4" /></video>
           </div>
+
+          {/* Dark vignette overlay — helps text readability over bright video */}
+          <div style={{ position: "absolute", inset: 0, zIndex: 5, pointerEvents: "none", background: "radial-gradient(ellipse at center, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.15) 60%, rgba(0,0,0,0.4) 100%)" }} />
 
           {/* HERO TEXT — independent overlay, explodes outward on scroll */}
           <div id="hero-text" style={{ position: "absolute", inset: 0, zIndex: 20, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", textAlign: "center", pointerEvents: "none" }}>
