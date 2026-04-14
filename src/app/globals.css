@@ -141,36 +141,32 @@ body::after {
   #hero-text { padding: 0 16px !important; }
   /* S E T logo */
   #hero-text > .hero-explode:first-child {
-    font-size: 2.8rem !important;
-    letter-spacing: 0.2em !important;
-    margin-bottom: 10px !important;
+    font-size: 4.5rem !important;
+    letter-spacing: 0.25em !important;
+    margin-bottom: 14px !important;
   }
   /* Revenue Architecture subtitle */
   #hero-text > .hero-explode:nth-child(2) {
-    font-size: 0.6rem !important;
-    letter-spacing: 0.15em !important;
-    margin-bottom: 8px !important;
+    font-size: 0.85rem !important;
+    letter-spacing: 0.2em !important;
+    margin-bottom: 12px !important;
   }
   /* H1 text lines — all spans/ems inside the wrapper div */
   #hero-text > div:nth-child(3) .hero-explode {
-    font-size: 1.5rem !important;
-    line-height: 1.25 !important;
+    font-size: 2.2rem !important;
+    line-height: 1.2 !important;
   }
 
-  /* ── SERVICE CARDS — single column ── */
-  .svc-pair {
-    grid-template-columns: 1fr !important;
-    gap: 10px !important;
-    width: 90vw !important;
-    max-height: calc(100vh - 100px) !important;
-    overflow-y: auto !important;
-    top: 100px !important;
+  /* ── SERVICE CARDS — hidden on mobile (replaced by swipeable carousel below hero) ── */
+  .svc-pair { display: none !important; }
+  #svc-title { display: none !important; }
+
+  /* ── MOBILE CAROUSEL — hide scrollbar ── */
+  section > div[style*="overflowX"] {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
-  .svc-pair > div { padding: 14px !important; }
-  .svc-pair h3 { font-size: 1.1rem !important; }
-  .svc-pair p, .svc-pair span { font-size: 0.8rem !important; line-height: 1.5 !important; }
-  #svc-title { top: 56px !important; }
-  #svc-title h2 { font-size: 1.5rem !important; }
+  section > div[style*="overflowX"]::-webkit-scrollbar { display: none; }
 
   /* ── METHOD STEPS — centered, full width ── */
   .method-step {

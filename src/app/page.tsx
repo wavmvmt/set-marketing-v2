@@ -452,7 +452,7 @@ export default function Home() {
     { q: "Revenue OS reduced our CPA by 27%. We doubled revenue in 18 months. The system works.", a: "George Pintilie", r: "Founder, Pintilie Group" },
   ];
 
-  const vidStyle: React.CSSProperties = { position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", minWidth: "100%", minHeight: "100%", width: "auto", height: "auto", objectFit: "cover" };
+  const vidStyle: React.CSSProperties = { position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: isMobile ? "65% center" : "center center" };
   // Mobile-safe blur: skip backdrop-filter on mobile, increase bg opacity
   const mobileBlur = (blur: string, bg: string, mobileBg: string) =>
     isMobile ? { background: mobileBg } : { backdropFilter: blur, background: bg };
@@ -499,7 +499,7 @@ export default function Home() {
 
           {/* LAYER 1: Drift video — preload auto required for smooth scrubbing */}
           <div id="drift-layer" style={{ position: "absolute", inset: 0, zIndex: 3, opacity: 0, willChange: "opacity" }}>
-            <video ref={driftVideoRef} muted playsInline preload="auto" style={{ ...vidStyle, transform: "translate(-50%, -50%) translateZ(0)" }}><source src="/hero-drift.mp4" type="video/mp4" /></video>
+            <video ref={driftVideoRef} muted playsInline preload="auto" style={{ ...vidStyle, transform: "translateZ(0)" }}><source src="/hero-drift.mp4" type="video/mp4" /></video>
           </div>
 
           {/* LAYER 2: Section 2 video + Trust Wall — preload metadata, play on scroll */}
@@ -509,7 +509,7 @@ export default function Home() {
 
           {/* LAYER 3: Services FPV drone video — preload auto required for smooth scrubbing */}
           <div id="svc-layer" style={{ position: "absolute", inset: 0, zIndex: 1, opacity: 0, willChange: "opacity" }}>
-            <video ref={svcVideoRef} muted playsInline preload="auto" style={{ ...vidStyle, filter: "saturate(1.2)", transform: "translate(-50%, -50%) translateZ(0)" }}><source src="/services-bg.mp4" type="video/mp4" /></video>
+            <video ref={svcVideoRef} muted playsInline preload="auto" style={{ ...vidStyle, filter: "saturate(1.2)", transform: "translateZ(0)" }}><source src="/services-bg.mp4" type="video/mp4" /></video>
           </div>
 
           {/* OVERLAY: Trust Wall content */}
@@ -575,6 +575,44 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* ═══ MOBILE SERVICES CAROUSEL — swipeable cards, hidden on desktop ═══ */}
+      {isMobile && (
+        <section style={{ padding: "60px 0 60px", background: "var(--bg)" }}>
+          <div style={{ textAlign: "center", marginBottom: 28, padding: "0 20px" }}>
+            <h2 style={{ fontFamily: "var(--serif)", fontSize: "2rem", color: "#fff", marginBottom: 8 }}>Revenue <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Architecture</em></h2>
+            <p style={{ fontSize: "0.9rem", color: "var(--text2)", lineHeight: 1.6 }}>Swipe to explore our six systems</p>
+          </div>
+          <div style={{ display: "flex", overflowX: "auto", gap: 14, padding: "0 20px 20px", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }}>
+            {SERVICES.map(s => (
+              <div key={s.id} style={{ minWidth: "85vw", maxWidth: "85vw", scrollSnapAlign: "center", background: "var(--bg3)", border: `1px solid ${s.c}40`, borderRadius: 14, padding: 18, position: "relative", flexShrink: 0 }}>
+                <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: s.c, borderRadius: "14px 14px 0 0" }} />
+                <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 10 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 8, background: s.c + "15", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1rem", color: s.c }}>{s.i}</div>
+                  <h3 style={{ fontFamily: "var(--serif)", fontSize: "1.3rem", color: "#fff", lineHeight: 1.2 }}>{s.t}</h3>
+                </div>
+                <p style={{ fontSize: "0.85rem", color: "#fff", lineHeight: 1.55, marginBottom: 10 }}>{s.d}</p>
+                <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginBottom: 12 }}>
+                  {s.tags.map(t => <span key={t} style={{ padding: "3px 8px", borderRadius: 12, fontSize: "0.7rem", fontWeight: 500, background: s.c + "15", color: s.c }}>{t}</span>)}
+                </div>
+                <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 10 }}>
+                  <div style={{ fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.15em", color: s.c, textTransform: "uppercase", marginBottom: 8 }}>What You Get</div>
+                  {s.deliverables.map((del, di) => (
+                    <div key={di} style={{ display: "flex", gap: 6, alignItems: "flex-start", marginBottom: 3 }}>
+                      <div style={{ width: 4, height: 4, borderRadius: "50%", background: s.c, marginTop: 6, flexShrink: 0 }} />
+                      <span style={{ fontSize: "0.8rem", color: "#fff", lineHeight: 1.4 }}>{del}</span>
+                    </div>
+                  ))}
+                  <div style={{ marginTop: 10, padding: "8px 12px", background: s.c + "10", borderLeft: `3px solid ${s.c}`, borderRadius: "0 8px 8px 0" }}>
+                    <div style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.15em", color: s.c, textTransform: "uppercase", marginBottom: 3 }}>The Outcome</div>
+                    <p style={{ fontSize: "0.8rem", color: "#fff", lineHeight: 1.45, fontStyle: "italic" }}>{s.outcome}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ═══ CASE STUDIES ═══ */}
       <section id="results" style={{ padding: "clamp(80px, 14vh, 160px) clamp(20px, 6vw, 80px)", background: "var(--bg2)" }}>
@@ -670,7 +708,7 @@ export default function Home() {
             {VOICES.map((v, i) => <div key={i} style={{ background: "var(--bg3)", border: "1px solid var(--border)", borderRadius: 12, padding: 26, transition: "all 0.4s" }} onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--border2)"; e.currentTarget.style.transform = "translateY(-3px)"; }} onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.transform = ""; }}>
               <div style={{ display: "flex", gap: 3, marginBottom: 14 }}>{[1,2,3,4,5].map(s => <span key={s} style={{ color: "var(--star)", fontSize: "1.1rem", opacity: 0.5 }}>★</span>)}</div>
               <p style={{ fontSize: "1.45rem", color: "#fff", lineHeight: 1.7, fontStyle: "italic", marginBottom: 20 }}>&ldquo;{v.q}&rdquo;</p>
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}><div style={{ width: 38, height: 38, borderRadius: "50%", background: "var(--gold-dim)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--serif)", fontSize: "1.25rem", color: "var(--gold)" }}>{v.a[0]}</div><div><div style={{ fontSize: "1.3rem", fontWeight: 500 }}>{v.a}</div><div style={{ fontSize: "1.15rem", color: "var(--text3)" }}>{v.r}</div></div></div>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}><div style={{ width: 38, height: 38, borderRadius: "50%", background: "var(--gold-dim)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--serif)", fontSize: "1.25rem", color: "var(--gold)" }}>{v.a[0]}</div><div><div style={{ fontSize: "1.3rem", fontWeight: 500 }}>{v.a}</div><div style={{ fontSize: "1.15rem", color: "rgba(255,255,255,0.7)" }}>{v.r}</div></div></div>
             </div>)}
           </div>
         </div>
