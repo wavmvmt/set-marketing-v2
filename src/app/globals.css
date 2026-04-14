@@ -128,21 +128,32 @@ body::after {
 
 /* ── MOBILE OPTIMIZATION ── */
 @media (max-width: 768px) {
-  h1 { font-size: 3rem !important; }
-  h2 { font-size: 2.2rem !important; }
-  h3 { font-size: 1.8rem !important; }
+  h1 { font-size: 2.4rem !important; }
+  h2 { font-size: 1.8rem !important; }
+  h3 { font-size: 1.4rem !important; }
 
   /* Nav */
-  nav { height: 56px !important; }
+  nav { height: 52px !important; padding: 0 16px !important; }
   nav > div:last-child a:not(.btn-gold) { display: none !important; }
+  nav .btn-gold { padding: 8px 18px !important; font-size: 0.85rem !important; }
 
-  /* Trust wall stats grid */
-  .svc-pair { grid-template-columns: 1fr !important; gap: 16px !important; }
+  /* Hero text explosion — smaller vectors on mobile */
+  .hero-explode { --mobile-scale: 0.5; }
+
+  /* Service cards in hero overlay — single column */
+  .svc-pair {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    width: 92vw !important;
+    max-height: calc(100vh - 120px) !important;
+    overflow-y: auto !important;
+  }
 
   /* Method steps — full width on mobile */
   .method-step {
-    left: 20px !important;
-    right: 20px !important;
+    left: 16px !important;
+    right: 16px !important;
+    top: 60px !important;
     max-width: none !important;
     text-align: left !important;
   }
@@ -150,18 +161,39 @@ body::after {
   /* Form */
   .form-input, .form-select { font-size: 16px !important; /* prevents iOS zoom */ }
 
-  /* Disable noise grain on mobile — imperceptible at 0.02 opacity, wastes GPU */
+  /* Footer stacking */
+  footer > div:first-child { flex-direction: column !important; gap: 24px !important; }
+
+  /* Disable noise grain — wastes GPU */
   body::after { display: none !important; }
 }
 
 /* ── TABLET ── */
 @media (max-width: 1024px) and (min-width: 769px) {
-  .svc-pair { grid-template-columns: 1fr !important; gap: 20px !important; width: min(90vw, 600px) !important; }
+  .svc-pair { grid-template-columns: 1fr !important; gap: 16px !important; width: min(90vw, 600px) !important; }
+
+  .method-step {
+    max-width: min(450px, 70vw) !important;
+  }
 }
 
-/* ── SMALL MOBILE ── */
+/* ── SMALL MOBILE (iPhone SE, small Android) ── */
 @media (max-width: 480px) {
-  h1 { font-size: 2.4rem !important; }
-  h2 { font-size: 1.8rem !important; }
-  nav .btn-gold { padding: 8px 16px !important; font-size: 0.8rem !important; }
+  h1 { font-size: 1.8rem !important; }
+  h2 { font-size: 1.5rem !important; }
+  h3 { font-size: 1.2rem !important; }
+
+  nav .btn-gold { padding: 6px 14px !important; font-size: 0.75rem !important; }
+
+  /* Tighter section padding */
+  section { padding-left: 12px !important; padding-right: 12px !important; }
+
+  /* Method step text scales down */
+  .method-step h3 { font-size: 1.6rem !important; }
+  .method-step p { font-size: 1rem !important; }
+}
+
+/* ── LARGE DESKTOP (1440px+) ── */
+@media (min-width: 1440px) {
+  .svc-pair { width: min(94vw, 1400px) !important; }
 }

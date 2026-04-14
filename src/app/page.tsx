@@ -204,12 +204,15 @@ export default function Home() {
                 heroText.style.visibility = "visible";
                 const t = (p - 0.30) / 0.12;
                 const eased = t * t;
+                const mobileScale = window.innerWidth < 768 ? 0.4 : 1;
                 explodeEls.forEach(el => {
                   const e = el as HTMLElement;
                   const [ex, ey, er] = (e.dataset.ex || "0,0,0").split(",").map(Number);
-                  e.style.transform = `translate(${ex * eased}px, ${ey * eased}px) rotate(${er * eased}deg) scale(${1 + eased * 0.8})`;
+                  const x = ex * eased * mobileScale;
+                  const y = ey * eased * mobileScale;
+                  e.style.transform = `translate(${x}px, ${y}px) rotate(${er * eased}deg) scale(${1 + eased * 0.8})`;
                   e.style.opacity = String(Math.max(0, 1 - eased * 1.5));
-                  e.style.filter = `blur(${eased * 20}px)`;
+                  e.style.filter = `blur(${eased * 16}px)`;
                 });
               } else {
                 heroText.style.visibility = "hidden";
@@ -580,7 +583,7 @@ export default function Home() {
             <span style={{ fontSize: "1.2rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>03 · Client Results</span>
             <h2 style={{ fontSize: "clamp(3.2rem, 6vw, 5rem)", marginTop: 16 }}>Real Numbers. <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Real</em> Impact.</h2>
           </div>
-          <div className="fade-in-stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: 20 }}>
+          <div className="fade-in-stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 340px), 1fr))", gap: 20 }}>
             {CASES.map((c, i) => <div key={i} style={{ background: "var(--bg3)", border: "1px solid var(--border)", borderRadius: 14, overflow: "hidden", transition: "all 0.5s" }} onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-8px)"; e.currentTarget.style.boxShadow = "0 20px 60px rgba(0,0,0,0.5)"; }} onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}>
               <div style={{ height: 180, overflow: "hidden", position: "relative" }}>
                 <Image src={c.img} alt="" fill sizes="(max-width: 768px) 100vw, 33vw" style={{ objectFit: "cover", filter: "brightness(0.45) saturate(1.3)", transition: "transform 0.6s" }} />
@@ -607,7 +610,7 @@ export default function Home() {
         <div style={{ position: "absolute", inset: 0, zIndex: 1, background: "linear-gradient(to right, transparent 20%, rgba(7,7,10,0.6) 55%, rgba(7,7,10,0.85) 100%)" }} />
         <div style={{ position: "absolute", inset: 0, zIndex: 1, background: "linear-gradient(to top, rgba(7,7,10,0.7) 0%, transparent 40%)" }} />
 
-        <div style={{ position: "relative", zIndex: 10, maxWidth: 620, padding: "clamp(60px, 10vh, 120px) clamp(40px, 6vw, 100px)", textAlign: "right" }}>
+        <div style={{ position: "relative", zIndex: 10, maxWidth: 620, padding: "clamp(60px, 10vh, 120px) clamp(20px, 6vw, 100px)", textAlign: isMobile ? "left" : "right" }}>
           <div className="fade-in" style={{ marginBottom: 40 }}>
             <span style={{ fontSize: "1.2rem", letterSpacing: "0.3em", color: "var(--gold)", textTransform: "uppercase", fontWeight: 600, textShadow: "var(--text-halo-gold)" }}>Founder & CEO</span>
             <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.6rem, 5vw, 3.8rem)", color: "#fff", marginTop: 12, fontWeight: 400, textShadow: "var(--text-halo)" }}>Chris Marchese</div>
@@ -622,7 +625,7 @@ export default function Home() {
             <p key={i} className="fade-in" style={{ fontFamily: "var(--serif)", fontSize: "clamp(1.3rem, 1.8vw, 1.55rem)", color: i >= 4 ? "var(--gold)" : "#fff", fontStyle: i >= 4 ? "italic" : "normal", lineHeight: 1.6, marginBottom: 10, textShadow: "var(--text-halo)" }}>{l}</p>
           ))}
 
-          <div className="fade-in-stagger" style={{ display: "flex", gap: 14, flexWrap: "wrap", marginTop: 32, justifyContent: "flex-end" }}>
+          <div className="fade-in-stagger" style={{ display: "flex", gap: 14, flexWrap: "wrap", marginTop: 32, justifyContent: isMobile ? "flex-start" : "flex-end" }}>
             {["SET Enterprises", "SET Ventures", "SET Sales Academy"].map(e => (
               <div key={e} style={{ padding: "10px 18px", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 6, ...mobileBlur("blur(12px)", "rgba(14,14,20,0.6)", "rgba(14,14,20,0.85)"), fontSize: "1.15rem", fontWeight: 600, color: "#fff", textShadow: "var(--text-halo)" }}>{e}</div>
             ))}
@@ -663,7 +666,7 @@ export default function Home() {
       <section style={{ padding: "clamp(60px, 10vh, 100px) clamp(20px, 6vw, 80px)", background: "var(--bg)" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div className="fade-in" style={{ textAlign: "center", marginBottom: 44 }}><span style={{ fontSize: "1.2rem", letterSpacing: "0.3em", color: "var(--text3)", textTransform: "uppercase" }}>06 · Client Voices</span><h2 style={{ fontSize: "clamp(3.2rem, 5vw, 4.5rem)", marginTop: 16 }}>Operators Who <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Scaled</em></h2></div>
-          <div className="fade-in-stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 16 }}>
+          <div className="fade-in-stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))", gap: 16 }}>
             {VOICES.map((v, i) => <div key={i} style={{ background: "var(--bg3)", border: "1px solid var(--border)", borderRadius: 12, padding: 26, transition: "all 0.4s" }} onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--border2)"; e.currentTarget.style.transform = "translateY(-3px)"; }} onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.transform = ""; }}>
               <div style={{ display: "flex", gap: 3, marginBottom: 14 }}>{[1,2,3,4,5].map(s => <span key={s} style={{ color: "var(--star)", fontSize: "1.1rem", opacity: 0.5 }}>★</span>)}</div>
               <p style={{ fontSize: "1.45rem", color: "var(--text2)", lineHeight: 1.7, fontStyle: "italic", marginBottom: 20 }}>&ldquo;{v.q}&rdquo;</p>
