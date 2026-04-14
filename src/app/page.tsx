@@ -196,7 +196,12 @@ export default function Home() {
 
             // ── Layer visibility — CROSSFADE with 4% overlap ──
             let driftOp: string, sec2Op: string, svcOp: string;
-            if (p < 0.48) {
+            if (p < 0.01) {
+              driftOp = "0"; sec2Op = "0"; svcOp = "0";
+            } else if (p < 0.08) {
+              // Drift fades in as splash fades out
+              driftOp = String((p - 0.01) / 0.07); sec2Op = "0"; svcOp = "0";
+            } else if (p < 0.48) {
               driftOp = "1"; sec2Op = "0"; svcOp = "0";
             } else if (p < 0.52) {
               // Crossfade drift → sec2 (hold drift if sec2 not ready)
@@ -453,7 +458,7 @@ export default function Home() {
           </div>
 
           {/* LAYER 1: Drift video — preload auto required for smooth scrubbing */}
-          <div id="drift-layer" style={{ position: "absolute", inset: 0, zIndex: 3, opacity: 1, willChange: "opacity" }}>
+          <div id="drift-layer" style={{ position: "absolute", inset: 0, zIndex: 3, opacity: 0, willChange: "opacity" }}>
             <video ref={driftVideoRef} muted playsInline preload="auto" style={{ ...vidStyle, transform: "translate(-50%, -50%) translateZ(0)" }}><source src="/hero-drift.mp4" type="video/mp4" /></video>
           </div>
 
