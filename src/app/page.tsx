@@ -78,6 +78,7 @@ export default function Home() {
       const svcLayer = document.getElementById("svc-layer");
       const trustOverlay = document.getElementById("trust-overlay");
       const svcTitle = document.getElementById("svc-title");
+      const heroText = document.getElementById("hero-text");
 
       if (hero && driftVideo && sec2Video && svcVideo && driftLayer && sec2Layer && svcLayer && trustOverlay && splashLayer) {
         // Wait for drift video to be sufficiently buffered for seeking
@@ -153,7 +154,7 @@ export default function Home() {
 
         // Cache previous values to skip redundant style writes
         let prevSplashOp = "", prevDriftOp = "", prevSec2Op = "", prevSvcOp = "";
-        let prevTrustOp = "", prevTrustTx = "", prevSvcTitleOp = "";
+        let prevTrustOp = "", prevTrustTx = "", prevSvcTitleOp = "", prevHeroTextOp = "";
 
         ScrollTrigger.create({
           trigger: hero,
@@ -185,6 +186,15 @@ export default function Home() {
             else if (p < 0.08) splashOp = String(1 - (p - 0.01) / 0.07);
             else splashOp = "0";
             if (splashOp !== prevSplashOp) { splashLayer.style.opacity = splashOp; prevSplashOp = splashOp; }
+
+            // ── Hero text: visible 0–38%, fades out 38–46% ──
+            if (heroText) {
+              let heroTextOp: string;
+              if (p < 0.38) heroTextOp = "1";
+              else if (p < 0.46) heroTextOp = String(1 - (p - 0.38) / 0.08);
+              else heroTextOp = "0";
+              if (heroTextOp !== prevHeroTextOp) { heroText.style.opacity = heroTextOp; prevHeroTextOp = heroTextOp; }
+            }
 
             // ── Drift video scrub: 0–50% ──
             driftTarget = Math.min(1, p / 0.50) * driftDur;
@@ -289,7 +299,7 @@ export default function Home() {
               }
 
               (pair as HTMLElement).style.opacity = String(opacity);
-              (pair as HTMLElement).style.transform = `translate(-50%, -45%) translateX(${xOffset}px)`;
+              (pair as HTMLElement).style.transform = `translateX(-50%) translateX(${xOffset}px)`;
             });
           },
         });
@@ -449,12 +459,13 @@ export default function Home() {
           {/* LAYER 0: Splash video — autoplay on load, fades out when scrolling begins */}
           <div id="splash-layer" style={{ position: "absolute", inset: 0, zIndex: 4, opacity: 1, willChange: "opacity" }}>
             <video ref={splashVideoRef} autoPlay loop muted playsInline preload="auto" style={{ ...vidStyle, filter: "saturate(1.2)" }}><source src="/splash-bg-hd.mp4" type="video/mp4" /></video>
-            {/* Hero text overlay on splash */}
-            <div style={{ position: "absolute", inset: 0, zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", textAlign: "center" }}>
-              <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(4.5rem, 12vw, 9rem)", fontWeight: 300, letterSpacing: "0.4em", color: "var(--gold)", marginBottom: 32, textShadow: "var(--text-halo-gold)" }}>S E T</div>
-              <div style={{ fontFamily: "var(--sans)", fontSize: "1.05rem", letterSpacing: "0.35em", color: "var(--gold)", textTransform: "uppercase", marginBottom: 20, fontWeight: 600, textShadow: "var(--text-halo-gold)" }}>Revenue Architecture · Toronto & Miami · Est. 2019</div>
-              <h1 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.8rem, 6vw, 5rem)", fontWeight: 300, lineHeight: 1.1, color: "#fff", textShadow: "var(--text-halo)", maxWidth: 800 }}>We Don&rsquo;t Run <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Campaigns.</em><br />We Install Systems.</h1>
-            </div>
+          </div>
+
+          {/* HERO TEXT — independent overlay, persists across splash + drift phases */}
+          <div id="hero-text" style={{ position: "absolute", inset: 0, zIndex: 20, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", textAlign: "center", pointerEvents: "none", willChange: "opacity" }}>
+            <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(4.5rem, 12vw, 9rem)", fontWeight: 300, letterSpacing: "0.4em", color: "var(--gold)", marginBottom: 32, textShadow: "var(--text-halo-gold)" }}>S E T</div>
+            <div style={{ fontFamily: "var(--sans)", fontSize: "1.05rem", letterSpacing: "0.35em", color: "var(--gold)", textTransform: "uppercase", marginBottom: 20, fontWeight: 600, textShadow: "var(--text-halo-gold)" }}>Revenue Architecture · Toronto & Miami · Est. 2019</div>
+            <h1 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.8rem, 6vw, 5rem)", fontWeight: 300, lineHeight: 1.1, color: "#fff", textShadow: "var(--text-halo)", maxWidth: 800 }}>We Don&rsquo;t Run <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Campaigns.</em><br />We Install Systems.</h1>
           </div>
 
           {/* LAYER 1: Drift video — preload auto required for smooth scrubbing */}
@@ -490,35 +501,35 @@ export default function Home() {
           </div>
 
           {/* OVERLAY: Revenue Architecture title */}
-          <div id="svc-title" style={{ position: "absolute", top: "clamp(24px, 4vh, 60px)", left: "50%", transform: "translateX(-50%)", zIndex: 14, textAlign: "center", opacity: 0, willChange: "opacity" }}>
-            <h2 style={{ fontFamily: "var(--serif)", fontSize: "clamp(3.8rem, 7vw, 6rem)", color: "#fff", textShadow: "var(--text-halo)", fontWeight: 400, letterSpacing: "0.02em" }}>Revenue <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Architecture</em></h2>
+          <div id="svc-title" style={{ position: "absolute", top: "clamp(68px, 9vh, 90px)", left: "50%", transform: "translateX(-50%)", zIndex: 14, textAlign: "center", opacity: 0, willChange: "opacity" }}>
+            <h2 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.4rem, 4vw, 3.2rem)", color: "#fff", textShadow: "var(--text-halo)", fontWeight: 400, letterSpacing: "0.02em" }}>Revenue <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Architecture</em></h2>
           </div>
 
           {/* OVERLAY: Service tile pairs — slide R→L */}
           {[[SERVICES[0], SERVICES[1]], [SERVICES[2], SERVICES[3]], [SERVICES[4], SERVICES[5]]].map((pair, pi) => (
-            <div key={pi} className="svc-pair" style={{ position: "absolute", top: "55%", left: "50%", transform: "translate(-50%, -50%) translateX(250px)", zIndex: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, width: "min(94vw, 1200px)", opacity: 0, willChange: "opacity, transform" }}>
+            <div key={pi} className="svc-pair" style={{ position: "absolute", top: "clamp(130px, 16vh, 160px)", left: "50%", transform: "translateX(-50%) translateX(250px)", zIndex: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, width: "min(94vw, 1200px)", maxHeight: "calc(100vh - 170px)", opacity: 0, willChange: "opacity, transform" }}>
               {pair.map(s => (
-                <div key={s.id} style={{ ...mobileBlur("blur(16px)", "rgba(14,14,20,0.85)", "rgba(14,14,20,0.95)"), border: `1px solid ${s.c + "40"}`, borderRadius: 14, padding: "clamp(24px, 3vw, 36px)", position: "relative", overflow: "hidden", boxShadow: `0 0 40px ${s.c}15` }}>
+                <div key={s.id} style={{ ...mobileBlur("blur(16px)", "rgba(14,14,20,0.85)", "rgba(14,14,20,0.95)"), border: `1px solid ${s.c + "40"}`, borderRadius: 12, padding: "clamp(16px, 2vw, 24px)", position: "relative", overflow: "auto", boxShadow: `0 0 40px ${s.c}15`, maxHeight: "calc(100vh - 190px)" }}>
                   <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: s.c }} />
-                  <div style={{ display: "flex", gap: 14, alignItems: "flex-start", marginBottom: 12 }}>
-                    <div style={{ width: 52, height: 52, borderRadius: 12, background: s.c + "15", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem", color: s.c, flexShrink: 0 }}>{s.i}</div>
+                  <div style={{ display: "flex", gap: 10, alignItems: "flex-start", marginBottom: 8 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 10, background: s.c + "15", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem", color: s.c, flexShrink: 0 }}>{s.i}</div>
                     <div style={{ flex: 1 }}>
-                      <h3 style={{ fontFamily: "var(--serif)", fontSize: "2rem", color: "#fff", lineHeight: 1.3 }}>{s.t}</h3>
+                      <h3 style={{ fontFamily: "var(--serif)", fontSize: "1.5rem", color: "#fff", lineHeight: 1.25 }}>{s.t}</h3>
                     </div>
                   </div>
-                  <p style={{ fontSize: "1.3rem", color: "#fff", lineHeight: 1.65, marginBottom: 12 }}>{s.d}</p>
-                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>{s.tags.map(t => <span key={t} style={{ padding: "5px 12px", borderRadius: 16, fontSize: "1.05rem", fontWeight: 500, background: s.c + "15", color: s.c }}>{t}</span>)}</div>
-                  <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 14 }}>
-                    <div style={{ fontSize: "1.05rem", fontWeight: 700, letterSpacing: "0.2em", color: s.c, textTransform: "uppercase", marginBottom: 10 }}>What You Get</div>
+                  <p style={{ fontSize: "1rem", color: "#fff", lineHeight: 1.55, marginBottom: 8 }}>{s.d}</p>
+                  <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginBottom: 10 }}>{s.tags.map(t => <span key={t} style={{ padding: "3px 10px", borderRadius: 16, fontSize: "0.85rem", fontWeight: 500, background: s.c + "15", color: s.c }}>{t}</span>)}</div>
+                  <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 10 }}>
+                    <div style={{ fontSize: "0.85rem", fontWeight: 700, letterSpacing: "0.2em", color: s.c, textTransform: "uppercase", marginBottom: 8 }}>What You Get</div>
                     {s.deliverables.map((del, di) => (
-                      <div key={di} style={{ display: "flex", gap: 10, alignItems: "flex-start", marginBottom: 6 }}>
-                        <div style={{ width: 5, height: 5, borderRadius: "50%", background: s.c, marginTop: 7, flexShrink: 0 }} />
-                        <span style={{ fontSize: "1.2rem", color: "#fff", lineHeight: 1.5 }}>{del}</span>
+                      <div key={di} style={{ display: "flex", gap: 8, alignItems: "flex-start", marginBottom: 4 }}>
+                        <div style={{ width: 4, height: 4, borderRadius: "50%", background: s.c, marginTop: 6, flexShrink: 0 }} />
+                        <span style={{ fontSize: "0.95rem", color: "#fff", lineHeight: 1.45 }}>{del}</span>
                       </div>
                     ))}
-                    <div style={{ marginTop: 14, padding: "12px 16px", background: s.c + "10", borderLeft: `3px solid ${s.c}`, borderRadius: "0 8px 8px 0" }}>
-                      <div style={{ fontSize: "1rem", fontWeight: 700, letterSpacing: "0.2em", color: s.c, textTransform: "uppercase", marginBottom: 6 }}>The Outcome</div>
-                      <p style={{ fontSize: "1.2rem", color: "#fff", lineHeight: 1.6, fontStyle: "italic" }}>{s.outcome}</p>
+                    <div style={{ marginTop: 10, padding: "10px 14px", background: s.c + "10", borderLeft: `3px solid ${s.c}`, borderRadius: "0 8px 8px 0" }}>
+                      <div style={{ fontSize: "0.85rem", fontWeight: 700, letterSpacing: "0.2em", color: s.c, textTransform: "uppercase", marginBottom: 4 }}>The Outcome</div>
+                      <p style={{ fontSize: "0.95rem", color: "#fff", lineHeight: 1.5, fontStyle: "italic" }}>{s.outcome}</p>
                     </div>
                   </div>
                 </div>
@@ -613,10 +624,10 @@ export default function Home() {
               textAlign: i % 2 === 1 ? "right" : "left",
               willChange: "opacity, transform",
             }}>
-              <div style={{ fontSize: "clamp(6rem, 14vw, 12rem)", fontFamily: "var(--serif)", fontWeight: 300, color: "var(--gold)", lineHeight: 0.85, marginBottom: 12, opacity: 0.7, textShadow: "var(--text-halo-gold)" }}>{step.n}</div>
-              <div style={{ fontSize: "clamp(1.05rem, 1.5vw, 1.25rem)", letterSpacing: "0.35em", color: "var(--gold)", textTransform: "uppercase", fontWeight: 700, marginBottom: 16, textShadow: "var(--text-halo-gold)" }}>{step.s}</div>
-              <h3 style={{ fontFamily: "var(--serif)", fontSize: "clamp(3.8rem, 7vw, 6rem)", color: "#fff", lineHeight: 1.05, marginBottom: 20, fontWeight: 400, textShadow: "var(--text-halo)" }}>{step.t}</h3>
-              <p style={{ fontSize: "clamp(1.35rem, 2vw, 1.65rem)", color: "#fff", lineHeight: 1.7, maxWidth: 520, fontWeight: 400, textShadow: "var(--text-halo)" }}>{step.d}</p>
+              <div style={{ fontSize: "clamp(3rem, 6vw, 5rem)", fontFamily: "var(--serif)", fontWeight: 300, color: "var(--gold)", lineHeight: 1, marginBottom: 16, opacity: 0.7, textShadow: "var(--text-halo-gold)" }}>{step.n}</div>
+              <div style={{ fontSize: "clamp(0.9rem, 1.2vw, 1.1rem)", letterSpacing: "0.35em", color: "var(--gold)", textTransform: "uppercase", fontWeight: 700, marginBottom: 20, textShadow: "var(--text-halo-gold)" }}>{step.s}</div>
+              <h3 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.8rem, 5vw, 4.2rem)", color: "#fff", lineHeight: 1.1, marginBottom: 20, fontWeight: 400, textShadow: "var(--text-halo)" }}>{step.t}</h3>
+              <p style={{ fontSize: "clamp(1.15rem, 1.6vw, 1.4rem)", color: "#fff", lineHeight: 1.7, maxWidth: 520, fontWeight: 400, textShadow: "var(--text-halo)" }}>{step.d}</p>
             </div>
           ))}
         </div>
