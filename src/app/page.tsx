@@ -645,15 +645,15 @@ export default function Home() {
               left: i % 2 === 0 ? "clamp(24px, 6vw, 120px)" : "auto",
               right: i % 2 === 1 ? "clamp(24px, 6vw, 120px)" : "auto",
               zIndex: 15,
-              maxWidth: "min(520px, 85vw)",
+              maxWidth: "min(650px, 85vw)",
               opacity: 0,
               textAlign: i % 2 === 1 ? "right" : "left",
               willChange: "opacity, transform",
             }}>
-              <div style={{ fontSize: "clamp(3rem, 6vw, 5rem)", fontFamily: "var(--serif)", fontWeight: 300, color: "var(--gold)", lineHeight: 1, marginBottom: 16, opacity: 0.7, textShadow: "var(--text-halo-gold)" }}>{step.n}</div>
-              <div style={{ fontSize: "clamp(0.9rem, 1.2vw, 1.1rem)", letterSpacing: "0.35em", color: "var(--gold)", textTransform: "uppercase", fontWeight: 700, marginBottom: 20, textShadow: "var(--text-halo-gold)" }}>{step.s}</div>
-              <h3 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.8rem, 5vw, 4.2rem)", color: "#fff", lineHeight: 1.1, marginBottom: 20, fontWeight: 400, textShadow: "var(--text-halo)" }}>{step.t}</h3>
-              <p style={{ fontSize: "clamp(1.15rem, 1.6vw, 1.4rem)", color: "#fff", lineHeight: 1.7, maxWidth: 520, fontWeight: 400, textShadow: "var(--text-halo)" }}>{step.d}</p>
+              <div style={{ fontSize: "clamp(5rem, 10vw, 8rem)", fontFamily: "var(--serif)", fontWeight: 300, color: "var(--gold)", lineHeight: 1, marginBottom: 20, opacity: 0.7, textShadow: "var(--text-halo-gold)" }}>{step.n}</div>
+              <div style={{ fontSize: "clamp(1.2rem, 1.8vw, 1.5rem)", letterSpacing: "0.35em", color: "var(--gold)", textTransform: "uppercase", fontWeight: 700, marginBottom: 24, textShadow: "var(--text-halo-gold)" }}>{step.s}</div>
+              <h3 style={{ fontFamily: "var(--serif)", fontSize: "clamp(3.5rem, 7vw, 5.5rem)", color: "#fff", lineHeight: 1.1, marginBottom: 24, fontWeight: 400, textShadow: "var(--text-halo)" }}>{step.t}</h3>
+              <p style={{ fontSize: "clamp(1.4rem, 2.2vw, 1.8rem)", color: "#fff", lineHeight: 1.7, maxWidth: 580, fontWeight: 400, textShadow: "var(--text-halo)" }}>{step.d}</p>
             </div>
           ))}
         </div>
