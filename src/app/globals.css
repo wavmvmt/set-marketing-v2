@@ -126,71 +126,124 @@ body::after {
   transform: translateY(0);
 }
 
-/* ── MOBILE OPTIMIZATION ── */
+/* ── MOBILE (≤768px) ── */
 @media (max-width: 768px) {
-  h1 { font-size: 2.4rem !important; }
-  h2 { font-size: 1.8rem !important; }
-  h3 { font-size: 1.4rem !important; }
+  h1 { font-size: 2.2rem !important; }
+  h2 { font-size: 1.6rem !important; }
+  h3 { font-size: 1.3rem !important; }
 
   /* Nav */
   nav { height: 52px !important; padding: 0 16px !important; }
   nav > div:last-child a:not(.btn-gold) { display: none !important; }
   nav .btn-gold { padding: 8px 18px !important; font-size: 0.85rem !important; }
 
-  /* Hero text explosion — smaller vectors on mobile */
-  .hero-explode { --mobile-scale: 0.5; }
+  /* ── HERO TEXT — must come BEFORE generic .hero-explode ── */
+  #hero-text { padding: 0 16px !important; }
+  /* S E T logo */
+  #hero-text > .hero-explode:first-child {
+    font-size: 2.8rem !important;
+    letter-spacing: 0.2em !important;
+    margin-bottom: 10px !important;
+  }
+  /* Revenue Architecture subtitle */
+  #hero-text > .hero-explode:nth-child(2) {
+    font-size: 0.6rem !important;
+    letter-spacing: 0.15em !important;
+    margin-bottom: 8px !important;
+  }
+  /* H1 text lines — all spans/ems inside the wrapper div */
+  #hero-text > div:nth-child(3) .hero-explode {
+    font-size: 1.5rem !important;
+    line-height: 1.25 !important;
+  }
 
-  /* Service cards in hero overlay — single column */
+  /* ── SERVICE CARDS — single column ── */
   .svc-pair {
     grid-template-columns: 1fr !important;
-    gap: 12px !important;
-    width: 92vw !important;
-    max-height: calc(100vh - 120px) !important;
+    gap: 10px !important;
+    width: 90vw !important;
+    max-height: calc(100vh - 100px) !important;
     overflow-y: auto !important;
+    top: 100px !important;
   }
+  .svc-pair > div { padding: 14px !important; }
+  .svc-pair h3 { font-size: 1.1rem !important; }
+  .svc-pair p, .svc-pair span { font-size: 0.8rem !important; line-height: 1.5 !important; }
+  #svc-title { top: 56px !important; }
+  #svc-title h2 { font-size: 1.5rem !important; }
 
-  /* Method steps — full width on mobile */
+  /* ── METHOD STEPS — centered, full width ── */
   .method-step {
-    left: 16px !important;
-    right: 16px !important;
+    left: 20px !important;
+    right: 20px !important;
     top: 60px !important;
     max-width: none !important;
-    text-align: left !important;
+    text-align: center !important;
+  }
+  .method-step h3 { font-size: 2rem !important; }
+  .method-step p { font-size: 1.1rem !important; }
+
+  /* ── FOUNDER — centered on mobile ── */
+  #about { justify-content: center !important; align-items: center !important; }
+  #about > div[style*="zIndex"] {
+    text-align: center !important;
+    max-width: 100% !important;
+    padding: 80px 16px !important;
+  }
+  #about .fade-in-stagger { justify-content: center !important; }
+
+  /* ── BACKDROP-FILTER fallback — prevent black boxes on unsupported mobile browsers ── */
+  @supports not (backdrop-filter: blur(1px)) {
+    .svc-pair > div, [style*="backdropFilter"] {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      background: rgba(14, 14, 20, 0.95) !important;
+    }
   }
 
-  /* Form */
-  .form-input, .form-select { font-size: 16px !important; /* prevents iOS zoom */ }
+  /* ── SCROLL INDICATOR — centered ── */
+  [style*="bob"] { left: 50% !important; transform: translateX(-50%) !important; }
 
-  /* Footer stacking */
-  footer > div:first-child { flex-direction: column !important; gap: 24px !important; }
+  /* ── CASE STUDIES — single column ── */
+  #results .fade-in-stagger { grid-template-columns: 1fr !important; }
 
-  /* Disable noise grain — wastes GPU */
+  /* ── TESTIMONIALS — white text ── */
+  section:has(.fade-in-stagger) p[style*="italic"] { color: #fff !important; }
+
+  /* ── CONTACT — full width ── */
+  #contact .fade-in { max-width: 100% !important; padding: 16px !important; }
+
+  /* ── FORM — prevent iOS zoom ── */
+  .form-input, .form-select { font-size: 16px !important; }
+
+  /* ── FOOTER — stacked ── */
+  footer > div:first-child { flex-direction: column !important; gap: 24px !important; text-align: center !important; }
+
+  /* Noise grain off */
   body::after { display: none !important; }
 }
 
-/* ── TABLET ── */
+/* ── TABLET (769–1024px) ── */
 @media (max-width: 1024px) and (min-width: 769px) {
   .svc-pair { grid-template-columns: 1fr !important; gap: 16px !important; width: min(90vw, 600px) !important; }
-
-  .method-step {
-    max-width: min(450px, 70vw) !important;
-  }
+  .method-step { max-width: min(450px, 70vw) !important; }
 }
 
-/* ── SMALL MOBILE (iPhone SE, small Android) ── */
+/* ── SMALL MOBILE (≤480px) ── */
 @media (max-width: 480px) {
-  h1 { font-size: 1.8rem !important; }
-  h2 { font-size: 1.5rem !important; }
-  h3 { font-size: 1.2rem !important; }
+  h1 { font-size: 1.6rem !important; }
+  h2 { font-size: 1.3rem !important; }
+  h3 { font-size: 1.1rem !important; }
 
-  nav .btn-gold { padding: 6px 14px !important; font-size: 0.75rem !important; }
+  nav .btn-gold { padding: 6px 14px !important; font-size: 0.7rem !important; }
 
-  /* Tighter section padding */
   section { padding-left: 12px !important; padding-right: 12px !important; }
 
-  /* Method step text scales down */
-  .method-step h3 { font-size: 1.6rem !important; }
-  .method-step p { font-size: 1rem !important; }
+  #hero-text > .hero-explode:first-child { font-size: 2.2rem !important; }
+  #hero-text > div:nth-child(3) .hero-explode { font-size: 1.2rem !important; }
+
+  .method-step h3 { font-size: 1.5rem !important; }
+  .method-step p { font-size: 0.9rem !important; }
 }
 
 /* ── LARGE DESKTOP (1440px+) ── */

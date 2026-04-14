@@ -487,7 +487,7 @@ export default function Home() {
           {/* HERO TEXT — independent overlay, explodes outward on scroll */}
           <div id="hero-text" style={{ position: "absolute", inset: 0, zIndex: 20, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", textAlign: "center", pointerEvents: "none" }}>
             <div className="hero-explode" data-ex="-120,-180,25" style={{ fontFamily: "var(--serif)", fontSize: "clamp(4.5rem, 12vw, 9rem)", fontWeight: 300, letterSpacing: "0.4em", color: "var(--gold)", marginBottom: 32, textShadow: "var(--text-halo-gold)", willChange: "transform, opacity, filter" }}>S E T</div>
-            <div className="hero-explode" data-ex="80,140,-15" style={{ fontFamily: "var(--sans)", fontSize: "1.05rem", letterSpacing: "0.35em", color: "var(--gold)", textTransform: "uppercase", marginBottom: 20, fontWeight: 600, textShadow: "var(--text-halo-gold)", willChange: "transform, opacity, filter" }}>Revenue Architecture · Toronto & Miami · Est. 2019</div>
+            <div className="hero-explode" data-ex="80,140,-15" style={{ fontFamily: "var(--sans)", fontSize: "1.05rem", letterSpacing: "0.35em", color: "var(--gold)", textTransform: "uppercase", marginBottom: 20, fontWeight: 600, textShadow: "var(--text-halo-gold)", willChange: "transform, opacity, filter" }}>Revenue Architecture · Est. 2019</div>
             <div style={{ maxWidth: 800 }}>
               <span className="hero-explode" data-ex="-200,-100,20" style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.8rem, 6vw, 5rem)", fontWeight: 300, lineHeight: 1.1, color: "#fff", textShadow: "var(--text-halo)", display: "inline", willChange: "transform, opacity, filter" }}>We Don&rsquo;t Run </span>
               <em className="hero-explode" data-ex="250,-150,-30" style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.8rem, 6vw, 5rem)", fontWeight: 300, lineHeight: 1.1, fontStyle: "italic", color: "var(--gold)", textShadow: "var(--text-halo)", display: "inline", willChange: "transform, opacity, filter" }}>Campaigns.</em>
@@ -610,7 +610,7 @@ export default function Home() {
         <div style={{ position: "absolute", inset: 0, zIndex: 1, background: "linear-gradient(to right, transparent 20%, rgba(7,7,10,0.6) 55%, rgba(7,7,10,0.85) 100%)" }} />
         <div style={{ position: "absolute", inset: 0, zIndex: 1, background: "linear-gradient(to top, rgba(7,7,10,0.7) 0%, transparent 40%)" }} />
 
-        <div style={{ position: "relative", zIndex: 10, maxWidth: 620, padding: "clamp(60px, 10vh, 120px) clamp(20px, 6vw, 100px)", textAlign: isMobile ? "left" : "right" }}>
+        <div style={{ position: "relative", zIndex: 10, maxWidth: isMobile ? "100%" : 620, padding: isMobile ? "clamp(60px, 10vh, 100px) 20px" : "clamp(60px, 10vh, 120px) clamp(20px, 6vw, 100px)", textAlign: isMobile ? "center" : "right" }}>
           <div className="fade-in" style={{ marginBottom: 40 }}>
             <span style={{ fontSize: "1.2rem", letterSpacing: "0.3em", color: "var(--gold)", textTransform: "uppercase", fontWeight: 600, textShadow: "var(--text-halo-gold)" }}>Founder & CEO</span>
             <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.6rem, 5vw, 3.8rem)", color: "#fff", marginTop: 12, fontWeight: 400, textShadow: "var(--text-halo)" }}>Chris Marchese</div>
@@ -618,14 +618,14 @@ export default function Home() {
           </div>
 
           <h2 className="fade-in" style={{ fontSize: "clamp(2.6rem, 4.5vw, 3.8rem)", lineHeight: 1.2, marginBottom: 36, color: "#fff", textShadow: "var(--text-halo)" }}>
-            <span style={{ background: "linear-gradient(135deg, #c8a050, #e8c878)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.9))" }}>$500M+</span> in client revenue.<br />System-first.
+            <span style={{ color: "var(--gold)", textShadow: "var(--text-halo-gold)" }}>$500M+</span> in client revenue.<br />System-first.
           </h2>
 
           {["12 years as an industrial millwright.", "No trust fund. No shortcuts.", "Just pattern recognition and an obsession", "with what actually moves people to act.", "That obsession became Strategic Emotional Targeting.", "That framework became SET."].map((l, i) => (
             <p key={i} className="fade-in" style={{ fontFamily: "var(--serif)", fontSize: "clamp(1.3rem, 1.8vw, 1.55rem)", color: i >= 4 ? "var(--gold)" : "#fff", fontStyle: i >= 4 ? "italic" : "normal", lineHeight: 1.6, marginBottom: 10, textShadow: "var(--text-halo)" }}>{l}</p>
           ))}
 
-          <div className="fade-in-stagger" style={{ display: "flex", gap: 14, flexWrap: "wrap", marginTop: 32, justifyContent: isMobile ? "flex-start" : "flex-end" }}>
+          <div className="fade-in-stagger" style={{ display: "flex", gap: 14, flexWrap: "wrap", marginTop: 32, justifyContent: isMobile ? "center" : "flex-end" }}>
             {["SET Enterprises", "SET Ventures", "SET Sales Academy"].map(e => (
               <div key={e} style={{ padding: "10px 18px", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 6, ...mobileBlur("blur(12px)", "rgba(14,14,20,0.6)", "rgba(14,14,20,0.85)"), fontSize: "1.15rem", fontWeight: 600, color: "#fff", textShadow: "var(--text-halo)" }}>{e}</div>
             ))}
@@ -669,7 +669,7 @@ export default function Home() {
           <div className="fade-in-stagger" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))", gap: 16 }}>
             {VOICES.map((v, i) => <div key={i} style={{ background: "var(--bg3)", border: "1px solid var(--border)", borderRadius: 12, padding: 26, transition: "all 0.4s" }} onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--border2)"; e.currentTarget.style.transform = "translateY(-3px)"; }} onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.transform = ""; }}>
               <div style={{ display: "flex", gap: 3, marginBottom: 14 }}>{[1,2,3,4,5].map(s => <span key={s} style={{ color: "var(--star)", fontSize: "1.1rem", opacity: 0.5 }}>★</span>)}</div>
-              <p style={{ fontSize: "1.45rem", color: "var(--text2)", lineHeight: 1.7, fontStyle: "italic", marginBottom: 20 }}>&ldquo;{v.q}&rdquo;</p>
+              <p style={{ fontSize: "1.45rem", color: "#fff", lineHeight: 1.7, fontStyle: "italic", marginBottom: 20 }}>&ldquo;{v.q}&rdquo;</p>
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}><div style={{ width: 38, height: 38, borderRadius: "50%", background: "var(--gold-dim)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--serif)", fontSize: "1.25rem", color: "var(--gold)" }}>{v.a[0]}</div><div><div style={{ fontSize: "1.3rem", fontWeight: 500 }}>{v.a}</div><div style={{ fontSize: "1.15rem", color: "var(--text3)" }}>{v.r}</div></div></div>
             </div>)}
           </div>
