@@ -187,13 +187,50 @@ export default function Home() {
             else splashOp = "0";
             if (splashOp !== prevSplashOp) { splashLayer.style.opacity = splashOp; prevSplashOp = splashOp; }
 
-            // ── Hero text: visible 0–38%, fades out 38–46% ──
+            // ── Hero text: visible 0–30%, EXPLODES outward 30–42%, gone after ──
             if (heroText) {
-              let heroTextOp: string;
-              if (p < 0.38) heroTextOp = "1";
-              else if (p < 0.46) heroTextOp = String(1 - (p - 0.38) / 0.08);
-              else heroTextOp = "0";
-              if (heroTextOp !== prevHeroTextOp) { heroText.style.opacity = heroTextOp; prevHeroTextOp = heroTextOp; }
+              const explodeEls = heroText.querySelectorAll(".hero-explode");
+              if (p < 0.30) {
+                // Fully visible, no transform
+                if (prevHeroTextOp !== "static") {
+                  explodeEls.forEach(el => {
+                    const e = el as HTMLElement;
+                    e.style.transform = "translate(0, 0) rotate(0deg) scale(1)";
+                    e.style.opacity = "1";
+                    e.style.filter = "blur(0px)";
+                  });
+                  prevHeroTextOp = "static";
+                }
+              } else if (p < 0.42) {
+                // Explosion phase: each element flies outward, scales up, blurs, fades
+                const t = (p - 0.30) / 0.12; // 0→1 over the explosion window
+                const eased = t * t; // ease-in for accelerating explosion feel
+                explodeEls.forEach(el => {
+                  const e = el as HTMLElement;
+                  const [ex, ey, er] = (e.dataset.ex || "0,0,0").split(",").map(Number);
+                  const x = ex * eased;
+                  const y = ey * eased;
+                  const rot = er * eased;
+                  const scale = 1 + eased * 0.8;
+                  const blur = eased * 20;
+                  const opacity = Math.max(0, 1 - eased * 1.5);
+                  e.style.transform = `translate(${x}px, ${y}px) rotate(${rot}deg) scale(${scale})`;
+                  e.style.opacity = String(opacity);
+                  e.style.filter = `blur(${blur}px)`;
+                });
+                prevHeroTextOp = "exploding";
+              } else {
+                // Fully gone
+                if (prevHeroTextOp !== "gone") {
+                  heroText.style.display = "none";
+                  prevHeroTextOp = "gone";
+                }
+              }
+              // Re-show if scrolling back up
+              if (p < 0.42 && prevHeroTextOp === "gone") {
+                heroText.style.display = "flex";
+                prevHeroTextOp = "";
+              }
             }
 
             // ── Drift video scrub: 0–50% ──
@@ -461,11 +498,17 @@ export default function Home() {
             <video ref={splashVideoRef} autoPlay loop muted playsInline preload="auto" style={{ ...vidStyle, filter: "saturate(1.2)" }}><source src="/splash-bg-hd.mp4" type="video/mp4" /></video>
           </div>
 
-          {/* HERO TEXT — independent overlay, persists across splash + drift phases */}
-          <div id="hero-text" style={{ position: "absolute", inset: 0, zIndex: 20, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", textAlign: "center", pointerEvents: "none", willChange: "opacity" }}>
-            <div style={{ fontFamily: "var(--serif)", fontSize: "clamp(4.5rem, 12vw, 9rem)", fontWeight: 300, letterSpacing: "0.4em", color: "var(--gold)", marginBottom: 32, textShadow: "var(--text-halo-gold)" }}>S E T</div>
-            <div style={{ fontFamily: "var(--sans)", fontSize: "1.05rem", letterSpacing: "0.35em", color: "var(--gold)", textTransform: "uppercase", marginBottom: 20, fontWeight: 600, textShadow: "var(--text-halo-gold)" }}>Revenue Architecture · Toronto & Miami · Est. 2019</div>
-            <h1 style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.8rem, 6vw, 5rem)", fontWeight: 300, lineHeight: 1.1, color: "#fff", textShadow: "var(--text-halo)", maxWidth: 800 }}>We Don&rsquo;t Run <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Campaigns.</em><br />We Install Systems.</h1>
+          {/* HERO TEXT — independent overlay, explodes outward on scroll */}
+          <div id="hero-text" style={{ position: "absolute", inset: 0, zIndex: 20, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "0 24px", textAlign: "center", pointerEvents: "none" }}>
+            <div className="hero-explode" data-ex="-120,-180,25" style={{ fontFamily: "var(--serif)", fontSize: "clamp(4.5rem, 12vw, 9rem)", fontWeight: 300, letterSpacing: "0.4em", color: "var(--gold)", marginBottom: 32, textShadow: "var(--text-halo-gold)", willChange: "transform, opacity, filter" }}>S E T</div>
+            <div className="hero-explode" data-ex="80,140,-15" style={{ fontFamily: "var(--sans)", fontSize: "1.05rem", letterSpacing: "0.35em", color: "var(--gold)", textTransform: "uppercase", marginBottom: 20, fontWeight: 600, textShadow: "var(--text-halo-gold)", willChange: "transform, opacity, filter" }}>Revenue Architecture · Toronto & Miami · Est. 2019</div>
+            <div style={{ maxWidth: 800 }}>
+              <span className="hero-explode" data-ex="-200,-100,20" style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.8rem, 6vw, 5rem)", fontWeight: 300, lineHeight: 1.1, color: "#fff", textShadow: "var(--text-halo)", display: "inline", willChange: "transform, opacity, filter" }}>We Don&rsquo;t Run </span>
+              <em className="hero-explode" data-ex="250,-150,-30" style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.8rem, 6vw, 5rem)", fontWeight: 300, lineHeight: 1.1, fontStyle: "italic", color: "var(--gold)", textShadow: "var(--text-halo)", display: "inline", willChange: "transform, opacity, filter" }}>Campaigns.</em>
+              <br />
+              <span className="hero-explode" data-ex="-150,200,35" style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.8rem, 6vw, 5rem)", fontWeight: 300, lineHeight: 1.1, color: "#fff", textShadow: "var(--text-halo)", display: "inline", willChange: "transform, opacity, filter" }}>We Install </span>
+              <span className="hero-explode" data-ex="180,160,-25" style={{ fontFamily: "var(--serif)", fontSize: "clamp(2.8rem, 6vw, 5rem)", fontWeight: 300, lineHeight: 1.1, color: "#fff", textShadow: "var(--text-halo)", display: "inline", willChange: "transform, opacity, filter" }}>Systems.</span>
+            </div>
           </div>
 
           {/* LAYER 1: Drift video — preload auto required for smooth scrubbing */}
