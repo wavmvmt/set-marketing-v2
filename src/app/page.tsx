@@ -187,49 +187,32 @@ export default function Home() {
             else splashOp = "0";
             if (splashOp !== prevSplashOp) { splashLayer.style.opacity = splashOp; prevSplashOp = splashOp; }
 
-            // ── Hero text: visible 0–30%, EXPLODES outward 30–42%, gone after ──
+            // ── Hero text: visible 0–30%, EXPLODES outward 30–42%, hidden after ──
             if (heroText) {
               const explodeEls = heroText.querySelectorAll(".hero-explode");
               if (p < 0.30) {
-                // Fully visible, no transform
-                if (prevHeroTextOp !== "static") {
-                  explodeEls.forEach(el => {
-                    const e = el as HTMLElement;
-                    e.style.transform = "translate(0, 0) rotate(0deg) scale(1)";
-                    e.style.opacity = "1";
-                    e.style.filter = "blur(0px)";
-                  });
-                  prevHeroTextOp = "static";
-                }
+                // Fully visible, reset all transforms
+                explodeEls.forEach(el => {
+                  const e = el as HTMLElement;
+                  e.style.transform = "translate(0px, 0px) rotate(0deg) scale(1)";
+                  e.style.opacity = "1";
+                  e.style.filter = "blur(0px)";
+                });
+                heroText.style.visibility = "visible";
               } else if (p < 0.42) {
                 // Explosion phase: each element flies outward, scales up, blurs, fades
-                const t = (p - 0.30) / 0.12; // 0→1 over the explosion window
-                const eased = t * t; // ease-in for accelerating explosion feel
+                heroText.style.visibility = "visible";
+                const t = (p - 0.30) / 0.12;
+                const eased = t * t;
                 explodeEls.forEach(el => {
                   const e = el as HTMLElement;
                   const [ex, ey, er] = (e.dataset.ex || "0,0,0").split(",").map(Number);
-                  const x = ex * eased;
-                  const y = ey * eased;
-                  const rot = er * eased;
-                  const scale = 1 + eased * 0.8;
-                  const blur = eased * 20;
-                  const opacity = Math.max(0, 1 - eased * 1.5);
-                  e.style.transform = `translate(${x}px, ${y}px) rotate(${rot}deg) scale(${scale})`;
-                  e.style.opacity = String(opacity);
-                  e.style.filter = `blur(${blur}px)`;
+                  e.style.transform = `translate(${ex * eased}px, ${ey * eased}px) rotate(${er * eased}deg) scale(${1 + eased * 0.8})`;
+                  e.style.opacity = String(Math.max(0, 1 - eased * 1.5));
+                  e.style.filter = `blur(${eased * 20}px)`;
                 });
-                prevHeroTextOp = "exploding";
               } else {
-                // Fully gone
-                if (prevHeroTextOp !== "gone") {
-                  heroText.style.display = "none";
-                  prevHeroTextOp = "gone";
-                }
-              }
-              // Re-show if scrolling back up
-              if (p < 0.42 && prevHeroTextOp === "gone") {
-                heroText.style.display = "flex";
-                prevHeroTextOp = "";
+                heroText.style.visibility = "hidden";
               }
             }
 
