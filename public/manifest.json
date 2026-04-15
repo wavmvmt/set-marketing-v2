@@ -1,0 +1,18 @@
+{
+  "name": "SET Marketing — Fractional CMO & Revenue Architecture",
+  "short_name": "SET Marketing",
+  "description": "Fractional CMO leadership and revenue architecture for operators generating $1M–$20M. $500M+ in client revenue generated. Toronto & Miami.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "orientation": "portrait-primary",
+  "categories": ["business", "marketing"],
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}
